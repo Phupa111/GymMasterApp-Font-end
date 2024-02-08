@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gym_master_fontend/screen/hom_page.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 import 'package:gym_master_fontend/widgets/background.dart';
+import 'package:gym_master_fontend/widgets/menu_bar.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -69,7 +71,14 @@ class _StartPageState extends State<StartPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(25.0),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const MenuNavBar()), // Replace YourLoginPage with your actual login page widget
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.white,
                         fixedSize: const Size(250, 50),
