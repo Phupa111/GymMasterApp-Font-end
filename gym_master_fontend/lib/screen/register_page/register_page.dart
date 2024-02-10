@@ -8,6 +8,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  TextEditingController _date = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +44,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     filled: true,
                     fillColor: const Color(0xFFF1F0F0),
                     border: InputBorder.none,
-                    hintText: "ชื่อ",
+                    hintText: "ชื่อผู้ใช้",
                     hintStyle: const TextStyle(
                       fontFamily: 'Kanit',
                       color: Color(0xFFFFAC41),
@@ -65,36 +66,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(15.0),
-                    filled: true,
-                    fillColor: const Color(0xFFF1F0F0),
-                    border: InputBorder.none,
-                    hintText: "นามสกุล",
-                    hintStyle: const TextStyle(
-                      fontFamily: 'Kanit',
+                    prefixIcon: Icon(
+                      Icons.monitor_weight_sharp,
                       color: Color(0xFFFFAC41),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Colors
-                              .transparent), // Change border color on focus
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.transparent),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  decoration: InputDecoration(
                     suffixIcon: const Padding(
                       padding: EdgeInsets.only(top: 12.0),
                       child: Text(
-                        "Kg",
+                        "กก.",
                         style:
                             TextStyle(fontSize: 16, color: Color(0xFFFFAC41)),
                       ),
@@ -103,7 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     filled: true,
                     fillColor: const Color(0xFFF1F0F0),
                     border: InputBorder.none,
-                    hintText: "ชื่อ",
+                    hintText: "น้ำหนัก",
                     hintStyle: const TextStyle(
                       fontFamily: 'Kanit',
                       color: Color(0xFFFFAC41),
@@ -120,11 +99,112 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
+                const SizedBox(
+                  height: 10,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                    focusColor: Color(0xFFFFAC41),
+                    prefixIcon: Icon(
+                      Icons.accessibility,
+                      color: Color(0xFFFFAC41),
+                    ),
+                    suffixIcon: const Padding(
+                      padding: EdgeInsets.only(top: 12.0),
+                      child: Text(
+                        "ซม.",
+                        style:
+                            TextStyle(fontSize: 16, color: Color(0xFFFFAC41)),
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(15.0),
+                    filled: true,
+                    fillColor: const Color(0xFFF1F0F0),
+                    border: InputBorder.none,
+                    hintText: "ส่วนสูง",
+                    hintStyle: const TextStyle(
+                      fontFamily: 'Kanit',
+                      color: Color(0xFFFFAC41),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: Colors
+                              .transparent), // Change border color on focus
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.transparent),
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                TextField(
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.calendar_today_rounded,
+                      color: Color(0xFFFFAC41),
+                    ),
+                    contentPadding: const EdgeInsets.all(15.0),
+                    filled: true,
+                    fillColor: const Color(0xFFF1F0F0),
+                    border: InputBorder.none,
+                    hintText: "วัน-เดือน-ปีเกิด",
+                    hintStyle: const TextStyle(
+                      fontFamily: 'Kanit',
+                      color: Color(0xFFFFAC41),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: Colors
+                              .transparent), // Change border color on focus
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.transparent),
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                  controller: _date,
+                  onTap: () {
+                    print("clicked");
+                    _selectDate();
+                  },
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _selectDate() async {
+    DateTime? _picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: Color(0xFFFFAC41),
+              ),
+            ),
+            child: child!);
+      },
+    );
+
+    if (_picked != null) {
+      setState(() {
+        _date.text =
+            "${_picked.day.toString().padLeft(2, '0')}-${_picked.month.toString().padLeft(2, '0')}-${_picked.year.toString()}";
+        print(_date.text);
+      });
+    }
   }
 }
