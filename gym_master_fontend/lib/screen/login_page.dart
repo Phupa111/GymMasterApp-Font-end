@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
 import 'package:gym_master_fontend/widgets/widgets.dart';
 
@@ -23,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back,
-                color: Colors.white,
+                color: Colors.transparent,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -169,11 +170,12 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           TextButton(
                               onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const RegisterPage()));
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) =>
+                                //             const RegisterPage()));
+                                Get.to(RegisterPage());
                               },
                               child: const Text(
                                 'Register now',

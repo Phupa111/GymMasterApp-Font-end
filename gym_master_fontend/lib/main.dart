@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gym_master_fontend/screen/start_page.dart';
@@ -36,7 +37,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         textTheme: GoogleFonts.kanitTextTheme(), // Use Kanit as the font

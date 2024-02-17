@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
+import 'package:gym_master_fontend/widgets/background.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -8,203 +11,233 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  TextEditingController _date = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              children: [
-                const Text(
-                  "กรอกข้อมูล",
-                  style: TextStyle(
-                    fontSize: 42,
-                    color: Color(0xFFFFAC41),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(15.0),
-                    filled: true,
-                    fillColor: const Color(0xFFF1F0F0),
-                    border: InputBorder.none,
-                    hintText: "ชื่อผู้ใช้",
-                    hintStyle: const TextStyle(
-                      fontFamily: 'Kanit',
-                      color: Color(0xFFFFAC41),
+    return Stack(
+      children: [
+        BackgroundImage(),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0.0,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                color: Colors.transparent,
+              ),
+              onPressed: () {
+                // Navigator.pop(context);
+                Get.back();
+              },
+            ),
+          ),
+          body: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 30.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "Register",
+                      style:
+                          TextStyle(color: Color(0xFFFFAC41), fontSize: 40.0),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Colors
-                              .transparent), // Change border color on focus
-                      borderRadius: BorderRadius.circular(25.0),
+                    SizedBox(
+                      height: 10.0,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.transparent),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.monitor_weight_sharp,
-                      color: Color(0xFFFFAC41),
-                    ),
-                    suffixIcon: const Padding(
-                      padding: EdgeInsets.only(top: 12.0),
-                      child: Text(
-                        "กก.",
-                        style:
-                            TextStyle(fontSize: 16, color: Color(0xFFFFAC41)),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        prefixIcon:
+                            Icon(Icons.person, color: Color(0xFFFFAC41)),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "Username",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors
+                                  .transparent), // Change border color on focus
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
                       ),
                     ),
-                    contentPadding: const EdgeInsets.all(15.0),
-                    filled: true,
-                    fillColor: const Color(0xFFF1F0F0),
-                    border: InputBorder.none,
-                    hintText: "น้ำหนัก",
-                    hintStyle: const TextStyle(
-                      fontFamily: 'Kanit',
-                      color: Color(0xFFFFAC41),
+                    SizedBox(
+                      height: 10.0,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Colors
-                              .transparent), // Change border color on focus
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.transparent),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    focusColor: Color(0xFFFFAC41),
-                    prefixIcon: Icon(
-                      Icons.accessibility,
-                      color: Color(0xFFFFAC41),
-                    ),
-                    suffixIcon: const Padding(
-                      padding: EdgeInsets.only(top: 12.0),
-                      child: Text(
-                        "ซม.",
-                        style:
-                            TextStyle(fontSize: 16, color: Color(0xFFFFAC41)),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        prefixIcon: Icon(Icons.email, color: Color(0xFFFFAC41)),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "Email",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors
+                                  .transparent), // Change border color on focus
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                       ),
                     ),
-                    contentPadding: const EdgeInsets.all(15.0),
-                    filled: true,
-                    fillColor: const Color(0xFFF1F0F0),
-                    border: InputBorder.none,
-                    hintText: "ส่วนสูง",
-                    hintStyle: const TextStyle(
-                      fontFamily: 'Kanit',
-                      color: Color(0xFFFFAC41),
+                    SizedBox(
+                      height: 10.0,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Colors
-                              .transparent), // Change border color on focus
-                      borderRadius: BorderRadius.circular(25.0),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFFFFAC41)),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "Password",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors
+                                  .transparent), // Change border color on focus
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      obscureText: true,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.transparent),
-                      borderRadius: BorderRadius.circular(25.0),
+                    SizedBox(
+                      height: 10.0,
                     ),
-                  ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFFFFAC41)),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "Re-Password",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors
+                                  .transparent), // Change border color on focus
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      obscureText: true,
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    SizedBox(
+                      height: 40.0,
+                      width: 150.0,
+                      child: FilledButton(
+                        onPressed: () {
+                          Get.to(InformationPage());
+                        },
+                        child: Text(
+                          "Register",
+                          style: TextStyle(fontSize: 18.0),
+                        ),
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStatePropertyAll(Color(0xFFFFAC41))),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.white,
+                              side: BorderSide(
+                                  color: Color.fromRGBO(66, 255, 0, 1.0),
+                                  width: 2),
+                              fixedSize: Size(250, 50)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.network(
+                                  'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'),
+                              Text('register with Google',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Kanit')),
+                            ],
+                          )),
+                    ),
+                  ],
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.calendar_today_rounded,
-                      color: Color(0xFFFFAC41),
-                    ),
-                    contentPadding: const EdgeInsets.all(15.0),
-                    filled: true,
-                    fillColor: const Color(0xFFF1F0F0),
-                    border: InputBorder.none,
-                    hintText: "วัน-เดือน-ปีเกิด",
-                    hintStyle: const TextStyle(
-                      fontFamily: 'Kanit',
-                      color: Color(0xFFFFAC41),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Colors
-                              .transparent), // Change border color on focus
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.transparent),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                  controller: _date,
-                  onTap: () {
-                    print("clicked");
-                    _selectDate();
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
-  }
-
-  Future<void> _selectDate() async {
-    DateTime? _picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: Color(0xFFFFAC41),
-              ),
-            ),
-            child: child!);
-      },
-    );
-
-    if (_picked != null) {
-      setState(() {
-        _date.text =
-            "${_picked.day.toString().padLeft(2, '0')}-${_picked.month.toString().padLeft(2, '0')}-${_picked.year.toString()}";
-        print(_date.text);
-      });
-    }
   }
 }
