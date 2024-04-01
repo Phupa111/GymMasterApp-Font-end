@@ -21,36 +21,39 @@ class _MenuNavBarState extends State<MenuNavBar> {
   ];
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[currentPageIndex],
-      bottomNavigationBar: NavigationBar(
-        indicatorShape: CircleBorder(),
-        backgroundColor: Colors.orange,
-        selectedIndex: currentPageIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.stacked_bar_chart_outlined),
-            label: 'Static',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.directions_run),
-            label: 'Exercise',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_circle),
-            label: 'profile',
-          ),
-        ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: _pages[currentPageIndex],
+        bottomNavigationBar: NavigationBar(
+          indicatorShape: CircleBorder(),
+          backgroundColor: Colors.orange,
+          selectedIndex: currentPageIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+          destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.stacked_bar_chart_outlined),
+              label: 'Static',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.directions_run),
+              label: 'Exercise',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.account_circle),
+              label: 'profile',
+            ),
+          ],
+        ),
       ),
     );
   }
