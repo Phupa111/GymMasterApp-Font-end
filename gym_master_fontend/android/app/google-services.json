@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "658147218168",
+    "project_id": "gymmasterproject-ac78e",
+    "storage_bucket": "gymmasterproject-ac78e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658147218168:android:74aea6a95b7d0fff2da10d",
+        "android_client_info": {
+          "package_name": "com.example.gym_master_fontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "658147218168-8i530171pt1febdqobba876r4jiqkl5b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gym_master_fontend",
+            "certificate_hash": "c8ff58570aafb854e6f3d5ff09b9ecdf454e77d2"
+          }
+        },
+        {
+          "client_id": "658147218168-en0jh091r651h1nbqkg06jmnju4kqj9p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBL4PmBS0lO1zP0DFMrvcObnVN9cggYC-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "658147218168-en0jh091r651h1nbqkg06jmnju4kqj9p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "658147218168-j5fj4tnpeitp9qqbgrokhsr1bnqubrk4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gymMasterFontend.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

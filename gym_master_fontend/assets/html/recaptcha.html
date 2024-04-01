@@ -1,0 +1,21 @@
+<html>
+<head>
+    <title>reCAPTCHA Example</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body style='background-color: aqua;'>
+    <div style='height: 60px;'></div>
+    <!-- reCAPTCHA widget -->
+    <div class="g-recaptcha" data-sitekey="6Lf_SJYpAAAAALxZCQfwr_0PlgzJuwAyaN7yrZgY" data-callback="captchaCallback"></div>
+
+    <script>
+      function captchaCallback(response) {
+        // This function is called when the user completes the CAPTCHA
+        alert(response); // You might want to send this response to your server for verification
+        if (typeof Captcha !== "undefined") {
+          Captcha.postMessage(response);
+        }
+      }
+    </script>
+</body>
+</html>

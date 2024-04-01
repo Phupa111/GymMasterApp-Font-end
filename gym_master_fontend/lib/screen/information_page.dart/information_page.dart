@@ -1,7 +1,22 @@
+import 'dart:convert';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:gym_master_fontend/screen/login_page.dart';
+import 'package:http/http.dart' as http;
 
 class InformationPage extends StatefulWidget {
-  const InformationPage({super.key});
+  final String username;
+  final String email;
+  final String password;
+
+  const InformationPage({
+    Key? key,
+    required this.username,
+    required this.email,
+    required this.password,
+  }) : super(key: key);
 
   @override
   State<InformationPage> createState() => _InformationPageState();
@@ -12,6 +27,63 @@ class _InformationPageState extends State<InformationPage> {
   String _dropdownValue = "male";
   final _gender = ["Male", "Female"];
   final _formkey = GlobalKey<FormState>();
+
+  int genderid = 0;
+
+  void signUp() async {
+    var regBody = {
+      "user_name": widget.username,
+      "email": widget.email,
+      "password": widget.password,
+      "weight": 70,
+      "height": 175,
+      "gender": 3,
+      "birth_day": "1990-01-01",
+      "body_fat": 15,
+      "profile_pic": ""
+    };
+    var response = await http.post(
+        Uri.parse('http://192.168.175.2:8080/user/register'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody));
+
+    print(response.statusCode);
+
+    try {
+      // Assuming `sendSignUpRequest` is a function that sends regBody to your backend
+
+      if (response.statusCode == 201) {
+        // Try creating a Firebase Auth user with the provided email and password
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: widget.email, password: widget.password);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        ).then((_) {
+          ;
+        }); //n
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Failed to sign up. Please try again."),
+        ));
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "An error occurred. Please try again.";
+      if (e.code == 'weak-password') {
+        errorMessage = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = 'An account already exists for that email.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(errorMessage),
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("An unexpected error occurred. Please try again."),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +91,7 @@ class _InformationPageState extends State<InformationPage> {
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
+          color: Colors.orange,
           onPressed: () {
             Navigator.pop(context);
           },
@@ -73,7 +145,7 @@ class _InformationPageState extends State<InformationPage> {
                         filled: true,
                         fillColor: const Color(0xFFF1F0F0),
                         border: InputBorder.none,
-                        hintText: "ชื่อผู้ใช้",
+                        hintText: "ชื่อ-นามสกุล",
                         hintStyle: const TextStyle(
                           fontFamily: 'Kanit',
                           color: Color(0xFFFFAC41),
@@ -216,6 +288,11 @@ class _InformationPageState extends State<InformationPage> {
                       onChanged: (String? value) {
                         setState(() {
                           _dropdownValue = value!;
+                          if (_dropdownValue == "Male") {
+                            genderid = 4;
+                          } else {
+                            genderid = 3;
+                          }
                         });
                       },
                       decoration: InputDecoration(
@@ -283,9 +360,10 @@ class _InformationPageState extends State<InformationPage> {
                     ),
                     FilledButton(
                         onPressed: () {
-                          _formkey.currentState!.validate();
+                          // _formkey.currentState!.validate();
+                          signUp();
                         },
-                        child: Text("9jvwx"))
+                        child: Text("submit"))
                   ],
                 ),
               ),

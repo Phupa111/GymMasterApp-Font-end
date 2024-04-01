@@ -1,10 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gym_master_fontend/screen/login_page.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:gym_master_fontend/screen/start_page.dart';
+import 'package:gym_master_fontend/firebase_options.dart';
+import 'package:gym_master_fontend/screen/auth_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensure that Flutter bindings are initialized
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -38,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StartPage(),
+      home: AuthPage(),
     );
   }
 }
