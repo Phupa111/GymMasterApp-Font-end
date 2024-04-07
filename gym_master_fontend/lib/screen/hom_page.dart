@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  int? uid;
+  int? roleid;
+  HomePage({Key? key, this.uid, this.roleid}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -60,7 +62,7 @@ class _HomePageState extends State<HomePage> {
           Center(
             child: Text(
               currentUser != null
-                  ? "Logged in as ${currentUser!.email}" // Use currentUser to access the email
+                  ? "Logged in as ${currentUser!.email}  ${widget.uid} ${widget.roleid}" // Use currentUser to access the email
                   : "Guset",
             ),
           ),
