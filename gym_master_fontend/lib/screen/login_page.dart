@@ -29,7 +29,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  
   late bool _isLoading;
 
   @override
@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     _isLoading = false; // Initially not loading
   }
 
-  void signUserIn() async {
+ void signUserIn() async {
     setState(() {
       _isLoading = true; // Set loading to true when starting the login process
     });
@@ -51,23 +51,26 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var response = await http.post(
-          Uri.parse('http://192.168.1.125:8080/user/login'),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(regBody));
+        Uri.parse('http://192.168.1.125:8080/user/login'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody),
+      );
 
-      log(response.toString());
       if (response.statusCode == 200) {
         var userData = jsonDecode(response.body);
         var userEmail = userData['user']['email'];
 
+        // Assuming you have a method to parse the user data into a UserModel object
         var userModel = userModelFromJson(jsonEncode(userData));
 
-        await GetStorage().write('uid', userModel.user.uid);
-        await GetStorage().write('role', userModel.user.role);
+        await GetStorage().write('userModel', userModel);
+
         // ถ้าล็อกอินสำเร็จ
         try {
           await FirebaseAuth.instance.signInWithEmailAndPassword(
-              email: userEmail, password: _passwordController.text);
+            email: userEmail,
+            password: _passwordController.text,
+          );
 
           Get.to(AuthPage())?.then((_) {
             _emailController.clear();
@@ -81,11 +84,43 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading = false;
           });
         }
-      } else {
-        print("not sucess");
+      } else if (response.statusCode == 404)  {
+        // Show alert dialog for unsuccessful login
+        showDailog("เข้าสู่ระบบไม่สำเร็จ","ชื่อผู้ใช้ หรือ อีเมล ไม่ถูกต้อง");
+
+      }
+      else if (response.statusCode == 401) {
+   showDailog("เข้าสู่ระบบไม่สำเร็จ","รหัสผ่านไม่ถูกต้อง");
       }
     }
+else {
+  showDailog("เข้าสู่ระบบไม่สำเร็จ","กรุณาใส่ ชื่อผู้ใช้ หรือ อีเมล และ รหัสผ่าน");
+
+}
+    
   }
+
+ Future<dynamic> showDailog(String title,String content) {
+   return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                 Navigator.pop(context); // Close the dialog
+          setState(() {
+            _isLoading = false; // Set isLoading to false after closing the dialog
+          }); // Close the dialog
+              },
+              child: Text("OK"),
+              
+            ),
+          ],
+        ),
+      );
+ }
 
 void googleSigIn() async {
   setState(() {
@@ -103,12 +138,13 @@ void googleSigIn() async {
 
       if (response.statusCode == 200) {
         var responseData = response.data;
-
+        var userModel = userModelFromJson(jsonEncode(responseData));
         if (responseData.isEmpty) {
           Get.to(RegisterPage(
             email: user.email.toString(),
           ));
         } else {
+          await GetStorage().write('userModel',userModel );
           Get.to(MenuNavBar());
         }
       } else {
@@ -209,7 +245,7 @@ void googleSigIn() async {
                         padding: const EdgeInsets.all(25.0),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            signUserIn();
+                            _isLoading ? null : signUserIn();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[800],

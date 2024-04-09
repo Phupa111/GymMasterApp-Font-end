@@ -1,14 +1,10 @@
-import 'dart:convert';
-import 'dart:math';
 
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
-
 import 'package:gym_master_fontend/screen/exercise_page.dart';
 import 'package:gym_master_fontend/screen/hom_page.dart';
 import 'package:gym_master_fontend/screen/profile_page.dart';
@@ -26,11 +22,22 @@ class _MenuNavBarState extends State<MenuNavBar> {
   late int uid;
   late int roleid;
   GetStorage gs = GetStorage();
+   auth.User? currentUser;
   @override
   void initState() {
     super.initState();
     // อ่านค่าใน GetStorage เพื่ออัปเดตข้อมูลในหน้าจอ
     updateStorageData();
+        auth.FirebaseAuth.instance
+        .authStateChanges()
+        .listen((auth.User? updatedUser) {
+      setState(() {
+        currentUser = updatedUser;
+      });
+
+
+    
+    });
   }
 
   void updateStorageData() {
@@ -85,4 +92,6 @@ class _MenuNavBarState extends State<MenuNavBar> {
       ),
     );
   }
+
+
 }

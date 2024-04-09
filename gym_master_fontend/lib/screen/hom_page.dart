@@ -9,7 +9,8 @@ import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key});
+  int? uid = 0;
+  HomePage({Key? key,this.uid }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -17,9 +18,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   auth.User? currentUser;
-  late User userModel;
-  late Future<void> loadData;
-
+ int uid =0;
+ 
+  late Future<void> loadData ;
+   GetStorage gs = GetStorage();
+   late UserModel  userModel = gs.read('userModel'); 
   @override
   void initState() {
     super.initState();
@@ -31,7 +34,9 @@ class _HomePageState extends State<HomePage> {
         currentUser = updatedUser;
       });
     });
-    loadData = loadDataAsync();
+
+   
+ 
   }
 
   void logOut() async {
@@ -64,7 +69,7 @@ class _HomePageState extends State<HomePage> {
           Center(
             child: Text(
               currentUser != null
-                  ? "Logged in as ${currentUser!.email}"
+                  ? "Logged in as ${currentUser!.email} ${userModel.user.uid} ${userModel.user.username}"
                   : "Guest",
             ),
           ),
@@ -73,19 +78,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> loadDataAsync() async {
-    if (currentUser == null) {
-      return; // Return early if currentUser is null
-    }
+  // Future<void> loadDataAsync() async {
+  //   if (currentUser == null) {
+  //     return; // Return early if currentUser is null
+  //   }
 
-    final dio = Dio();
-    final response = await dio.get(
-        'http://192.168.1.125:8080/user/selectFromEmail/${currentUser!.email}');
+  //   final dio = Dio();
+  //   final response = await dio.get(
+  //       'http://192.168.1.125:8080/user/selectFromEmail/${currentUser!.email}');
 
-    if (response.statusCode == 200) {
-      await GetStorage().write('uid', userModel.uid);
-      await GetStorage().write('role', userModel.role);
-      log("Success");
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     await GetStorage().write('uid', userModel.uid);
+  //     await GetStorage().write('role', userModel.role);
+  //     log("Success");
+  //   }
+  // }
 }
