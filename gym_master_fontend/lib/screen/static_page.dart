@@ -29,7 +29,7 @@ class _StaticPageState extends State<StaticPage> {
                   style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: Colors.amber[800], fixedSize: Size(250, 50)),
+                    backgroundColor: Colors.amber[800], fixedSize: Size(250, 50)),
               )
             ],
           ),

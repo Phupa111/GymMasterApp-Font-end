@@ -44,10 +44,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
-      HomePage(
-        uid: uid,
-        roleid: roleid,
-      ),
+      HomePage(),
       StaticPage(),
       ExercisePage(),
       ProfilePage()

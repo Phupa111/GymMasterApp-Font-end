@@ -44,7 +44,7 @@ class _InformationPageState extends State<InformationPage> {
       "role": 1
     };
     var response = await http.post(
-        Uri.parse('http://192.168.1.119:8080/user/register'),
+        Uri.parse('http://192.168.1.125:8080/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 

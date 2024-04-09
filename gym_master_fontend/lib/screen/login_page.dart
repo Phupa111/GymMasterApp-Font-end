@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var response = await http.post(
-          Uri.parse('http://192.168.1.119:8080/user/login'),
+          Uri.parse('http://192.168.1.125:8080/user/login'),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(regBody));
 
@@ -87,46 +87,43 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void googleSigIn() async {
-    setState(() {
-      _isLoading = true; // Set loading to true when starting the login process
-    });
+void googleSigIn() async {
+  setState(() {
+    _isLoading = true; // Set loading to true when starting the login process
+  });
 
-    final dio = Dio();
+  final dio = Dio();
 
-    try {
-      var user = await AuthService().signInWithGoogle();
-      if (user != null) {
-        final response = await dio.get(
-            'http://192.168.1.119:8080/user/selectFromEmail/${user.email}');
-        if (response.statusCode == 200) {
-          var responseData = response.data;
-          if (responseData is List<dynamic>) {
-            List<UserModel> userModelList =
-                responseData.map((item) => UserModel.fromJson(item)).toList();
-            log(responseData.length.toString());
-            if (userModelList.isNotEmpty) {
-              Get.to(MenuNavBar());
-            } else {
-              Get.to(RegisterPage(
-                email: user.email.toString(),
-              ));
-            }
-          } else {
-            print('Error: Unexpected response data format');
-          }
+  try {
+    var user = await AuthService().signInWithGoogle();
+    if (user != null) {
+      final response = await dio.get(
+        'http://192.168.1.125:8080/user/selectFromEmail/${user.email.toString()}',
+      );
+
+      if (response.statusCode == 200) {
+        var responseData = response.data;
+
+        if (responseData.isEmpty) {
+          Get.to(RegisterPage(
+            email: user.email.toString(),
+          ));
         } else {
-          print('Error fetching user data: ${response.statusCode}');
+          Get.to(MenuNavBar());
         }
+      } else {
+        print('Error fetching user data: ${response.statusCode}');
       }
-    } catch (e) {
-      print("Error signing in: $e");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
+  } catch (e) {
+    print("Error signing in: $e");
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                             signUserIn();
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.amber[800],
+                            backgroundColor: Colors.amber[800],
                             fixedSize: const Size(150, 50),
                           ),
                           icon: _isLoading
