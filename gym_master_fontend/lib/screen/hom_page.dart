@@ -1,42 +1,51 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  int? uid = 0;
+  HomePage({Key? key,this.uid }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  User?
-      currentUser; // Correctly declare a User? object to hold the current user
-
+  auth.User? currentUser;
+ int uid =0;
+ 
+  late Future<void> loadData ;
+   GetStorage gs = GetStorage();
+   late UserModel  userModel = gs.read('userModel'); 
   @override
   void initState() {
     super.initState();
     // Listen to the authentication state changes
-    FirebaseAuth.instance.authStateChanges().listen((User? updatedUser) {
+    auth.FirebaseAuth.instance
+        .authStateChanges()
+        .listen((auth.User? updatedUser) {
       setState(() {
-        currentUser =
-            updatedUser; // Update the currentUser with the updated user
+        currentUser = updatedUser;
       });
     });
+
+   
+ 
   }
 
   void logOut() async {
     try {
-      await FirebaseAuth.instance.signOut();
-
-      // After signing out, navigate to a login or start page
-      // You can replace the MaterialPageRoute and choose the appropriate page
+      await auth.FirebaseAuth.instance.signOut();
       Get.to(const LoginPage());
     } catch (e) {
       // Handle sign-out errors
       print("Error signing out: $e");
-      // Add your error handling logic here, such as displaying an error message
     }
   }
 
@@ -60,12 +69,28 @@ class _HomePageState extends State<HomePage> {
           Center(
             child: Text(
               currentUser != null
-                  ? "Logged in as ${currentUser!.email}" // Use currentUser to access the email
-                  : "Guset",
+                  ? "Logged in as ${currentUser!.email} ${userModel.user.uid} ${userModel.user.username}"
+                  : "Guest",
             ),
           ),
         ],
       ),
     );
   }
+
+  // Future<void> loadDataAsync() async {
+  //   if (currentUser == null) {
+  //     return; // Return early if currentUser is null
+  //   }
+
+  //   final dio = Dio();
+  //   final response = await dio.get(
+  //       'http://192.168.1.125:8080/user/selectFromEmail/${currentUser!.email}');
+
+  //   if (response.statusCode == 200) {
+  //     await GetStorage().write('uid', userModel.uid);
+  //     await GetStorage().write('role', userModel.role);
+  //     log("Success");
+  //   }
+  // }
 }

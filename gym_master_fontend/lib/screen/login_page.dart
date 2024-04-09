@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:gym_master_fontend/screen/captchaPage.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/screen/auth_page.dart';
+
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
 import 'package:gym_master_fontend/services/auth_service.dart';
 import 'package:gym_master_fontend/widgets/header_container.dart';
@@ -25,7 +29,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  
   late bool _isLoading;
 
   @override
@@ -34,80 +38,128 @@ class _LoginPageState extends State<LoginPage> {
     _isLoading = false; // Initially not loading
   }
 
-  // void signUserIn() async {
-  //   setState(() {
-  //     _isLoading = true; // Set loading to true when starting the login process
-  //   });
-
-  //   if (_emailController.text.isNotEmpty &&
-  //       _passwordController.text.isNotEmpty) {
-  //     var regBody = {
-  //       "login": _emailController.text,
-  //       "password": _passwordController.text
-  //     };
-
-  //     var response = await http.post(
-  //         Uri.parse('http://192.168.175.2:8080/user/login'),
-  //         headers: {"Content-Type": "application/json"},
-  //         body: jsonEncode(regBody));
-
-  //     print(response.statusCode);
-  //     if (response.statusCode == 200) {
-  //       var userData = jsonDecode(response.body);
-  //       var userEmail = userData['user']['email'];
-  //       // ถ้าล็อกอินสำเร็จ
-  //       try {
-  //         await FirebaseAuth.instance.signInWithEmailAndPassword(
-  //             email: userEmail, password: _passwordController.text);
-
-  //         // Navigate to MenuNavBar after successful sign-in
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(builder: (context) => MenuNavBar()),
-  //         ).then((_) {
-  //           // Optional: You can perform additional actions after navigating
-  //           // For example, you can clear the text fields or update the UI
-  //           _emailController.clear();
-  //           _passwordController.clear();
-  //         });
-  //       } catch (e) {
-  //         // Handle sign-in errors
-  //         print("Error signing in: $e");
-  //         // Add your error handling logic here, such as displaying an error message
-  //       } finally {
-  //         setState(() {
-  //           _isLoading =
-  //               false; // Set loading to false when the login process is complete
-  //         });
-  //       }
-  //     } else {
-  //       print("not sucess");
-  //     }
-  //   }
-  // }
-
-  void googleSigIn() async {
+ void signUserIn() async {
     setState(() {
       _isLoading = true; // Set loading to true when starting the login process
     });
 
-    try {
-      User? user = await AuthService().signInWithGoogle();
-      if (user != null) {
-        // Navigate to MenuNavBar after successful sign-in
-        Get.to(MenuNavBar());
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      var regBody = {
+        "login": _emailController.text,
+        "password": _passwordController.text
+      };
+
+      var response = await http.post(
+        Uri.parse('http://192.168.1.125:8080/user/login'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody),
+      );
+
+      if (response.statusCode == 200) {
+        var userData = jsonDecode(response.body);
+        var userEmail = userData['user']['email'];
+
+        // Assuming you have a method to parse the user data into a UserModel object
+        var userModel = userModelFromJson(jsonEncode(userData));
+
+        await GetStorage().write('userModel', userModel);
+
+        // ถ้าล็อกอินสำเร็จ
+        try {
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: userEmail,
+            password: _passwordController.text,
+          );
+
+          Get.to(AuthPage())?.then((_) {
+            _emailController.clear();
+            _passwordController.clear();
+          });
+        } catch (e) {
+          // Handle sign-in errors
+          print("Error signing in: $e");
+        } finally {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      } else if (response.statusCode == 404)  {
+        // Show alert dialog for unsuccessful login
+        showDailog("เข้าสู่ระบบไม่สำเร็จ","ชื่อผู้ใช้ หรือ อีเมล ไม่ถูกต้อง");
+
       }
-    } catch (e) {
-      // Handle sign-in errors
-      log("Error signing in: $e");
-      // Add your error handling logic here, such as displaying an error message
-    } finally {
-      setState(() {
-        _isLoading =
-            false; // Set loading to false when the login process is complete
-      });
+      else if (response.statusCode == 401) {
+   showDailog("เข้าสู่ระบบไม่สำเร็จ","รหัสผ่านไม่ถูกต้อง");
+      }
     }
+else {
+  showDailog("เข้าสู่ระบบไม่สำเร็จ","กรุณาใส่ ชื่อผู้ใช้ หรือ อีเมล และ รหัสผ่าน");
+
+}
+    
   }
+
+ Future<dynamic> showDailog(String title,String content) {
+   return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                 Navigator.pop(context); // Close the dialog
+          setState(() {
+            _isLoading = false; // Set isLoading to false after closing the dialog
+          }); // Close the dialog
+              },
+              child: Text("OK"),
+              
+            ),
+          ],
+        ),
+      );
+ }
+
+void googleSigIn() async {
+  setState(() {
+    _isLoading = true; // Set loading to true when starting the login process
+  });
+
+  final dio = Dio();
+
+  try {
+    var user = await AuthService().signInWithGoogle();
+    if (user != null) {
+      final response = await dio.get(
+        'http://192.168.1.125:8080/user/selectFromEmail/${user.email.toString()}',
+      );
+
+      if (response.statusCode == 200) {
+        var responseData = response.data;
+        var userModel = userModelFromJson(jsonEncode(responseData));
+        if (responseData.isEmpty) {
+          Get.to(RegisterPage(
+            email: user.email.toString(),
+          ));
+        } else {
+          await GetStorage().write('userModel',userModel );
+          Get.to(MenuNavBar());
+        }
+      } else {
+        print('Error fetching user data: ${response.statusCode}');
+      }
+    }
+  } catch (e) {
+    print("Error signing in: $e");
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _emailController,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: 'Email or Username',
+                              hintText: 'อีเมล หรือ ชื่อผู้ใช้',
                               prefixIcon: const Icon(
                                 Icons.email,
                                 color: Colors.orange,
@@ -177,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                                   Icons.key,
                                   color: Colors.orange,
                                 ),
-                                hintText: 'Password',
+                                hintText: 'รหัสผ่าน',
                                 hintStyle: const TextStyle(
                                     fontFamily: 'Kanit', color: Colors.orange),
                                 focusedBorder: OutlineInputBorder(
@@ -191,14 +243,30 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(25.0),
-                        child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.amber[800],
-                                fixedSize: const Size(150, 50)),
-                            child: const Text('Login',
-                                style: TextStyle(
-                                    color: Colors.white, fontFamily: 'Kanit'))),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _isLoading ? null : signUserIn();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber[800],
+                            fixedSize: const Size(150, 50),
+                          ),
+                          icon: _isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Icon(
+                                  Icons.login,
+                                  color: Colors.white,
+                                ),
+                          label: const Text(
+                            'เข้าสู่ระบบ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Kanit',
+                            ),
+                          ),
+                        ),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -226,7 +294,7 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               IconButton(
                                   onPressed: () {
-                                    Get.to(const MenuNavBar());
+                                    Get.to(MenuNavBar());
                                   },
                                   icon: const Icon(
                                     Icons.person,
@@ -244,15 +312,17 @@ class _LoginPageState extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Not a member?',
+                            'ยังไม่เป็นสมาชิก ?',
                             style: TextStyle(color: Colors.black),
                           ),
                           TextButton(
                               onPressed: () {
-                                Get.to(const RegisterPage());
+                                Get.to(RegisterPage(
+                                  email: "",
+                                ));
                               },
                               child: const Text(
-                                'Register now',
+                                'ลงทะเบียน',
                                 style: TextStyle(color: Colors.orange),
                               ))
                         ],

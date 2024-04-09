@@ -1,11 +1,17 @@
+
+import 'dart:math';
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/exercise_page.dart';
 import 'package:gym_master_fontend/screen/hom_page.dart';
 import 'package:gym_master_fontend/screen/profile_page.dart';
 import 'package:gym_master_fontend/screen/static_page.dart';
 
 class MenuNavBar extends StatefulWidget {
-  const MenuNavBar({super.key});
+  MenuNavBar({super.key});
 
   @override
   State<MenuNavBar> createState() => _MenuNavBarState();
@@ -13,20 +19,49 @@ class MenuNavBar extends StatefulWidget {
 
 class _MenuNavBarState extends State<MenuNavBar> {
   int currentPageIndex = 0;
-  final List<Widget> _pages = [
-    HomePage(),
-    StaticPage(),
-    ExercisePage(),
-    ProfilePage()
-  ];
+  late int uid;
+  late int roleid;
+  GetStorage gs = GetStorage();
+   auth.User? currentUser;
+  @override
+  void initState() {
+    super.initState();
+    // อ่านค่าใน GetStorage เพื่ออัปเดตข้อมูลในหน้าจอ
+    updateStorageData();
+        auth.FirebaseAuth.instance
+        .authStateChanges()
+        .listen((auth.User? updatedUser) {
+      setState(() {
+        currentUser = updatedUser;
+      });
+
+
+    
+    });
+  }
+
+  void updateStorageData() {
+    setState(() {
+      uid = gs.read('uid') ?? 0; // Use 0 as the default value if 'uid' is null
+      roleid =
+          gs.read('role') ?? 0; // Use 0 as the default value if 'role' is null
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      HomePage(),
+      StaticPage(),
+      ExercisePage(),
+      ProfilePage()
+    ];
     return PopScope(
       canPop: false,
       child: Scaffold(
         body: _pages[currentPageIndex],
         bottomNavigationBar: NavigationBar(
-          indicatorShape: CircleBorder(),
+          indicatorShape: const CircleBorder(),
           backgroundColor: Colors.orange,
           selectedIndex: currentPageIndex,
           onDestinationSelected: (int index) {
@@ -57,4 +92,6 @@ class _MenuNavBarState extends State<MenuNavBar> {
       ),
     );
   }
+
+
 }

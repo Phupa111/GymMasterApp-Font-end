@@ -47,6 +47,9 @@ dependencies:
   http: ^1.2.0
   flutter_recaptcha_v2_compat: ^1.0.3+3
   font_awesome_flutter: ^10.7.0
+  provider: ^6.1.2
+  dio: ^5.4.2+1
+  get_storage: ^2.1.1
 
 
 dev_dependencies:

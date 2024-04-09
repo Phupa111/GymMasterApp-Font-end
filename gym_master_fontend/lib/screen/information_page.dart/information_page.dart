@@ -31,19 +31,20 @@ class _InformationPageState extends State<InformationPage> {
   int genderid = 0;
 
   void signUp() async {
+    print(widget.username);
     var regBody = {
-      "user_name": widget.username,
+      "username": widget.username,
       "email": widget.email,
       "password": widget.password,
-      "weight": 70,
-      "height": 175,
-      "gender": 3,
-      "birth_day": "1990-01-01",
-      "body_fat": 15,
-      "profile_pic": ""
+      "height": 180,
+      "birthday": "1990-05-15",
+      "gender": 1,
+      "profile_pic": "",
+      "day_success_exerice": 0,
+      "role": 1
     };
     var response = await http.post(
-        Uri.parse('http://192.168.175.2:8080/user/register'),
+        Uri.parse('http://192.168.1.125:8080/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 

@@ -5,7 +5,8 @@ import 'package:gym_master_fontend/screen/information_page.dart/information_page
 import 'package:gym_master_fontend/widgets/header_container.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  String email;
+  RegisterPage({Key? key, required this.email}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -16,6 +17,15 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _password = TextEditingController();
   Color orangeColors = Colors.orange;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.email.isNotEmpty) {
+      _emailController.text =
+          widget.email; // Set the text property of _emailController
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +112,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
+                            color: Colors.transparent,
+                          ), // Change border color on focus
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -226,7 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                            primary: Colors.white,
+                            backgroundColor: Colors.white,
                             side: const BorderSide(
                                 color: Color.fromRGBO(66, 255, 0, 1.0),
                                 width: 2),
