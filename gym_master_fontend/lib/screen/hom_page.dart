@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
           Center(
             child: Text(
               currentUser != null
-                  ? "Logged in as ${currentUser!.email} ${userModel.user.uid} ${userModel.user.username}"
+                  ? "Logged in as ${currentUser!.email} ${userModel.user.uid} ${userModel.user.isDisbel}"
                   : "Guest",
             ),
           ),

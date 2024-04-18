@@ -1,8 +1,16 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
+import 'package:gym_master_fontend/services/auth_service.dart';
 
 import 'package:gym_master_fontend/widgets/header_container.dart';
+import 'package:gym_master_fontend/widgets/menu_bar.dart';
 
 class RegisterPage extends StatefulWidget {
   String email;
@@ -18,6 +26,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final _password = TextEditingController();
   Color orangeColors = Colors.orange;
 final _formKey = GlobalKey<FormState>();
+var emailStatusCode = 0;
+var usernameStatusCode = 0 ;
+
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +38,89 @@ final _formKey = GlobalKey<FormState>();
           widget.email; // Set the text property of _emailController
     }
   }
+
+void checkEmailUsername() async {
+  final dio = Dio();
+  print(_emailController.text);
+  try {
+   var emailResponse = await dio.get(
+      'http://192.168.1.125:8080/user/selectFromEmail/${_emailController.text.toString()}',
+    );
+
+var  userResponse = await dio.get(
+      'http://192.168.1.125:8080/user/selectFromEmail/${_usernameController.text.toString()}',
+    );
+
+if (emailResponse.data.isEmpty && userResponse.data.isEmpty)
+{
+       Get.to(InformationPage(
+              username: _usernameController.text,
+              email: _emailController.text,
+              password: _password.text,
+              isGoogleAcc: false,
+            ));
+}
+else 
+{
+  if(emailResponse.data.isNotEmpty)
+  {
+    emailStatusCode = 200;
+  }
+  if(userResponse.data.isNotEmpty)
+  {
+    usernameStatusCode = 200;
+  }
+
+}
+  } catch (e) {
+    print("Error: $e");
+    // Handle Dio exceptions or network errors here
+    // Show a snackbar or toast message indicating network error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("An error occurred. Please try again."),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+}
+void googleSigIn() async {
+  // setState(() {
+  //   _isLoading = true; // Set loading to true when starting the login process
+  // });
+
+  final dio = Dio();
+
+  try {
+    var user = await AuthService().signInWithGoogle();
+    if (user != null) {
+      final response = await dio.get(
+        'http://192.168.1.125:8080/user/selectFromEmail/${user.email.toString()}',
+      );
+
+      if (response.statusCode == 200) {
+        var responseData = response.data;
+    
+        if (response.data.isEmpty) {
+          Get.to(InformationPage(username: user.email.toString(), email: user.email.toString(), password: "fdhsuyu#372638990ifjkkklf", isGoogleAcc: true));
+        } else {
+              var userModel = userModelFromJson(jsonEncode(responseData));
+          await GetStorage().write('userModel',userModel );
+          Get.to(MenuNavBar());
+        }
+      } else {
+        print('Error fetching user data: ${response.statusCode}');
+      }
+    }
+  } catch (e) {
+    print("Error signing in: $e");
+  } finally {
+    // setState(() {
+    //   _isLoading = false;
+    // });
+  }
+}
+
   bool isValidEmail(String email) {
     // Regular expression for email validation
     // This is a basic example; you can use a more comprehensive regex pattern for email validation
@@ -92,13 +187,21 @@ final _formKey = GlobalKey<FormState>();
                           ),
                         ),
                                   validator: (value) {
+                                    if(usernameStatusCode == 200)
+                                    {
+                                      usernameStatusCode = 0;
+                                      return 'มีชื่อผู้ใช้นี้อยู่แล้ว';
+                                    }
+                                    else{
     if (value == null || value.isEmpty) {
       return 'กรุณาใส่ชื่อผู้ใช้';
     }
     if (value.length < 6) {
       return 'ชื่อผู้ใช้ต้องมีมากกว่า 6 ตัวอักษร';
     }
-    return null; // Return null if the password is valid
+    return null;
+                                    }
+ // Return null if the password is valid
   }
                       ),
                     ),
@@ -139,13 +242,20 @@ final _formKey = GlobalKey<FormState>();
         ),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) {
+             if(emailStatusCode == 200)
+                                    {
+                                      emailStatusCode =0;
+                                      return 'มีอีเมลนี้อยู่แล้ว';
+                                    
+                                    }
+                                    else{    if (value == null || value.isEmpty) {
           return 'กรุณาใส่อีเมล';
         }
         if (!isValidEmail(value)) {
           return 'กรุณาใส่ อีเมล ที่ใช้ได้';
         }
-        return null; // Return null if the value is valid
+        return null;}
+     // Return null if the value is valid
       },
     ),
   ),
@@ -257,11 +367,7 @@ final _formKey = GlobalKey<FormState>();
                       child: FilledButton(
                         onPressed: () {
                          if (_formKey.currentState?.validate() ?? false) {
-      Get.to(InformationPage(
-        username: _usernameController.text,
-        email: _emailController.text,
-        password: _password.text,
-      ));
+ checkEmailUsername();
     }
                         },
                         child: Text(
@@ -279,7 +385,7 @@ final _formKey = GlobalKey<FormState>();
                     Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {googleSigIn();},
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               side: const BorderSide(

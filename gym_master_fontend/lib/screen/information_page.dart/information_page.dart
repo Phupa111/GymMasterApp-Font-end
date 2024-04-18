@@ -1,21 +1,29 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
+import 'package:gym_master_fontend/widgets/header_container.dart';
 import 'package:http/http.dart' as http;
 
 class InformationPage extends StatefulWidget {
   final String username;
   final String email;
   final String password;
+  final bool isGoogleAcc;
 
   const InformationPage({
     Key? key,
     required this.username,
     required this.email,
     required this.password,
+    required this.isGoogleAcc,
   }) : super(key: key);
 
   @override
@@ -23,48 +31,72 @@ class InformationPage extends StatefulWidget {
 }
 
 class _InformationPageState extends State<InformationPage> {
-  TextEditingController _date = TextEditingController();
-  String _dropdownValue = "male";
-  final _gender = ["Male", "Female"];
+  final _date = TextEditingController();
+var _heightController = TextEditingController();
+var _weightController = TextEditingController();
   final _formkey = GlobalKey<FormState>();
-
-  int genderid = 0;
-
+  int _selectedGender = 1;
+  DateTime date = DateTime(2024, 12, 1);
   void signUp() async {
     print(widget.username);
     var regBody = {
       "username": widget.username,
       "email": widget.email,
       "password": widget.password,
-      "height": 180,
-      "birthday": "1990-05-15",
-      "gender": 1,
+      "height": int.parse(_heightController.text),
+      "birthday": "${date.year}-${date.month}-${date.day}",
+      "gender": _selectedGender,
       "profile_pic": "",
       "day_success_exerice": 0,
-      "role": 1
+      "role": 1,
+      "isDisbel":0,
     };
     var response = await http.post(
         Uri.parse('http://192.168.1.125:8080/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 
-    print(response.statusCode);
-
     try {
       // Assuming `sendSignUpRequest` is a function that sends regBody to your backend
 
       if (response.statusCode == 201) {
-        // Try creating a Firebase Auth user with the provided email and password
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        // Try creating a Firebase Auth user with the provided email and passwor
+        // 
+        if(widget.isGoogleAcc == false)
+          {
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: widget.email, password: widget.password);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        ).then((_) {
-          ;
-        }); //n
+          }
+            
+        final dio = Dio();
+         final response = await dio.get(
+        'http://192.168.1.125:8080/user/selectFromEmail/${widget.email.toString()}',
+      );
+      var userModel = userModelFromJson(jsonEncode(response.data));
+    if (response.statusCode == 200) {
+  try {
+    final progressRes = await dio.post(
+      'http://192.168.1.125:8080/progress/weightInsert',
+      data: {
+        'uid': userModel.user.uid, // Assuming you have the user ID available
+        'weight':double.parse(_weightController.text), // The weight data you want to insert
+      },
+    );
+    // Check if weight progress insertion was successful
+    if (progressRes.statusCode == 200) {
+      // Navigate to the login page
+      Get.to(const LoginPage());
+    }
+  } catch (e) {
+    // Handle any exceptions that occur during the HTTP request
+    print('Error while inserting weight progress: $e');
+    // Show an error message or take appropriate action
+  }
+}
+
+      //n
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Failed to sign up. Please try again."),
         ));
       }
@@ -79,7 +111,7 @@ class _InformationPageState extends State<InformationPage> {
         content: Text(errorMessage),
       ));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("An unexpected error occurred. Please try again."),
       ));
     }
@@ -88,120 +120,171 @@ class _InformationPageState extends State<InformationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.orange,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SafeArea(
+
+    body: SizedBox(
+         width: MediaQuery.of(context).size.width,
         child: SingleChildScrollView(
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: Form(
-                key: _formkey,
-                child: Column(
-                  children: [
-                    const Text(
-                      "กรอกข้อมูล",
-                      style: TextStyle(
-                        fontSize: 42,
-                        color: Color(0xFFFFAC41),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextFormField(
-                      validator: (username) {
-                        if (username!.isEmpty) {
-                          return "Please Enter username";
-                        } else
-                          return null;
-                      },
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.transparent),
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        contentPadding: const EdgeInsets.all(15.0),
-                        filled: true,
-                        fillColor: const Color(0xFFF1F0F0),
-                        border: InputBorder.none,
-                        hintText: "ชื่อ-นามสกุล",
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Kanit',
-                          color: Color(0xFFFFAC41),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.transparent),
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.monitor_weight_sharp,
-                          color: Color(0xFFFFAC41),
-                        ),
-                        suffixIcon: const Padding(
-                          padding: EdgeInsets.only(top: 12.0),
-                          child: Text(
-                            "กก.",
+            child: Form(
+              key: _formkey,
+              child: Column(
+                children: [
+                     HeaderContainer(
+                    pageName: "Info",
+                    onBackButtonPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedGender = 1;
+                            });
+                          },
+                          icon: Icon(
+                            Icons.male,
+                            size: 50,
+                            color: _selectedGender == 1
+                                ? Colors.white
+                                : const Color(0xFFFFAC41),
+                          ),
+                          label: Text(
+                            'ชาย',
                             style: TextStyle(
-                                fontSize: 16, color: Color(0xFFFFAC41)),
+                              color: _selectedGender == 1
+                                  ? Colors.white
+                                  : const Color(0xFFFFAC41),
+                            ),
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                              _selectedGender == 1
+                                  ? const Color(0xFFFFAC41)
+                                  : Colors.white,
+                            ),
                           ),
                         ),
-                        contentPadding: const EdgeInsets.all(15.0),
-                        filled: true,
-                        fillColor: const Color(0xFFF1F0F0),
-                        border: InputBorder.none,
-                        hintText: "น้ำหนัก",
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Kanit',
-                          color: Color(0xFFFFAC41),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedGender = 2;
+                            });
+                          },
+                          icon: Icon(
+                            Icons.female,
+                            size: 50,
+                            color: _selectedGender == 2
+                                ? Colors.white
+                                : const Color(0xFFFFAC41),
+                          ),
+                          label: Text(
+                            'หญิง',
+                            style: TextStyle(
+                              color: _selectedGender == 2
+                                  ? Colors.white
+                                  : const Color(0xFFFFAC41),
+                            ),
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                              _selectedGender == 2
+                                  ? const Color(0xFFFFAC41)
+                                  : Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextFormField(
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+              
+                                     Padding(
+                                       padding: const EdgeInsets.all(8.0),
+                                       child: TextFormField(
+                                                           readOnly: true,
+                                                           controller: _weightController,
+                                                           decoration: InputDecoration(
+                                                             focusColor: const Color(0xFFFFAC41),
+                                                             prefixIcon: const Icon(
+                                                               Icons.scale,
+                                                               color: Color(0xFFFFAC41),
+                                                             ),
+                                                             suffixIcon: const Padding(
+                                                               padding: EdgeInsets.only(top: 12.0),
+                                                               child: Text(
+                                                                 "กก.",
+                                                                 style: TextStyle(
+                                                                     fontSize: 16, color: Color(0xFFFFAC41)),
+                                                               ),
+                                                             ),
+                                                             contentPadding: const EdgeInsets.all(15.0),
+                                                             filled: true,
+                                                             fillColor: const Color(0xFFF1F0F0),
+                                                             border: InputBorder.none,
+                                                             hintText: "น้ำหนัก",
+                                                               
+                                                             hintStyle: const TextStyle(
+                                                               fontFamily: 'Kanit',
+                                                               color: Color(0xFFFFAC41),
+                                                             ),
+                                                             focusedBorder: OutlineInputBorder(
+                                                               borderSide: const BorderSide(
+                                                                   color: Colors
+                                                                       .transparent), // Change border color on focus
+                                                               borderRadius: BorderRadius.circular(15.0),
+                                                             ),
+                                                             enabledBorder: OutlineInputBorder(
+                                                               borderSide:
+                                                                   const BorderSide(color: Colors.transparent),
+                                                               borderRadius: BorderRadius.circular(25.0),
+                                                             ),
+                                                           ),
+                                                           onTap: () {
+                                                                showCupertinoModalPopup(
+                                                         context: context,
+                                                         builder: (BuildContext context) => SizedBox(
+                                                           height: 250,
+                                                           child: CupertinoPicker(
+                                                             backgroundColor: Colors.white,
+                                                             itemExtent: 30,
+                                                             scrollController: FixedExtentScrollController(initialItem: 70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
+                                                             onSelectedItemChanged: (value) {
+                                                               setState(() {
+                                                   _weightController.text = (value).toString();
+                                                               });
+                                                             },
+                                                             children: List.generate(
+                                                               151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
+                                                               (index) => Center(child: Text('${index} กก.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
+                                                             ),
+                                                           ),
+                                                         ),
+                                                       );
+                                                       
+                                                           },
+                                                           validator: (value) {
+                                                                 if (value == null || value.isEmpty) {
+      return 'กรุณาใส่น้ำหนักของคุณ';
+    }
+                                                           },
+                                                         ),
+                                     ),
+                      const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      readOnly: true,
+                      controller: _heightController,
                       decoration: InputDecoration(
                         focusColor: const Color(0xFFFFAC41),
                         prefixIcon: const Icon(
@@ -221,6 +304,7 @@ class _InformationPageState extends State<InformationPage> {
                         fillColor: const Color(0xFFF1F0F0),
                         border: InputBorder.none,
                         hintText: "ส่วนสูง",
+                          
                         hintStyle: const TextStyle(
                           fontFamily: 'Kanit',
                           color: Color(0xFFFFAC41),
@@ -237,11 +321,41 @@ class _InformationPageState extends State<InformationPage> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
+                      onTap: () {
+                           showCupertinoModalPopup(
+                    context: context,
+                    builder: (BuildContext context) => SizedBox(
+                      height: 250,
+                      child: CupertinoPicker(
+                        backgroundColor: Colors.white,
+                        itemExtent: 30,
+                        scrollController: FixedExtentScrollController(initialItem: 70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
+                        onSelectedItemChanged: (value) {
+                          setState(() {
+                                _heightController.text = (value + 100).toString();
+                          });
+                        },
+                        children: List.generate(
+                          151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
+                          (index) => Center(child: Text('${index + 100} ซม.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
+                        ),
+                      ),
                     ),
-                    const SizedBox(
-                      height: 10,
+                                    );
+                      },
+                        validator: (value) {
+                                                                 if (value == null || value.isEmpty) {
+      return 'กรุณาใส่ส่วนสูงของคุณ';
+    }
+                                                           },
                     ),
-                    TextFormField(
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
                       readOnly: true,
                       decoration: InputDecoration(
                         prefixIcon: const Icon(
@@ -274,99 +388,31 @@ class _InformationPageState extends State<InformationPage> {
                         // print("clicked");
                         _selectDate();
                       },
+                        validator: (value) {
+                                                                 if (value == null || value.isEmpty) {
+      return 'กรุณาใส่ วัน/เดือน/ปีเกิด ของคุณ';
+    }
+                                                           },
                     ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    DropdownButtonFormField(
-                      iconEnabledColor: const Color(0xFFFFAC41),
-                      items: _gender.map((String gender) {
-                        return DropdownMenuItem(
-                          value: gender,
-                          child: Text(gender),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        setState(() {
-                          _dropdownValue = value!;
-                          if (_dropdownValue == "Male") {
-                            genderid = 4;
-                          } else {
-                            genderid = 3;
-                          }
-                        });
-                      },
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFF1F0F0),
-                          prefixIcon: const Icon(
-                            Icons.transgender_sharp,
-                            color: Color(0xFFFFAC41),
-                          ),
-                          contentPadding: const EdgeInsets.all(15.0),
-                          border: InputBorder.none,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors
-                                    .transparent), // Change border color on focus
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                const BorderSide(color: Colors.transparent),
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                          hintText: "เพศ",
-                          hintStyle: const TextStyle(color: Color(0xFFFFAC41))),
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors
-                                  .transparent), // Change border color on focus
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.transparent),
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.percent_sharp,
-                          color: Color(0xFFFFAC41),
-                        ),
-                        contentPadding: const EdgeInsets.all(15.0),
-                        filled: true,
-                        fillColor: const Color(0xFFF1F0F0),
-                        border: InputBorder.none,
-                        hintText: "Body Fat",
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Kanit',
-                          color: Color(0xFFFFAC41),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    FilledButton(
-                        onPressed: () {
-                          // _formkey.currentState!.validate();
+                  ),
+                  const SizedBox(
+                    height: 20.0,
+                  ),
+             
+                
+                  FilledButton(
+                      onPressed: () {
+                        // _formkey.currentState!.validate();
+                        if(_formkey.currentState!.validate())
+                        {
                           signUp();
-                        },
-                        child: Text("submit"))
-                  ],
-                ),
+                        }
+                        
+                      },
+                      child: const Text("ตกลง"),style:ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFFFAC41)),
+              ),)
+                ],
               ),
             ),
           ),
@@ -375,29 +421,22 @@ class _InformationPageState extends State<InformationPage> {
     );
   }
 
-  Future<void> _selectDate() async {
-    DateTime? _picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: Color(0xFFFFAC41),
+  void _selectDate() async {
+    showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) => SizedBox(
+              height: 250,
+              child: CupertinoDatePicker(
+                backgroundColor: Colors.white,
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: date,
+                onDateTimeChanged: (DateTime newTime) {
+                  setState(() {
+                    date = newTime;
+                    _date.text = '${date.month}-${date.day}-${date.year}';
+                  });
+                },
               ),
-            ),
-            child: child!);
-      },
-    );
-
-    if (_picked != null) {
-      setState(() {
-        _date.text =
-            "${_picked.day.toString().padLeft(2, '0')}-${_picked.month.toString().padLeft(2, '0')}-${_picked.year.toString()}";
-        print(_date.text);
-      });
-    }
+            ));
   }
 }

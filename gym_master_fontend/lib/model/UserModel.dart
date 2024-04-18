@@ -9,47 +9,49 @@ UserModel userModelFromJson(String str) => UserModel.fromJson(json.decode(str));
 String userModelToJson(UserModel data) => json.encode(data.toJson());
 
 class UserModel {
-  User user;
+    User user;
 
-  UserModel({
-    required this.user,
-  });
+    UserModel({
+        required this.user,
+    });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
+    factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         user: User.fromJson(json["user"]),
-      );
+    );
 
-  Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toJson() => {
         "user": user.toJson(),
-      };
+    };
 }
 
 class User {
-  int uid;
-  String username;
-  String email;
-  String password;
-  int height;
-  String birthday;
-  int gender;
-  String profilePic;
-  int daySuscessExerice;
-  int role;
+    int uid;
+    String username;
+    String email;
+    String password;
+    int height;
+    String birthday;
+    int gender;
+    String profilePic;
+    int daySuscessExerice;
+    int role;
+    int isDisbel;
 
-  User({
-    required this.uid,
-    required this.username,
-    required this.email,
-    required this.password,
-    required this.height,
-    required this.birthday,
-    required this.gender,
-    required this.profilePic,
-    required this.daySuscessExerice,
-    required this.role,
-  });
+    User({
+        required this.uid,
+        required this.username,
+        required this.email,
+        required this.password,
+        required this.height,
+        required this.birthday,
+        required this.gender,
+        required this.profilePic,
+        required this.daySuscessExerice,
+        required this.role,
+        required this.isDisbel,
+    });
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
+    factory User.fromJson(Map<String, dynamic> json) => User(
         uid: json["uid"],
         username: json["username"],
         email: json["email"],
@@ -60,9 +62,10 @@ class User {
         profilePic: json["profile_pic"],
         daySuscessExerice: json["day_suscess_exerice"],
         role: json["role"],
-      );
+        isDisbel: json["isDisbel"],
+    );
 
-  Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toJson() => {
         "uid": uid,
         "username": username,
         "email": email,
@@ -73,5 +76,6 @@ class User {
         "profile_pic": profilePic,
         "day_suscess_exerice": daySuscessExerice,
         "role": role,
-      };
+        "isDisbel": isDisbel,
+    };
 }

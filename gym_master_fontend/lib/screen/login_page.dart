@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/auth_page.dart';
+import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
 
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
 import 'package:gym_master_fontend/services/auth_service.dart';
@@ -138,12 +139,11 @@ void googleSigIn() async {
 
       if (response.statusCode == 200) {
         var responseData = response.data;
-        var userModel = userModelFromJson(jsonEncode(responseData));
-        if (responseData.isEmpty) {
-          Get.to(RegisterPage(
-            email: user.email.toString(),
-          ));
+    
+        if (response.data.isEmpty) {
+          Get.to(InformationPage(username: user.email.toString(), email: user.email.toString(), password: "fdhsuyu#372638990ifjkkklf", isGoogleAcc: true));
         } else {
+              var userModel = userModelFromJson(jsonEncode(responseData));
           await GetStorage().write('userModel',userModel );
           Get.to(MenuNavBar());
         }
