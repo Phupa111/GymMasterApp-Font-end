@@ -9,7 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
-import 'package:gym_master_fontend/screen/auth_page.dart';
+
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
 
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
@@ -19,6 +19,7 @@ import 'package:gym_master_fontend/widgets/menu_bar.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:slider_captcha/slider_captcha.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,9 +31,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+    final SliderController controller = SliderController();
   late bool _isLoading;
-
+ String text = "" ;
   @override
   void initState() {
     super.initState();
@@ -65,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
         var userModel = userModelFromJson(jsonEncode(userData));
 
         await GetStorage().write('userModel', userModel);
+        
 
         // ถ้าล็อกอินสำเร็จ
         try {
@@ -72,11 +74,7 @@ class _LoginPageState extends State<LoginPage> {
             email: userEmail,
             password: _passwordController.text,
           );
-
-          Get.to(AuthPage())?.then((_) {
-            _emailController.clear();
-            _passwordController.clear();
-          });
+ CaptchaDailog();
         } catch (e) {
           // Handle sign-in errors
           print("Error signing in: $e");
@@ -145,7 +143,8 @@ void googleSigIn() async {
         } else {
               var userModel = userModelFromJson(jsonEncode(responseData));
           await GetStorage().write('userModel',userModel );
-          Get.to(MenuNavBar());
+         CaptchaDailog();
+
         }
       } else {
         print('Error fetching user data: ${response.statusCode}');
@@ -158,6 +157,67 @@ void googleSigIn() async {
       _isLoading = false;
     });
   }
+}
+
+Future<dynamic> CaptchaDailog() {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor:Colors.white,
+        title: const Text("ยืนยันความเป็นมนุษย์"),
+        content: SliderCaptcha(
+          controller: controller,
+          image: Image.asset(
+            'assets/image.jpeg',
+            fit: BoxFit.fitWidth,
+          ),
+          colorBar: Colors.blue,
+          colorCaptChar: Colors.blue,
+          onConfirm: (value) async {
+            debugPrint(value.toString());
+
+            if (value == true) {
+              Navigator.pop(context);
+              Get.to(MenuNavBar());
+              setState(() {
+                text = ""; // ยืนยันความเป็นมนุษย์แล้ว กำหนดค่า text เป็นข้อความว่าง
+              });
+            } else { 
+              setState(() {
+                    text = "พบข้อผิดผลาด"; // ยังไม่ยืนยันความเป็นมนุษย์ กำหนดค่า text เป็นข้อความ "พบข้อผิดผลาด"
+                  });
+              return await Future.delayed(const Duration(seconds: 5)).then(
+                (value) {
+                  controller.create.call();
+                 
+                },
+              );
+            }
+          },
+        ),
+        actions: [
+          Column(
+            children: [
+              Text(
+                text,
+                style: const TextStyle(color: Colors.red),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    text = "";
+                  });
+                },
+                child: const Text("ปิด"),
+              ),
+            ],
+          ),
+        ],
+      );
+    },
+  );
 }
 
 
@@ -337,4 +397,5 @@ void googleSigIn() async {
       ],
     );
   }
+
 }
