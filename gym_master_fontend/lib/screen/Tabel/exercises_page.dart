@@ -88,7 +88,7 @@ return Padding(
 
     try {
       final response =
-          await dio.get('http://192.168.1.109:8080/exPost/getExPost');
+          await dio.get('http://192.168.1.127:8080/exPost/getExPost');
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       exPosts = jsonData.map((item) => ExPostModel.fromJson(item)).toList();
