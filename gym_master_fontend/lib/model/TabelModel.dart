@@ -1,49 +1,47 @@
-// To parse this JSON data, do
-//
-//     final tabelModel = tabelModelFromJson(jsonString);
-
 import 'dart:convert';
 
-List<TabelModel> tabelModelFromJson(String str) => List<TabelModel>.from(json.decode(str).map((x) => TabelModel.fromJson(x)));
+List<TabelModel> tabelModelFromJson(String str) =>
+    List<TabelModel>.from(json.decode(str).map((x) => TabelModel.fromJson(x)));
 
-String tabelModelToJson(List<TabelModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String tabelModelToJson(List<TabelModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class TabelModel {
-    int tid;
-    int uid;
-    String couserName;
-    int times;
-    int gender;
-    int level;
-    String description;
-    int isCreateByAdmin;
-    int dayPerWeek;
+  int tid;
+  int uid;
+  String couserName;
+  int times;
+  int gender;
+  int level;
+  String description;
+  int isCreateByAdmin;
+  int dayPerWeek;
 
-    TabelModel({
-        required this.tid,
-        required this.uid,
-        required this.couserName,
-        required this.times,
-        required this.gender,
-        required this.level,
-        required this.description,
-        required this.isCreateByAdmin,
-        required this.dayPerWeek,
-    });
+  TabelModel({
+    required this.tid,
+    required this.uid,
+    required this.couserName,
+    required this.times,
+    required this.gender,
+    required this.level,
+    required this.description,
+    required this.isCreateByAdmin,
+    required this.dayPerWeek,
+  });
 
-    factory TabelModel.fromJson(Map<String, dynamic> json) => TabelModel(
-        tid: json["tid"],
-        uid: json["uid"],
-        couserName: json["couserName"],
-        times: json["times"],
-        gender: json["gender"],
-        level: json["level"],
-        description: json["description"],
-        isCreateByAdmin: json["isCreateByAdmin"],
-        dayPerWeek: json["dayPerWeek"],
-    );
+  factory TabelModel.fromJson(Map<String, dynamic> json) => TabelModel(
+        tid: json["tid"] ?? 0,
+        uid: json["uid"] ?? 0,
+        couserName: json["couserName"] ?? '',
+        times: json["times"] ?? 0,
+        gender: json["gender"] ?? 0,
+        level: json["level"] ?? 0,
+        description: json["description"] ?? '',
+        isCreateByAdmin: json["isCreateByAdmin"] ?? 0,
+        dayPerWeek: json["dayPerWeek"] ?? 0,
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "tid": tid,
         "uid": uid,
         "couserName": couserName,
@@ -53,5 +51,5 @@ class TabelModel {
         "description": description,
         "isCreateByAdmin": isCreateByAdmin,
         "dayPerWeek": dayPerWeek,
-    };
+      };
 }

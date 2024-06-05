@@ -23,7 +23,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("ท่าออกกำลังกาย"),
+        title: const Text("ท่าออกกำลังกาย"),
       ),
       body: FutureBuilder<void>(
         future: loadData,
@@ -38,43 +38,43 @@ class _ExerciesePageState extends State<ExerciesePage> {
               itemBuilder: (context, index) {
                 final exPost = exPosts[index];
                 // Build your list item using exPost data
-return Padding(
-  padding: const EdgeInsets.all(8.0),
-  child: Container(
-    height: 150,
-    decoration: BoxDecoration(
-      border: Border.all(color: const Color(0xFFFFAC41)),
-      borderRadius: const BorderRadius.all(Radius.circular(30)),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.network(
-              exPost.gifImage.toString(),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(exPost.name),
-              Text(exPost.description),
-            ],
-          ),
-        ),
-      ],
-    ),
-  ),
-);
-
-
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFFFAC41)),
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: exPost.gifImage != null
+                                ? Image.network(
+                                    exPost.gifImage!,
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Placeholder(), // Show placeholder if gifImage is null
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(exPost.name),
+                              Text(exPost.description),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
             );
           }
@@ -87,10 +87,8 @@ return Padding(
     final dio = Dio();
 
     try {
-      final response =
-          await dio.get('http://192.168.1.127:8080/exPost/getExPost');
-      final jsonData =
-          response.data as List<dynamic>; // Assuming the response is a list
+      final response = await dio.get('http://192.168.1.101:8080/exPost/getExPost');
+      final jsonData = response.data as List<dynamic>; // Assuming the response is a list
       exPosts = jsonData.map((item) => ExPostModel.fromJson(item)).toList();
     } catch (e) {
       print('Error loading data: $e');
