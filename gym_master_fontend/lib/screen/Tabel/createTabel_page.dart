@@ -43,7 +43,7 @@ void createTabel() async {
 
     // Make a POST request
     final response = await dio.post(
-      'http://192.168.1.127:8080/tabel/CreatTabel', // Corrected URL
+      'http://192.168.1.101:8080/tabel/CreatTabel', // Corrected URL
       data: regBody,
     );
 
