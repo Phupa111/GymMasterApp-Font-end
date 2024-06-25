@@ -4,8 +4,11 @@ import 'dart:ffi';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
 import 'package:provider/provider.dart';
 
 class CreateTabelPage extends StatefulWidget {
@@ -43,7 +46,7 @@ void createTabel() async {
 
     // Make a POST request
     final response = await dio.post(
-      'http://192.168.1.101:8080/tabel/CreatTabel', // Corrected URL
+      'http://192.168.2.37:8080/tabel/CreatTabel', // Corrected URL
       data: regBody,
     );
 
@@ -146,6 +149,9 @@ void createTabel() async {
                                 
                               ),
                                   keyboardType: TextInputType.number,
+                                            inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
                              controller: _times,    
                               ),
                               
@@ -195,7 +201,7 @@ void createTabel() async {
       onSelectedItemChanged: (value) {
         setState(() {
           // Handle the selected value here
-          _dayPerWeek.text = value.toString();
+          _dayPerWeek.text = (value+1).toString();
         });
       },
       children: List.generate(
@@ -218,6 +224,7 @@ SizedBox(
     onPressed: () {
       // Button action
       createTabel() ;
+      Get.to(UserTabelPage());
     },
     child: const Text(
       "ตกลง",

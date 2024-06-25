@@ -8,7 +8,7 @@ import 'package:gym_master_fontend/model/TabelModel.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/createTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
-import 'package:gym_master_fontend/screen/Tabel/exercises_page.dart';
+import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_page.dart';
 
 class UserTabelPage extends StatefulWidget {
   const UserTabelPage({Key? key}) : super(key: key);
@@ -97,7 +97,7 @@ class _UserTabelPageState extends State<UserTabelPage> {
                                  padding: const EdgeInsets.fromLTRB(8,10,8,0),
                                  child: ElevatedButton(onPressed: (){
                                   Get.to(EditTabelPage(tabelID: tabel.tid,tabelName: tabel.couserName,dayPerWeek: tabel.dayPerWeek,));
-                                 }, child: Text("แก้ไข", style: TextStyle(color: Colors.orange),),style: ElevatedButton.styleFrom(
+                                 }, child: const Text("แก้ไข", style: TextStyle(color: Colors.orange),),style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white, // Button background color
                                                                ),),
                                ),
@@ -122,7 +122,7 @@ class _UserTabelPageState extends State<UserTabelPage> {
             .white, // Change the foreground color (icon color) to your desired color
         elevation: 4, // Change the elevation if needed
         tooltip: 'เพิ่มข้อมูล', // Add a tooltip for accessibility
-        child: Icon(Icons.add), // Change the icon to your desired icon
+        child: const Icon(Icons.add), // Change the icon to your desired icon
       ),
     );
   }
@@ -134,7 +134,7 @@ class _UserTabelPageState extends State<UserTabelPage> {
     };
     try {
       final response =
-          await dio.post('http://192.168.1.101:8080/tabel/getUserTabel',data: regBody);
+          await dio.post('http://192.168.2.37:8080/tabel/getUserTabel',data: regBody);
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       userTabels = jsonData.map((item) => TabelModel.fromJson(item)).toList();

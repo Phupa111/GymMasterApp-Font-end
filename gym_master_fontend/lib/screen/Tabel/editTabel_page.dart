@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gym_master_fontend/model/ExPostModel.dart';
-import 'package:gym_master_fontend/screen/Tabel/exercises_page.dart';
+import 'package:gym_master_fontend/model/ExInTabelModel.dart';
+import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_page.dart';
 
 class EditTabelPage extends StatefulWidget {
   final int tabelID;
@@ -23,7 +23,8 @@ class EditTabelPage extends StatefulWidget {
 class _EditTabelPageState extends State<EditTabelPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<List<ExPostModel>> exPosts = [];
+  List<List<ExInTabelModel>> exPosts = [];
+  int dayNum = 1;
 
   @override
   void initState() {
@@ -43,11 +44,11 @@ class _EditTabelPageState extends State<EditTabelPage>
     for (int day = 1; day <= widget.dayPerWeek; day++) {
       try {
         final response = await dio.post(
-          'http://192.168.1.101:8080/tabel/getExercisesInTabel',
+          'http://192.168.2.37:8080/tabel/getExercisesInTabel',
           data: {'tid': widget.tabelID, 'dayNum': day},
         );
         final jsonData = response.data as List<dynamic>;
-        exPosts.add(jsonData.map((item) => ExPostModel.fromJson(item)).toList());
+        exPosts.add(jsonData.map((item) => ExInTabelModel.fromJson(item)).toList());
       } catch (e) {
         print('Error fetching exercises for day $day: $e');
         exPosts.add([]); // Add an empty list in case of error
@@ -70,40 +71,47 @@ class _EditTabelPageState extends State<EditTabelPage>
         itemBuilder: (context, i) {
           final exPost = dayExercises[i];
           return Padding(
-  padding: const EdgeInsets.all(8.0),
-  child: Container(
-    height: 150,
-    decoration: BoxDecoration(
-      border: Border.all(color: const Color(0xFFFFAC41)),
-      borderRadius: const BorderRadius.all(Radius.circular(30)),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Image.network(
-              exPost.gifImage ,
-              fit: BoxFit.cover,
+            child: Container(
+              height: 150,
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFFFAC41)),
+                borderRadius: const BorderRadius.all(Radius.circular(30)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.network(
+                        exPost.gifImage,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(exPost.name),
+                        Text('Sets: ${exPost.exInTabelModelSet}'),
+                        Text('Reps: ${exPost.rep}'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(exPost.name),
-              Text(exPost.description),
-            ],
-          ),
-        ),
-      ],
-    ),
-  ),
-);
+          );
         },
       );
     });
@@ -125,17 +133,18 @@ class _EditTabelPageState extends State<EditTabelPage>
               controller: _tabController,
               children: _generateTabViews(),
             ),
-                 floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
-      Get.to(ExerciesePage());
+          Get.to(() => ExerciesePage(
+                tabelID: widget.tabelID,
+                dayNum: _tabController.index + 1, // Pass the current tab index + 1 for day number
+              ));
         },
-        backgroundColor: const Color(
-            0xFFFFAC41), // Change the background color to your desired color
-        foregroundColor: Colors
-            .white, // Change the foreground color (icon color) to your desired color
-        elevation: 4, // Change the elevation if needed
-        tooltip: 'เพิ่มข้อมูล', // Add a tooltip for accessibility
-        child: Icon(Icons.add), // Change the icon to your desired icon
+        backgroundColor: const Color(0xFFFFAC41),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        tooltip: 'เพิ่มข้อมูล',
+        child: Icon(Icons.add),
       ),
     );
   }

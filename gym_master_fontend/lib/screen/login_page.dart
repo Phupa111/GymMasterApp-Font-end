@@ -53,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var response = await http.post(
-        Uri.parse('http://192.168.1.101:8080/user/login'),
+        Uri.parse('http://192.168.2.37:8080/user/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
@@ -132,14 +132,14 @@ void googleSigIn() async {
     var user = await AuthService().signInWithGoogle();
     if (user != null) {
       final response = await dio.get(
-        'http://192.168.1.101:8080/user/selectFromEmail/${user.email.toString()}',
+        'http://192.168.2.37:8080/user/selectFromEmail/${user.email.toString()}',
       );
 
       if (response.statusCode == 200) {
         var responseData = response.data;
     
         if (response.data.isEmpty) {
-          Get.to(InformationPage(username: user.email.toString(), email: user.email.toString(), password: "fdhsuyu#372638990ifjkkklf", isGoogleAcc: true));
+          Get.to(RegisterPage(email: user.email.toString()));
         } else {
               var userModel = userModelFromJson(jsonEncode(responseData));
           await GetStorage().write('userModel',userModel );
