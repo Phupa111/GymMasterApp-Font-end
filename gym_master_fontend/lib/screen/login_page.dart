@@ -3,22 +3,19 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
-
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
-
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
 import 'package:gym_master_fontend/services/auth_service.dart';
 import 'package:gym_master_fontend/widgets/header_container.dart';
 import 'package:gym_master_fontend/widgets/menu_bar.dart';
-
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slider_captcha/slider_captcha.dart';
 
 class LoginPage extends StatefulWidget {
@@ -31,29 +28,38 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-    final SliderController controller = SliderController();
+  final SliderController _sliderController = SliderController();
   late bool _isLoading;
- String text = "" ;
+  late SharedPreferences _prefs;
+  String _captchaErrorText = "";
+
   @override
   void initState() {
     super.initState();
     _isLoading = false; // Initially not loading
+    _initializePreferences();
   }
 
- void signUserIn() async {
+  Future<void> _initializePreferences() async {
+    _prefs = await SharedPreferences.getInstance();
     setState(() {
-      _isLoading = true; // Set loading to true when starting the login process
+      
+    });
+  }
+
+  Future<void> _signUserIn() async {
+    setState(() {
+      _isLoading = true;
     });
 
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
+    if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
       var regBody = {
         "login": _emailController.text,
         "password": _passwordController.text
       };
 
       var response = await http.post(
-        Uri.parse('http://192.168.2.37:8080/user/login'),
+        Uri.parse('http://192.168.2.182:8080/user/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
@@ -61,166 +67,154 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         var userData = jsonDecode(response.body);
         var userEmail = userData['user']['email'];
-
-        // Assuming you have a method to parse the user data into a UserModel object
         var userModel = userModelFromJson(jsonEncode(userData));
 
         await GetStorage().write('userModel', userModel);
-        
+        await _prefs.setInt("uid", userModel.user.uid);
+        await _prefs.setInt("role", userModel.user.role);
 
-        // ถ้าล็อกอินสำเร็จ
         try {
           await FirebaseAuth.instance.signInWithEmailAndPassword(
             email: userEmail,
             password: _passwordController.text,
           );
- CaptchaDailog();
+          _showCaptchaDialog();
         } catch (e) {
-          // Handle sign-in errors
-          print("Error signing in: $e");
-        } finally {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      } else if (response.statusCode == 404)  {
-        // Show alert dialog for unsuccessful login
-        showDailog("เข้าสู่ระบบไม่สำเร็จ","ชื่อผู้ใช้ หรือ อีเมล ไม่ถูกต้อง");
-
-      }
-      else if (response.statusCode == 401) {
-   showDailog("เข้าสู่ระบบไม่สำเร็จ","รหัสผ่านไม่ถูกต้อง");
-      }
-    }
-else {
-  showDailog("เข้าสู่ระบบไม่สำเร็จ","กรุณาใส่ ชื่อผู้ใช้ หรือ อีเมล และ รหัสผ่าน");
-
-}
-    
-  }
-
- Future<dynamic> showDailog(String title,String content) {
-   return showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: [
-            TextButton(
-              onPressed: () {
-                 Navigator.pop(context); // Close the dialog
-          setState(() {
-            _isLoading = false; // Set isLoading to false after closing the dialog
-          }); // Close the dialog
-              },
-              child: Text("OK"),
-              
-            ),
-          ],
-        ),
-      );
- }
-
-void googleSigIn() async {
-  setState(() {
-    _isLoading = true; // Set loading to true when starting the login process
-  });
-
-  final dio = Dio();
-
-  try {
-    var user = await AuthService().signInWithGoogle();
-    if (user != null) {
-      final response = await dio.get(
-        'http://192.168.2.37:8080/user/selectFromEmail/${user.email.toString()}',
-      );
-
-      if (response.statusCode == 200) {
-        var responseData = response.data;
-    
-        if (response.data.isEmpty) {
-          Get.to(RegisterPage(email: user.email.toString()));
-        } else {
-              var userModel = userModelFromJson(jsonEncode(responseData));
-          await GetStorage().write('userModel',userModel );
-         CaptchaDailog();
-
+          log("Error signing in: $e");
         }
       } else {
-        print('Error fetching user data: ${response.statusCode}');
+        _handleErrorResponse(response);
       }
+    } else {
+      _showDialog("เข้าสู่ระบบไม่สำเร็จ", "กรุณาใส่ ชื่อผู้ใช้ หรือ อีเมล และ รหัสผ่าน");
     }
-  } catch (e) {
-    print("Error signing in: $e");
-  } finally {
+
     setState(() {
       _isLoading = false;
     });
   }
-}
 
-Future<dynamic> CaptchaDailog() {
-  return showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor:Colors.white,
-        title: const Text("ยืนยันความเป็นมนุษย์"),
-        content: SliderCaptcha(
-          controller: controller,
-          image: Image.asset(
-            'assets/image.jpeg',
-            fit: BoxFit.fitWidth,
+  Future<void> _googleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final dio = Dio();
+
+    try {
+      var user = await AuthService().signInWithGoogle();
+      if (user != null) {
+        final response = await dio.get(
+          'http://192.168.2.182:8080/user/selectFromEmail/${user.email}',
+        );
+
+        if (response.statusCode == 200) {
+          var responseData = response.data;
+          if (response.data.isEmpty) {
+            Get.to(RegisterPage(email: user.email.toString()));
+          } else {
+            var userModel = userModelFromJson(jsonEncode(responseData));
+            await GetStorage().write('userModel', userModel);
+            await _prefs.setInt("uid", userModel.user.uid);
+            await _prefs.setInt("role", userModel.user.role);
+            _showCaptchaDialog();
+          }
+        } else {
+          log('Error fetching user data: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      log("Error signing in: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _showCaptchaDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text("ยืนยันความเป็นมนุษย์"),
+          content: SliderCaptcha(
+            controller: _sliderController,
+            image: Image.asset(
+              'assets/image.jpeg',
+              fit: BoxFit.fitWidth,
+            ),
+            colorBar: Colors.blue,
+            colorCaptChar: Colors.blue,
+            onConfirm: (value) async {
+              if (value) {
+                Navigator.pop(context);
+                Get.to(MenuNavBar());
+                setState(() {
+                  _captchaErrorText = "";
+                });
+              } else {
+                setState(() {
+                  _captchaErrorText = "พบข้อผิดผลาด";
+                });
+                await Future.delayed(const Duration(seconds: 5));
+                _sliderController.create.call();
+              }
+            },
           ),
-          colorBar: Colors.blue,
-          colorCaptChar: Colors.blue,
-          onConfirm: (value) async {
-            debugPrint(value.toString());
+          actions: [
+            Column(
+              children: [
+                Text(
+                  _captchaErrorText,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _captchaErrorText = "";
+                    });
+                  },
+                  child: const Text("ปิด"),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-            if (value == true) {
-              Navigator.pop(context);
-              Get.to(MenuNavBar());
-              setState(() {
-                text = ""; // ยืนยันความเป็นมนุษย์แล้ว กำหนดค่า text เป็นข้อความว่าง
-              });
-            } else { 
-              setState(() {
-                    text = "พบข้อผิดผลาด"; // ยังไม่ยืนยันความเป็นมนุษย์ กำหนดค่า text เป็นข้อความ "พบข้อผิดผลาด"
-                  });
-              return await Future.delayed(const Duration(seconds: 5)).then(
-                (value) {
-                  controller.create.call();
-                 
-                },
-              );
-            }
-          },
-        ),
+  void _handleErrorResponse(http.Response response) {
+    if (response.statusCode == 404) {
+      _showDialog("เข้าสู่ระบบไม่สำเร็จ", "ชื่อผู้ใช้ หรือ อีเมล ไม่ถูกต้อง");
+    } else if (response.statusCode == 401) {
+      _showDialog("เข้าสู่ระบบไม่สำเร็จ", "รหัสผ่านไม่ถูกต้อง");
+    }
+  }
+
+  Future<void> _showDialog(String title, String content) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
         actions: [
-          Column(
-            children: [
-              Text(
-                text,
-                style: const TextStyle(color: Colors.red),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    text = "";
-                  });
-                },
-                child: const Text("ปิด"),
-              ),
-            ],
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _isLoading = false;
+              });
+            },
+            child: const Text("OK"),
           ),
         ],
-      );
-    },
-  );
-}
-
-
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -305,7 +299,7 @@ Future<dynamic> CaptchaDailog() {
                         padding: const EdgeInsets.all(25.0),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            _isLoading ? null : signUserIn();
+                            _isLoading ? null : _signUserIn();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[800],
@@ -335,7 +329,7 @@ Future<dynamic> CaptchaDailog() {
                             children: [
                               IconButton(
                                   onPressed: () async {
-                                    googleSigIn();
+                                    _googleSignIn();
                                   },
                                   icon: const Icon(
                                     FontAwesomeIcons.google,
@@ -397,5 +391,4 @@ Future<dynamic> CaptchaDailog() {
       ],
     );
   }
-
 }

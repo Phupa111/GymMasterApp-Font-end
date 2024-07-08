@@ -1,19 +1,27 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/ExInTabelModel.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_page.dart';
+import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditTabelPage extends StatefulWidget {
   final int tabelID;
   final String tabelName;
   final int dayPerWeek;
+  final bool isUnused;
 
   const EditTabelPage({
     super.key,
     required this.tabelID,
     required this.tabelName,
     required this.dayPerWeek,
+    required this.isUnused,
   });
 
   @override
@@ -25,12 +33,23 @@ class _EditTabelPageState extends State<EditTabelPage>
   late TabController _tabController;
   List<List<ExInTabelModel>> exPosts = [];
   int dayNum = 1;
-
+    GetStorage gs = GetStorage();
+  late UserModel userModel = gs.read('userModel');
+    late SharedPreferences prefs;
+    int? uid;
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: widget.dayPerWeek, vsync: this);
     fetchExercisesForAllDays();
+  }
+    Future<void> _initializePreferences() async {
+    prefs = await SharedPreferences.getInstance();
+    uid = prefs.getInt("uid");
+        setState(() {
+           
+      
+    });
   }
 
   @override
@@ -44,7 +63,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     for (int day = 1; day <= widget.dayPerWeek; day++) {
       try {
         final response = await dio.post(
-          'http://192.168.2.37:8080/tabel/getExercisesInTabel',
+          'http://192.168.2.182:8080/tabel/getExercisesInTabel',
           data: {'tid': widget.tabelID, 'dayNum': day},
         );
         final jsonData = response.data as List<dynamic>;
@@ -129,23 +148,72 @@ class _EditTabelPageState extends State<EditTabelPage>
       ),
       body: exPosts.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: _generateTabViews(),
+          : Column(
+              children: [
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: _generateTabViews(),
+                  ),
+                ),
+                if (widget.isUnused)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+         child: ElevatedButton(
+                            onPressed: () {
+                              enabelUserCourse(widget.tabelID);
+                            },
+                            child: const Text("ใช้งาน", style: TextStyle(color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.lightGreen, // Button background color
+                            ),
+                          ),
+                  ),
+              ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => ExerciesePage(
-                tabelID: widget.tabelID,
-                dayNum: _tabController.index + 1, // Pass the current tab index + 1 for day number
-              ));
-        },
-        backgroundColor: const Color(0xFFFFAC41),
-        foregroundColor: Colors.white,
-        elevation: 4,
-        tooltip: 'เพิ่มข้อมูล',
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: !widget.isUnused
+          ? FloatingActionButton(
+              onPressed: () {
+                Get.to(() => ExerciesePage(
+                      tabelID: widget.tabelID,
+                      dayNum: _tabController.index + 1, // Pass the current tab index + 1 for day number
+                    ));
+              },
+              backgroundColor: const Color(0xFFFFAC41),
+              foregroundColor: Colors.white,
+              elevation: 4,
+              tooltip: 'เพิ่มข้อมูล',
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
+  }
+    void enabelUserCourse(int tid) async {
+    final dio = Dio();
+    var regBody = {
+      "uid": userModel.user.uid,
+      "tid": tid,
+      "week": 1,
+      "day": 1,
+    };
+
+    try {
+      final response = await dio.post('http://192.168.2.182:8080/enCouser/EnabelCouser', data: regBody);
+
+      if (response.statusCode == 200) {
+        // Course enabled successfully! (Handle success scenario)
+        log("Course with ID $tid enabled successfully!");
+        setState(() {
+         Get.to(const UserTabelPage());// Reload the data
+        });
+      } else {
+        // Handle error based on status code
+        log("Error enabling course: ${response.statusCode}");
+        // You can also check the response body for specific error messages
+      }
+    } catch (e) {
+      // Handle network or other errors
+      log("Error enabling course: $e");
+    }
   }
 }
