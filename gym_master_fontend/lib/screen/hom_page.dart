@@ -12,6 +12,7 @@ import 'package:gym_master_fontend/screen/Tabel/adminTabel_page.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 import 'package:gym_master_fontend/style/state_color.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   int? uid = 0;
@@ -25,13 +26,21 @@ class _HomePageState extends State<HomePage> {
   List<TabelModel> adminTabels = [];
 
   late Future<void> loadData;
-  GetStorage gs = GetStorage();
-  late UserModel userModel = gs.read('userModel');
 
+  late SharedPreferences _prefs;
+  int? uid;
   @override
   void initState() {
     super.initState();
     loadData = loadDataAsync();
+    _initializePreferences();
+  }
+
+  Future<void> _initializePreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    uid = _prefs.getInt("uid");
+    log(uid.toString());
+    setState(() {});
   }
 
   @override
@@ -155,7 +164,7 @@ class _HomePageState extends State<HomePage> {
                               padding: const EdgeInsets.all(20.0),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Get.to(const UserTabelPage() );
+                                  Get.to(const UserTabelPage());
                                 },
                                 child: Text(
                                   "ดูเพิ่มเติม",
@@ -184,7 +193,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final response =
-          await dio.get('http://192.168.2.37:8080/Tabel/getAdminTabel');
+          await dio.get('http://192.168.2.217:8080/Tabel/getAdminTabel');
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       adminTabels = jsonData.map((item) => TabelModel.fromJson(item)).toList();
