@@ -8,6 +8,8 @@ import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_start_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/createTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
+import 'package:gym_master_fontend/screen/hom_page.dart';
+import 'package:gym_master_fontend/widgets/menu_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserTabelPage extends StatefulWidget {
@@ -60,6 +62,10 @@ class _UserTabelPageState extends State<UserTabelPage>
             Tab(text: "กำลังใช้งาน"),
           ],
         ),
+                 leading: IconButton(
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () {Get.to(MenuNavBar());},
+  ),
       ),
       body: FutureBuilder<void>(
         future: loadData,
@@ -224,7 +230,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
     try {
       final response = await dio.post(
-          'http://192.168.2.217:8080/enCouser/EnabelCouser',
+          'http://192.168.2.182:8080/enCouser/EnabelCouser',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -253,7 +259,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
     try {
       final response = await dio.post(
-          'http://192.168.2.217:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.182:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -281,7 +287,7 @@ class _UserTabelPageState extends State<UserTabelPage>
     };
     try {
       final unusedResponse = await dio.post(
-          'http://192.168.2.217:8080/tabel/getUnUesUserTabel',
+          'http://192.168.2.182:8080/tabel/getUnUesUserTabel',
           data: regBody);
       final unusedJsonData = unusedResponse.data
           as List<dynamic>; // Assuming the response is a list
@@ -290,7 +296,7 @@ class _UserTabelPageState extends State<UserTabelPage>
       log(unusedTabels.length.toString());
 
       final activeResponse = await dio.post(
-          'http://192.168.2.217:8080/tabel/getEnnabelUserTabel',
+          'http://192.168.2.182:8080/tabel/getEnnabelUserTabel',
           data: regBody);
       final activeJsonData = activeResponse.data
           as List<dynamic>; // Assuming the response is a list
