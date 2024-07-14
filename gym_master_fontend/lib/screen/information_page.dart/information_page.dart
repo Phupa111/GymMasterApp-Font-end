@@ -52,7 +52,7 @@ var _weightController = TextEditingController();
       "isDisbel":0,
     };
     var response = await http.post(
-        Uri.parse('http://192.168.2.182:8080/user/register'),
+        Uri.parse('http://192.168.2.199:8080/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 
@@ -70,13 +70,13 @@ var _weightController = TextEditingController();
             
         final dio = Dio();
          final response = await dio.get(
-        'http://192.168.2.182:8080/user/selectFromEmail/${widget.email.toString()}',
+        'http://192.168.2.199:8080/user/selectFromEmail/${widget.email.toString()}',
       );
       var userModel = userModelFromJson(jsonEncode(response.data));
     if (response.statusCode == 200) {
   try {
     final progressRes = await dio.post(
-      'http://192.168.2.182:8080/progress/weightInsert',
+      'http://192.168.2.199:8080/progress/weightInsert',
       data: {
         'uid': userModel.user.uid, // Assuming you have the user ID available
         'weight':double.parse(_weightController.text), // The weight data you want to insert

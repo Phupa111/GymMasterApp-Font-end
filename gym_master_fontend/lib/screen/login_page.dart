@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var response = await http.post(
-        Uri.parse('http://192.168.2.182:8080/user/login'),
+        Uri.parse('http://192.168.2.199:8080/user/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
@@ -72,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
         await GetStorage().write('userModel', userModel);
         await _prefs.setInt("uid", userModel.user.uid);
         await _prefs.setInt("role", userModel.user.role);
+         await _prefs.setInt("isDisbel", userModel.user.isDisbel);
 
         try {
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -105,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
       var user = await AuthService().signInWithGoogle();
       if (user != null) {
         final response = await dio.get(
-          'http://192.168.2.182:8080/user/selectFromEmail/${user.email}',
+          'http://192.168.2.199:8080/user/selectFromEmail/${user.email}',
         );
 
         if (response.statusCode == 200) {
@@ -217,178 +218,182 @@ class _LoginPageState extends State<LoginPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: Colors.white,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Center(
-                child: Transform.translate(
-                  offset: const Offset(0.0, -40.0),
-                  child: Column(
-                    children: [
-                      HeaderContainer(pageName: "Login"),
-                      const SizedBox(
-                        height: 50,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                                color: Colors.grey), // Default border color
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: TextField(
-                            controller: _emailController,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'อีเมล หรือ ชื่อผู้ใช้',
-                              prefixIcon: const Icon(
-                                Icons.email,
-                                color: Colors.orange,
-                              ),
-                              hintStyle: const TextStyle(
-                                fontFamily: 'Kanit',
-                                color: Colors.orange,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors
-                                        .orange), // Change border color on focus
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                          ),
+    return PopScope(
+      canPop: false,
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: Colors.white,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Center(
+                  child: Transform.translate(
+                    offset: const Offset(0.0, -40.0),
+                    child: Column(
+                      children: [
+                        HeaderContainer(pageName: "Login"),
+                        const SizedBox(
+                          height: 50,
                         ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                        child: Container(
-                          decoration: BoxDecoration(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                          child: Container(
+                            decoration: BoxDecoration(
                               color: Colors.white,
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(16)),
-                          child: TextField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
+                              border: Border.all(
+                                  color: Colors.grey), // Default border color
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
                                 border: InputBorder.none,
+                                hintText: 'อีเมล หรือ ชื่อผู้ใช้',
                                 prefixIcon: const Icon(
-                                  Icons.key,
+                                  Icons.email,
                                   color: Colors.orange,
                                 ),
-                                hintText: 'รหัสผ่าน',
                                 hintStyle: const TextStyle(
-                                    fontFamily: 'Kanit', color: Colors.orange),
+                                  fontFamily: 'Kanit',
+                                  color: Colors.orange,
+                                ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: const BorderSide(
                                       color: Colors
                                           .orange), // Change border color on focus
                                   borderRadius: BorderRadius.circular(16),
-                                )),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(25.0),
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            _isLoading ? null : _signUserIn();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber[800],
-                            fixedSize: const Size(150, 50),
-                          ),
-                          icon: _isLoading
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : const Icon(
-                                  Icons.login,
-                                  color: Colors.white,
                                 ),
-                          label: const Text(
-                            'เข้าสู่ระบบ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Kanit',
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Column(
-                            children: [
-                              IconButton(
-                                  onPressed: () async {
-                                    _googleSignIn();
-                                  },
-                                  icon: const Icon(
-                                    FontAwesomeIcons.google,
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(16)),
+                            child: TextField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  prefixIcon: const Icon(
+                                    Icons.key,
                                     color: Colors.orange,
+                                  ),
+                                  hintText: 'รหัสผ่าน',
+                                  hintStyle: const TextStyle(
+                                      fontFamily: 'Kanit', color: Colors.orange),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors
+                                            .orange), // Change border color on focus
+                                    borderRadius: BorderRadius.circular(16),
                                   )),
-                              const Text(
-                                "Google",
-                                style: TextStyle(color: Colors.orange),
-                              )
-                            ],
+                            ),
                           ),
-                          const SizedBox(
-                            width: 50,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(25.0),
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              _isLoading ? null : _signUserIn();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber[800],
+                              fixedSize: const Size(150, 50),
+                            ),
+                            icon: _isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Icon(
+                                    Icons.login,
+                                    color: Colors.white,
+                                  ),
+                            label: const Text(
+                              'เข้าสู่ระบบ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Kanit',
+                              ),
+                            ),
                           ),
-                          Column(
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    Get.to(MenuNavBar());
-                                  },
-                                  icon: const Icon(
-                                    Icons.person,
-                                    color: Colors.orange,
-                                  )),
-                              const Text(
-                                "Guest",
-                                style: TextStyle(color: Colors.orange),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'ยังไม่เป็นสมาชิก ?',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                          TextButton(
-                              onPressed: () {
-                                Get.to(RegisterPage(
-                                  email: "",
-                                ));
-                              },
-                              child: const Text(
-                                'ลงทะเบียน',
-                                style: TextStyle(color: Colors.orange),
-                              ))
-                        ],
-                      ),
-                    ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                IconButton(
+                                    onPressed: () async {
+                                      _googleSignIn();
+                                    },
+                                    icon: const Icon(
+                                      FontAwesomeIcons.google,
+                                      color: Colors.orange,
+                                    )),
+                                const Text(
+                                  "Google",
+                                  style: TextStyle(color: Colors.orange),
+                                )
+                              ],
+                            ),
+                            const SizedBox(
+                              width: 50,
+                            ),
+                            Column(
+                              children: [
+                                IconButton(
+                                    onPressed: () async{
+                                      await _prefs.setInt("role", 0);
+                                      Get.to(MenuNavBar());
+                                    },
+                                    icon: const Icon(
+                                      Icons.person,
+                                      color: Colors.orange,
+                                    )),
+                                const Text(
+                                  "Guest",
+                                  style: TextStyle(color: Colors.orange),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'ยังไม่เป็นสมาชิก ?',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                            TextButton(
+                                onPressed: () {
+                                  Get.to(RegisterPage(
+                                    email: "",
+                                  ));
+                                },
+                                child: const Text(
+                                  'ลงทะเบียน',
+                                  style: TextStyle(color: Colors.orange),
+                                ))
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

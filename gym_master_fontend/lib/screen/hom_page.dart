@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   late SharedPreferences _prefs;
   int? uid;
+  int? role;
   @override
   void initState() {
     super.initState();
@@ -39,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _initializePreferences() async {
     _prefs = await SharedPreferences.getInstance();
     uid = _prefs.getInt("uid");
+    role = _prefs.getInt('role');
     log(uid.toString());
     setState(() {});
   }
@@ -48,6 +50,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Home"),
+        // leading: role == 0?
+        automaticallyImplyLeading: role !=0 ?false:true,
       ),
       body: FutureBuilder<void>(
         future: loadData,
@@ -166,12 +170,12 @@ class _HomePageState extends State<HomePage> {
                                 onPressed: () {
                                   Get.to(const UserTabelPage());
                                 },
-                                child: Text(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFFAC41)),
+                                child: const Text(
                                   "ดูเพิ่มเติม",
                                   style: TextStyle(color: Colors.white),
                                 ),
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFFAC41)),
                               ),
                             )
                           ],
@@ -193,7 +197,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final response =
-          await dio.get('http://192.168.2.182:8080/Tabel/getAdminTabel');
+          await dio.get('http://192.168.2.199:8080/Tabel/getAdminTabel');
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       adminTabels = jsonData.map((item) => TabelModel.fromJson(item)).toList();

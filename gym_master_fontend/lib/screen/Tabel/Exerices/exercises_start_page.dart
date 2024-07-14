@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/model/UserEnabelCourseModel.dart';
+import 'package:gym_master_fontend/screen/Tabel/Exerices/start_exercies_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
 import 'package:gym_master_fontend/screen/hom_page.dart';
 
@@ -47,7 +48,6 @@ class _ExerciesStartState extends State<ExerciesStart> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: orangeColors,
- 
       ),
       body: FutureBuilder(
         future: loadData,
@@ -153,24 +153,37 @@ class _ExerciesStartState extends State<ExerciesStart> {
                 !isDone
                     ? Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            updateDay();
-                          },
-                          child: const Text("เริ่ม",
-                              style: TextStyle(
-                                  fontFamily: 'Kanit', color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFAC41),
-                            fixedSize: const Size(300, 50),
-                          ),
-                        ),
+              child: ElevatedButton(
+  onPressed: () async {
+    var refresh = await Get.to(() => StartExPage(
+      exPosts: exPosts,
+      tabelID: widget.tabelID,
+      tabelName: widget.tabelName,
+      dayPerWeek: widget.dayPerWeek,
+      times: widget.times,
+      uid: widget.uid,
+      userEnabelCourse: userEnabelCourse,
+    ));
+    if (refresh == true) {
+      setState(() {
+        loadData = loadDataAsync();
+      });
+    }
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFFFFAC41),
+    fixedSize: const Size(300, 50),
+  ),
+  child: const Text("เริ่ม",
+      style: TextStyle(
+          fontFamily: 'Kanit', color: Colors.white)),
+),
                       )
                     : Padding(
                         padding: const EdgeInsets.all(8.0),
-                     child: ElevatedButton(
+                        child: ElevatedButton(
                           onPressed: () {
-                            deleteUserCourse() ;
+                            deleteUserCourse();
                           },
                           child: const Text("สิ้นสุด",
                               style: TextStyle(
@@ -189,7 +202,6 @@ class _ExerciesStartState extends State<ExerciesStart> {
     );
   }
 
-
   void deleteUserCourse() async {
     final dio = Dio();
     var regBody = {
@@ -199,12 +211,12 @@ class _ExerciesStartState extends State<ExerciesStart> {
 
     try {
       final response = await dio.post(
-          'http://192.168.2.182:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.199:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
         // Course deleted successfully! (Handle success scenario)
-        
+
         log("Course  deleted successfully!");
         Get.to(UserTabelPage());
         setState(() {
@@ -220,6 +232,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
       log("Error deleting course: $e");
     }
   }
+
   void updateDay() async {
     final dio = Dio();
     try {
@@ -227,7 +240,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
         updateWeek();
       } else {
         final response = await dio.post(
-          'http://192.168.2.182:8080/enCouser/updateDay',
+          'http://192.168.2.199:8080/enCouser/updateDay',
           data: {"utid": userEnabelCourse.utid},
         );
 
@@ -250,7 +263,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     final dio = Dio();
     try {
       final response = await dio.post(
-        'http://192.168.2.182:8080/enCouser/updateWeek',
+        'http://192.168.2.199:8080/enCouser/updateWeek',
         data: {"utid": userEnabelCourse.utid},
       );
       setState(() {
@@ -272,7 +285,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     final dio = Dio();
     try {
       final response = await dio.get(
-        'http://192.168.2.182:8080/enCouser/getUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+        'http://192.168.2.199:8080/enCouser/getUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
       );
 
       if (response.statusCode == 200) {
@@ -287,7 +300,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
           }
 
           final exercisesResponse = await dio.post(
-            'http://192.168.2.182:8080/tabel/getExercisesInTabel',
+            'http://192.168.2.199:8080/tabel/getExercisesInTabel',
             data: {'tid': widget.tabelID, 'dayNum': userEnabelCourse.day},
           );
 
