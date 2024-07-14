@@ -28,6 +28,7 @@ class _UserTabelPageState extends State<UserTabelPage>
   late final TabController _tabController;
   late SharedPreferences prefs;
   int? uid;
+  int? role;
   @override
   void initState() {
     super.initState();
@@ -39,6 +40,7 @@ class _UserTabelPageState extends State<UserTabelPage>
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     uid = prefs.getInt("uid");
+    role = prefs.getInt("role");
     setState(() {
       loadData = loadDataAsync();
     });
@@ -52,7 +54,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return role != 0? Scaffold(
       appBar: AppBar(
         title: const Text("ตารางของฉัน"),
         bottom: TabBar(
@@ -96,6 +98,16 @@ class _UserTabelPageState extends State<UserTabelPage>
         elevation: 4, // Change the elevation if needed
         tooltip: 'เพิ่มข้อมูล', // Add a tooltip for accessibility
         child: const Icon(Icons.add), // Change the icon to your desired icon
+      ),
+    ):Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: ElevatedButton(onPressed: (){},      style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFAC41),
+                            fixedSize: const Size(300, 50),
+                          ),   child: const Text("Login",
+                              style: TextStyle(
+                                  fontFamily: 'Kanit', color: Colors.white)),),
       ),
     );
   }
@@ -166,12 +178,12 @@ class _UserTabelPageState extends State<UserTabelPage>
                             onPressed: () {
                               enabelUserCourse(tabel.tid);
                             },
-                            child: const Text("ใช้งาน",
-                                style: TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Colors.lightGreen, // Button background color
                             ),
+                            child: const Text("ใช้งาน",
+                                style: TextStyle(color: Colors.white)),
                           ),
                         )
                       else
@@ -181,12 +193,12 @@ class _UserTabelPageState extends State<UserTabelPage>
                             onPressed: () {
                               deleteUserCourse(tabel.tid);
                             },
-                            child: const Text("เลิกใช้งาน",
-                                style: TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Colors.red, // Button background color
                             ),
+                            child: const Text("เลิกใช้งาน",
+                                style: TextStyle(color: Colors.white)),
                           ),
                         ),
                       Padding(
@@ -200,12 +212,12 @@ class _UserTabelPageState extends State<UserTabelPage>
                               isUnused: false,
                             ));
                           },
-                          child: const Text("แก้ไข",
-                              style: TextStyle(color: Colors.orange)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 Colors.white, // Button background color
                           ),
+                          child: const Text("แก้ไข",
+                              style: TextStyle(color: Colors.orange)),
                         ),
                       )
                     ],
@@ -230,7 +242,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
     try {
       final response = await dio.post(
-          'http://192.168.2.182:8080/enCouser/EnabelCouser',
+          'http://192.168.2.199:8080/enCouser/EnabelCouser',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -259,7 +271,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
     try {
       final response = await dio.post(
-          'http://192.168.2.182:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.199:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -287,7 +299,7 @@ class _UserTabelPageState extends State<UserTabelPage>
     };
     try {
       final unusedResponse = await dio.post(
-          'http://192.168.2.182:8080/tabel/getUnUesUserTabel',
+          'http://192.168.2.199:8080/tabel/getUnUesUserTabel',
           data: regBody);
       final unusedJsonData = unusedResponse.data
           as List<dynamic>; // Assuming the response is a list
@@ -296,7 +308,7 @@ class _UserTabelPageState extends State<UserTabelPage>
       log(unusedTabels.length.toString());
 
       final activeResponse = await dio.post(
-          'http://192.168.2.182:8080/tabel/getEnnabelUserTabel',
+          'http://192.168.2.199:8080/tabel/getEnnabelUserTabel',
           data: regBody);
       final activeJsonData = activeResponse.data
           as List<dynamic>; // Assuming the response is a list
