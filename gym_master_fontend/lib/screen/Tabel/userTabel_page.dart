@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/TabelModel.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/screen/Tabel/Exerices/Course_detail_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_start_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/createTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
@@ -88,8 +89,13 @@ class _UserTabelPageState extends State<UserTabelPage>
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(const CreateTabelPage());
+        onPressed: () async {
+       var refresh = await Get.to(const CreateTabelPage());
+                if (refresh == true) {
+                  setState(() {
+                   loadData = loadDataAsync();
+                  });
+                }
         },
         backgroundColor: const Color(
             0xFFFFAC41), // Change the background color to your desired color
@@ -133,7 +139,7 @@ class _UserTabelPageState extends State<UserTabelPage>
                   isUnused: isUnused,
                 ));
               } else {
-                Get.to(ExerciesStart(
+                Get.to(CourseDetailPage(
                     tabelID: tabel.tid,
                     tabelName: tabel.couserName,
                     dayPerWeek: tabel.dayPerWeek,
@@ -176,7 +182,7 @@ class _UserTabelPageState extends State<UserTabelPage>
                           padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
                           child: ElevatedButton(
                             onPressed: () {
-                              enabelUserCourse(tabel.tid);
+                              enabelUserCourse(tabel.tid,tabel.times,tabel.dayPerWeek);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
@@ -231,36 +237,43 @@ class _UserTabelPageState extends State<UserTabelPage>
     );
   }
 
-  void enabelUserCourse(int tid) async {
-    final dio = Dio();
-    var regBody = {
-      "uid": uid,
-      "tid": tid,
-      "week": 1,
-      "day": 1,
-    };
+ void enabelUserCourse(int tid, int times, int dayPerWeek) async {
+  final dio = Dio();
 
-    try {
-      final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/EnabelCouser',
-          data: regBody);
+  for (int i = 1; i <= times; i++) {
+    for (int j = 1; j <= dayPerWeek; j++) {
+      var regBody = {
+        "uid": uid,
+        "tid": tid,
+        "week": i,
+        "day": j,
+      };
 
-      if (response.statusCode == 200) {
-        // Course enabled successfully! (Handle success scenario)
-        log("Course with ID $tid enabled successfully!");
-        setState(() {
-          loadData = loadDataAsync(); // Reload the data
-        });
-      } else {
-        // Handle error based on status code
-        log("Error enabling course: ${response.statusCode}");
-        // You can also check the response body for specific error messages
+      try {
+        final response = await dio.post(
+          'http://192.168.2.221:8080/enCouser/EnabelCouser',
+          data: regBody,
+        );
+
+        if (response.statusCode == 200) {
+          // Course enabled successfully! (Handle success scenario)
+          log("Course with ID $tid enabled successfully!");
+          setState(() {
+            loadData = loadDataAsync(); // Reload the data
+          });
+        } else {
+          // Handle error based on status code
+          log("Error enabling course: ${response.statusCode}");
+          // You can also check the response body for specific error messages
+        }
+      } catch (e) {
+        // Handle network or other errors
+        log("Error enabling course: $e");
       }
-    } catch (e) {
-      // Handle network or other errors
-      log("Error enabling course: $e");
     }
   }
+}
+
 
   void deleteUserCourse(int tid) async {
     final dio = Dio();
@@ -271,7 +284,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
     try {
       final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.221:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -299,7 +312,7 @@ class _UserTabelPageState extends State<UserTabelPage>
     };
     try {
       final unusedResponse = await dio.post(
-          'http://192.168.2.199:8080/tabel/getUnUesUserTabel',
+          'http://192.168.2.221:8080/tabel/getUnUesUserTabel',
           data: regBody);
       final unusedJsonData = unusedResponse.data
           as List<dynamic>; // Assuming the response is a list
@@ -308,7 +321,7 @@ class _UserTabelPageState extends State<UserTabelPage>
       log(unusedTabels.length.toString());
 
       final activeResponse = await dio.post(
-          'http://192.168.2.199:8080/tabel/getEnnabelUserTabel',
+          'http://192.168.2.221:8080/tabel/getEnnabelUserTabel',
           data: regBody);
       final activeJsonData = activeResponse.data
           as List<dynamic>; // Assuming the response is a list

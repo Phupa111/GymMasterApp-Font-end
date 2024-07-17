@@ -211,7 +211,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
 
     try {
       final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.221:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -240,7 +240,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
         updateWeek();
       } else {
         final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/updateDay',
+          'http://192.168.2.221:8080/enCouser/updateDay',
           data: {"utid": userEnabelCourse.utid},
         );
 
@@ -263,7 +263,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     final dio = Dio();
     try {
       final response = await dio.post(
-        'http://192.168.2.199:8080/enCouser/updateWeek',
+        'http://192.168.2.221:8080/enCouser/updateWeek',
         data: {"utid": userEnabelCourse.utid},
       );
       setState(() {
@@ -285,7 +285,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     final dio = Dio();
     try {
       final response = await dio.get(
-        'http://192.168.2.199:8080/enCouser/getUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+        'http://192.168.2.221:8080/enCouser/getUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
       );
 
       if (response.statusCode == 200) {
@@ -299,20 +299,20 @@ class _ExerciesStartState extends State<ExerciesStart> {
             isDone = true;
           }
 
-          final exercisesResponse = await dio.post(
-            'http://192.168.2.199:8080/tabel/getExercisesInTabel',
-            data: {'tid': widget.tabelID, 'dayNum': userEnabelCourse.day},
-          );
+          // final exercisesResponse = await dio.post(
+          //   'http://192.168.2.221:8080/tabel/getExercisesInTabel',
+          //   data: {'tid': widget.tabelID, 'dayNum': userEnabelCourse.day},
+          // );
 
-          if (exercisesResponse.statusCode == 200) {
-            final exerciseData = exercisesResponse.data as List<dynamic>;
-            exPosts = exerciseData
-                .map((item) => ExInTabelModel.fromJson(item))
-                .toList();
-          } else {
-            throw Exception(
-                'Failed to load exercises: ${exercisesResponse.statusCode}');
-          }
+          // if (exercisesResponse.statusCode == 200) {
+          //   final exerciseData = exercisesResponse.data as List<dynamic>;
+          //   exPosts = exerciseData
+          //       .map((item) => ExInTabelModel.fromJson(item))
+          //       .toList();
+          // } else {
+          //   throw Exception(
+          //       'Failed to load exercises: ${exercisesResponse.statusCode}');
+          // }
         } else {
           throw Exception('Invalid data format received');
         }

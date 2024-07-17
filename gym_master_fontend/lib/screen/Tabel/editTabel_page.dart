@@ -63,7 +63,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     for (int day = 1; day <= widget.dayPerWeek; day++) {
       try {
         final response = await dio.post(
-          'http://192.168.2.199:8080/tabel/getExercisesInTabel',
+          'http://192.168.2.221:8080/tabel/getExercisesInTabel',
           data: {'tid': widget.tabelID, 'dayNum': day},
         );
         final jsonData = response.data as List<dynamic>;
@@ -111,6 +111,7 @@ class _EditTabelPageState extends State<EditTabelPage>
                             Icons.broken_image,
                             color: Colors.grey,
                           );
+                        
                         },
                       ),
                     ),
@@ -198,7 +199,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     };
 
     try {
-      final response = await dio.post('http://192.168.2.199:8080/enCouser/EnabelCouser', data: regBody);
+      final response = await dio.post('http://192.168.2.221:8080/enCouser/EnabelCouser', data: regBody);
 
       if (response.statusCode == 200) {
         // Course enabled successfully! (Handle success scenario)

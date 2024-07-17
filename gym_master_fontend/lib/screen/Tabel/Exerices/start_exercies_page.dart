@@ -82,6 +82,9 @@ class _StartExPageState extends State<StartExPage> {
                 child: Center(
                   child: Column(
                     children: [
+                       const Text("พักระหว่าง Set ",style: TextStyle(
+                                  fontFamily: 'Kanit',
+                                     fontSize: 15),) ,
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: SizedBox(
@@ -96,11 +99,14 @@ class _StartExPageState extends State<StartExPage> {
                             Colors.white),
                                 strokeWidth: 12,
                                 backgroundColor: Colors.orange,
-                              ),   
+                              ), 
+                              
                               Center(
+                                
                               child: Text(
                                 "$seconds",
                                 style: const TextStyle(
+                                  fontFamily: 'Kanit',
                                     fontWeight: FontWeight.bold, fontSize: 80),
                               ),
                             ),
@@ -215,7 +221,7 @@ class _StartExPageState extends State<StartExPage> {
         updateWeek();
       } else {
         final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/updateDay',
+          'http://192.168.2.221:8080/enCouser/updateDay',
           data: {"utid": widget.userEnabelCourse.utid},
         );
 
@@ -237,7 +243,7 @@ class _StartExPageState extends State<StartExPage> {
     final dio = Dio();
     try {
       final response = await dio.post(
-        'http://192.168.2.199:8080/enCouser/updateWeek',
+        'http://192.168.2.221:8080/enCouser/updateWeek',
         data: {"utid": widget.userEnabelCourse.utid},
       );
 

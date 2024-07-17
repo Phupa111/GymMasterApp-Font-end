@@ -269,7 +269,7 @@ Future<void> addExPost(int eid) async {
 
   try {
     final response = await dio.post(
-      'http://192.168.2.199:8080/tabel/addExPosttoTabel',
+      'http://192.168.2.221:8080/tabel/addExPosttoTabel',
       data: regBody, // Pass regBody directly
     );
 
@@ -293,7 +293,7 @@ Future<void> addExPost(int eid) async {
 
     try {
       final response =
-          await dio.get('http://192.168.2.199:8080/exPost/getExPost?tid=${widget.tabelID}&dayNum=${widget.dayNum}');
+          await dio.get('http://192.168.2.221:8080/exPost/getExPost?tid=${widget.tabelID}&dayNum=${widget.dayNum}');
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       exPosts = jsonData.map((item) => ExPostModel.fromJson(item)).toList();
