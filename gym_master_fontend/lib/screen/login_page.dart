@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var response = await http.post(
-        Uri.parse('http://192.168.2.199:8080/user/login'),
+        Uri.parse('http://192.168.2.151:8080/user/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
       var user = await AuthService().signInWithGoogle();
       if (user != null) {
         final response = await dio.get(
-          'http://192.168.2.199:8080/user/selectFromEmail/${user.email}',
+          'http://192.168.2.151:8080/user/selectFromEmail/${user.email}',
         );
 
         if (response.statusCode == 200) {

@@ -7,22 +7,23 @@ import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/model/UserEnabelCourseModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/start_exercies_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
-import 'package:gym_master_fontend/screen/hom_page.dart';
 
 class ExerciesStart extends StatefulWidget {
   final int tabelID;
   final String tabelName;
-  final int dayPerWeek;
-  final int times;
+  final int week;
+  final int day;
   final int uid;
+  final int time_rest;
 
   const ExerciesStart({
     super.key,
     required this.tabelID,
     required this.tabelName,
-    required this.dayPerWeek,
-    required this.times,
     required this.uid,
+    required this.week,
+    required this.day,
+    required this.time_rest,
   });
 
   @override
@@ -31,9 +32,10 @@ class ExerciesStart extends StatefulWidget {
 
 class _ExerciesStartState extends State<ExerciesStart> {
   List<ExInTabelModel> exPosts = [];
-  late UserEnabelCourse userEnabelCourse;
   late Future<void> loadData;
   bool isDone = false;
+  List<UserEnabelCourse> userEnabelCourse = [];
+  int currentIndex = 0;
 
   @override
   void initState() {
@@ -49,7 +51,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
       appBar: AppBar(
         backgroundColor: orangeColors,
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<void>(
         future: loadData,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -63,7 +65,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
                   padding: const EdgeInsets.only(bottom: 7.0),
                   child: Container(
                     height: 200,
-                    width: 1500,
+                    width: double.infinity,
                     decoration: const BoxDecoration(
                         gradient: LinearGradient(
                             colors: [orangeColors, orangeLightColors],
@@ -72,17 +74,22 @@ class _ExerciesStartState extends State<ExerciesStart> {
                         borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(50),
                             bottomRight: Radius.circular(50))),
-                    child: Stack(
+                    child: Column(
                       children: [
-                        Column(
-                          children: [
-                            Center(
-                              child: Text(widget.tabelName),
-                            ),
-                            Text("Week : ${userEnabelCourse.week}"),
-                            Text("Day : ${userEnabelCourse.day}")
-                          ],
-                        )
+                        Center(
+                          child: Text(
+                            widget.tabelName,
+                            style: const TextStyle(
+                                fontSize: 24, color: Colors.white),
+                          ),
+                        ),
+                        Center(
+                          child: Text(
+                            "Week ${widget.week} Day ${widget.day}",
+                            style: const TextStyle(
+                                fontSize: 24, color: Colors.white),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -145,55 +152,43 @@ class _ExerciesStartState extends State<ExerciesStart> {
                           },
                         ),
                       )
-                    : Expanded(
+                    : const Expanded(
                         child: Center(
                           child: Text('สิ้นสุด'),
                         ),
                       ),
-                !isDone
-                    ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-  onPressed: () async {
-    var refresh = await Get.to(() => StartExPage(
-      exPosts: exPosts,
-      tabelID: widget.tabelID,
-      tabelName: widget.tabelName,
-      dayPerWeek: widget.dayPerWeek,
-      times: widget.times,
-      uid: widget.uid,
-      userEnabelCourse: userEnabelCourse,
-    ));
-    if (refresh == true) {
-      setState(() {
-        loadData = loadDataAsync();
-      });
-    }
-  },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color(0xFFFFAC41),
-    fixedSize: const Size(300, 50),
-  ),
-  child: const Text("เริ่ม",
-      style: TextStyle(
-          fontFamily: 'Kanit', color: Colors.white)),
-),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          onPressed: () {
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: !isDone
+                        ? () async {
+                            var refresh = await Get.to(() => StartExPage(
+                                  exPosts: exPosts,
+                                  tabelID: widget.tabelID,
+                                  tabelName: widget.tabelName,
+                                  uid: widget.uid,
+                                  week: widget.week,
+                                  day: widget.day,
+                                  time_rest: widget.time_rest,
+                                ));
+                            if (refresh == true) {
+                              Get.back(result: true);
+                            }
+                          }
+                        : () {
                             deleteUserCourse();
                           },
-                          child: const Text("สิ้นสุด",
-                              style: TextStyle(
-                                  fontFamily: 'Kanit', color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFAC41),
-                            fixedSize: const Size(300, 50),
-                          ),
-                        ),
-                      )
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFAC41),
+                      fixedSize: const Size(300, 50),
+                    ),
+                    child: Text(
+                      !isDone ? "เริ่ม" : "สิ้นสุด",
+                      style: const TextStyle(
+                          fontFamily: 'Kanit', color: Colors.white),
+                    ),
+                  ),
+                ),
               ],
             );
           }
@@ -211,117 +206,60 @@ class _ExerciesStartState extends State<ExerciesStart> {
 
     try {
       final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.151:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
-        // Course deleted successfully! (Handle success scenario)
-
-        log("Course  deleted successfully!");
+        log("Course deleted successfully!");
         Get.to(UserTabelPage());
         setState(() {
           loadData = loadDataAsync(); // Reload the data
         });
       } else {
-        // Handle error based on status code
         log("Error deleting course: ${response.statusCode}");
-        // You can also check the response body for specific error messages
       }
     } catch (e) {
-      // Handle network or other errors
       log("Error deleting course: $e");
-    }
-  }
-
-  void updateDay() async {
-    final dio = Dio();
-    try {
-      if (userEnabelCourse.day >= widget.dayPerWeek) {
-        updateWeek();
-      } else {
-        final response = await dio.post(
-          'http://192.168.2.199:8080/enCouser/updateDay',
-          data: {"utid": userEnabelCourse.utid},
-        );
-
-        if (response.statusCode == 200) {
-          log('Day updated successfully: ${response.data}');
-          // Optionally, refresh data or update UI
-        } else {
-          log('Error: ${response.statusCode}, ${response.data}');
-        }
-      }
-      setState(() {
-        loadData = loadDataAsync();
-      });
-    } catch (e) {
-      log('Error updating day: $e');
-    }
-  }
-
-  void updateWeek() async {
-    final dio = Dio();
-    try {
-      final response = await dio.post(
-        'http://192.168.2.199:8080/enCouser/updateWeek',
-        data: {"utid": userEnabelCourse.utid},
-      );
-      setState(() {
-        loadData = loadDataAsync();
-      });
-
-      if (response.statusCode == 200) {
-        log('Day updated successfully: ${response.data}');
-        // Optionally, refresh data or update UI
-      } else {
-        log('Error: ${response.statusCode}, ${response.data}');
-      }
-    } catch (e) {
-      log('Error updating day: $e');
     }
   }
 
   Future<void> loadDataAsync() async {
     final dio = Dio();
     try {
-      final response = await dio.get(
-        'http://192.168.2.199:8080/enCouser/getUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+      // final response = await dio.get(
+      //   'http://192.168.2.151:8080/enCouser/getAllUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+      // );
+      // final userEnabelCourseData = response.data as List<dynamic>;
+      // if (userEnabelCourseData.isNotEmpty) {
+      //   userEnabelCourse =  userEnabelCourse = (response.data as List)
+      //       .map((json) => UserEnabelCourse.fromJson(json))
+      //       .toList();
+      // if (userEnabelCourse.week > widget.times) {
+      // setState(() {
+      //   isDone = true;
+      // });
+      //} else {
+      final exercisesResponse = await dio.post(
+        'http://192.168.2.151:8080/tabel/getExercisesInTabel',
+        data: {'tid': widget.tabelID, 'dayNum': widget.day},
       );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        if (data is List &&
-            data.isNotEmpty &&
-            data[0] is Map<String, dynamic>) {
-          userEnabelCourse = UserEnabelCourse.fromJson(data[0]);
-
-          if (userEnabelCourse.week > widget.times) {
-            isDone = true;
-          }
-
-          final exercisesResponse = await dio.post(
-            'http://192.168.2.199:8080/tabel/getExercisesInTabel',
-            data: {'tid': widget.tabelID, 'dayNum': userEnabelCourse.day},
-          );
-
-          if (exercisesResponse.statusCode == 200) {
-            final exerciseData = exercisesResponse.data as List<dynamic>;
-            exPosts = exerciseData
-                .map((item) => ExInTabelModel.fromJson(item))
-                .toList();
-          } else {
-            throw Exception(
-                'Failed to load exercises: ${exercisesResponse.statusCode}');
-          }
-        } else {
-          throw Exception('Invalid data format received');
-        }
+      if (exercisesResponse.statusCode == 200) {
+        final exerciseData = exercisesResponse.data as List<dynamic>;
+        setState(() {
+          exPosts = exerciseData
+              .map((item) => ExInTabelModel.fromJson(item))
+              .toList();
+        });
       } else {
-        throw Exception('Failed to load user course: ${response.statusCode}');
+        throw Exception(
+            'Failed to load exercises: ${exercisesResponse.statusCode}');
       }
+      //}
+      // } else {
+      //   throw Exception('Invalid data format received');
+      // }
     } catch (e) {
-      throw Exception('Error fetching data: $e');
+      print('Error loading data: $e');
     }
-    setState(() {});
   }
 }
