@@ -16,6 +16,7 @@ class TabelModel {
   String description;
   int isCreateByAdmin;
   int dayPerWeek;
+  int timeRest;
 
   TabelModel({
     required this.tid,
@@ -27,6 +28,7 @@ class TabelModel {
     required this.description,
     required this.isCreateByAdmin,
     required this.dayPerWeek,
+     required this.timeRest,
   });
 
   factory TabelModel.fromJson(Map<String, dynamic> json) => TabelModel(
@@ -39,6 +41,7 @@ class TabelModel {
         description: json["description"] ?? '',
         isCreateByAdmin: json["isCreateByAdmin"] ?? 0,
         dayPerWeek: json["dayPerWeek"] ?? 0,
+        timeRest: json["time_rest"]??0,
       );
 
   Map<String, dynamic> toJson() => {
@@ -51,5 +54,6 @@ class TabelModel {
         "description": description,
         "isCreateByAdmin": isCreateByAdmin,
         "dayPerWeek": dayPerWeek,
+        "time_rest": timeRest,
       };
 }

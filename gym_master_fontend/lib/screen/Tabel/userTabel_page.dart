@@ -55,67 +55,75 @@ class _UserTabelPageState extends State<UserTabelPage>
 
   @override
   Widget build(BuildContext context) {
-    return role != 0? Scaffold(
-      appBar: AppBar(
-        title: const Text("ตารางของฉัน"),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: "ไม่ได้ใช้งาน"),
-            Tab(text: "กำลังใช้งาน"),
-          ],
-        ),
-                 leading: IconButton(
-    icon: const Icon(Icons.arrow_back),
-    onPressed: () {Get.to(MenuNavBar());},
-  ),
-      ),
-      body: FutureBuilder<void>(
-        future: loadData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                buildListView(unusedTabels, true),
-                buildListView(activeTabels, false),
-              ],
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-       var refresh = await Get.to(const CreateTabelPage());
+    return role != 0
+        ? Scaffold(
+            appBar: AppBar(
+              title: const Text("ตารางของฉัน"),
+              bottom: TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: "ไม่ได้ใช้งาน"),
+                  Tab(text: "กำลังใช้งาน"),
+                ],
+              ),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Get.to(MenuNavBar());
+                },
+              ),
+            ),
+            body: FutureBuilder<void>(
+              future: loadData,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  return TabBarView(
+                    controller: _tabController,
+                    children: [
+                      buildListView(unusedTabels, true),
+                      buildListView(activeTabels, false),
+                    ],
+                  );
+                }
+              },
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                var refresh = await Get.to(const CreateTabelPage());
                 if (refresh == true) {
                   setState(() {
-                   loadData = loadDataAsync();
+                    loadData = loadDataAsync();
                   });
                 }
-        },
-        backgroundColor: const Color(
-            0xFFFFAC41), // Change the background color to your desired color
-        foregroundColor: Colors
-            .white, // Change the foreground color (icon color) to your desired color
-        elevation: 4, // Change the elevation if needed
-        tooltip: 'เพิ่มข้อมูล', // Add a tooltip for accessibility
-        child: const Icon(Icons.add), // Change the icon to your desired icon
-      ),
-    ):Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: ElevatedButton(onPressed: (){},      style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFAC41),
-                            fixedSize: const Size(300, 50),
-                          ),   child: const Text("Login",
-                              style: TextStyle(
-                                  fontFamily: 'Kanit', color: Colors.white)),),
-      ),
-    );
+              },
+              backgroundColor: const Color(
+                  0xFFFFAC41), // Change the background color to your desired color
+              foregroundColor: Colors
+                  .white, // Change the foreground color (icon color) to your desired color
+              elevation: 4, // Change the elevation if needed
+              tooltip: 'เพิ่มข้อมูล', // Add a tooltip for accessibility
+              child:
+                  const Icon(Icons.add), // Change the icon to your desired icon
+            ),
+          )
+        : Scaffold(
+            appBar: AppBar(),
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFAC41),
+                  fixedSize: const Size(300, 50),
+                ),
+                child: const Text("Login",
+                    style: TextStyle(fontFamily: 'Kanit', color: Colors.white)),
+              ),
+            ),
+          );
   }
 
   Widget buildListView(List<TabelModel> tabels, bool isUnused) {
@@ -144,7 +152,7 @@ class _UserTabelPageState extends State<UserTabelPage>
                     tabelName: tabel.couserName,
                     dayPerWeek: tabel.dayPerWeek,
                     times: tabel.times,
-                    uid: uid ?? 0));
+                    uid: uid ?? 0,time_rest: tabel.timeRest,));
               }
             },
             child: Container(
@@ -182,7 +190,8 @@ class _UserTabelPageState extends State<UserTabelPage>
                           padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
                           child: ElevatedButton(
                             onPressed: () {
-                              enabelUserCourse(tabel.tid,tabel.times,tabel.dayPerWeek);
+                              enabelUserCourse(
+                                  tabel.tid, tabel.times, tabel.dayPerWeek);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
@@ -237,43 +246,69 @@ class _UserTabelPageState extends State<UserTabelPage>
     );
   }
 
- void enabelUserCourse(int tid, int times, int dayPerWeek) async {
-  final dio = Dio();
+  void enabelUserCourse(int tid, int times, int dayPerWeek) async {
+    final dio = Dio();
 
-  for (int i = 1; i <= times; i++) {
-    for (int j = 1; j <= dayPerWeek; j++) {
-      var regBody = {
-        "uid": uid,
-        "tid": tid,
-        "week": i,
-        "day": j,
-      };
+    for (int i = 1; i <= times; i++) {
+      for (int j = 1; j <= dayPerWeek; j++) {
+        var regBody = {
+          "uid": uid,
+          "tid": tid,
+          "week": i,
+          "day": j,
+        };
 
-      try {
-        final response = await dio.post(
-          'http://192.168.2.221:8080/enCouser/EnabelCouser',
-          data: regBody,
-        );
+        try {
+          final response = await dio.post(
+            'http://192.168.2.151:8080/enCouser/EnabelCouser',
+            data: regBody,
+          );
 
-        if (response.statusCode == 200) {
-          // Course enabled successfully! (Handle success scenario)
-          log("Course with ID $tid enabled successfully!");
-          setState(() {
-            loadData = loadDataAsync(); // Reload the data
-          });
-        } else {
-          // Handle error based on status code
-          log("Error enabling course: ${response.statusCode}");
-          // You can also check the response body for specific error messages
+          if (response.statusCode == 200) {
+            // Course enabled successfully! (Handle success scenario)
+            log("Course with ID $tid enabled successfully!");
+            if (i == 1 && j == 1) {
+              updateWeekStart(tid);
+            }
+            setState(() {
+              loadData = loadDataAsync(); // Reload the data
+            });
+          } else {
+            // Handle error based on status code
+            log("Error enabling course: ${response.statusCode}");
+            // You can also check the response body for specific error messages
+          }
+        } catch (e) {
+          // Handle network or other errors
+          log("Error enabling course: $e");
         }
-      } catch (e) {
-        // Handle network or other errors
-        log("Error enabling course: $e");
       }
     }
   }
-}
 
+  void updateWeekStart(int tid) async {
+    var regUpdateWeekBody = {
+      "uid": uid, // Use widget.uid for the current user ID
+      "tid": tid,
+      "week": 1,
+      "day": 1
+    };
+    final dio = Dio();
+
+    try {
+      final response = await dio.post(
+        'http://192.168.2.151:8080/enCouser/updateWeekStartDate',
+        data: regUpdateWeekBody,
+      );
+      if (response.statusCode == 200) {
+        log("Week start date updated successfully");
+      } else {
+        log("Failed to update week start date: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error updating week start date: $e");
+    }
+  }
 
   void deleteUserCourse(int tid) async {
     final dio = Dio();
@@ -284,7 +319,7 @@ class _UserTabelPageState extends State<UserTabelPage>
 
     try {
       final response = await dio.post(
-          'http://192.168.2.221:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.151:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -312,7 +347,7 @@ class _UserTabelPageState extends State<UserTabelPage>
     };
     try {
       final unusedResponse = await dio.post(
-          'http://192.168.2.221:8080/tabel/getUnUesUserTabel',
+          'http://192.168.2.151:8080/tabel/getUnUesUserTabel',
           data: regBody);
       final unusedJsonData = unusedResponse.data
           as List<dynamic>; // Assuming the response is a list
@@ -321,7 +356,7 @@ class _UserTabelPageState extends State<UserTabelPage>
       log(unusedTabels.length.toString());
 
       final activeResponse = await dio.post(
-          'http://192.168.2.221:8080/tabel/getEnnabelUserTabel',
+          'http://192.168.2.151:8080/tabel/getEnnabelUserTabel',
           data: regBody);
       final activeJsonData = activeResponse.data
           as List<dynamic>; // Assuming the response is a list

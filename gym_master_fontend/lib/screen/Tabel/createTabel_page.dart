@@ -58,7 +58,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
     try {
       final dio = Dio();
       final response = await dio.post(
-        'http://192.168.2.221:8080/tabel/CreatTabel',
+        'http://192.168.2.151:8080/tabel/CreatTabel',
         data: regBody,
       );
 

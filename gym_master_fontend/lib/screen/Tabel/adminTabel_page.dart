@@ -201,7 +201,7 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
 
     try {
       final response = await dio.post(
-          'http://192.168.2.221:8080/enCouser/EnabelCouser',
+          'http://192.168.2.151:8080/enCouser/EnabelCouser',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -229,7 +229,7 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
 
     try {
       final response = await dio.post(
-          'http://192.168.2.221:8080/enCouser/deleteUserCourse',
+          'http://192.168.2.151:8080/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -257,13 +257,13 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
       "uid": uid,
     };
     try {
-      final unusedResponse = await dio.get('http://192.168.2.221:8080/Tabel/getAdminTabel');
+      final unusedResponse = await dio.get('http://192.168.2.151:8080/Tabel/getAdminTabel');
       final unusedJsonData = unusedResponse.data as List<dynamic>;
       adminUnUsedTabels = unusedJsonData.map((item) => TabelModel.fromJson(item)).toList();
       log(adminUnUsedTabels.length.toString());
 
       final activeResponse = await dio.post(
-        'http://192.168.2.221:8080/tabel/getEnnabelAdminTabel',
+        'http://192.168.2.151:8080/tabel/getEnnabelAdminTabel',
         data: regBody,
       );
       final activeJsonData = activeResponse.data as List<dynamic>;

@@ -44,11 +44,11 @@ void checkEmailUsername() async {
   print(_emailController.text);
   try {
    var emailResponse = await dio.get(
-      'http://192.168.2.221:8080/user/selectFromEmail/${_emailController.text.toString()}',
+      'http://192.168.2.151:8080/user/selectFromEmail/${_emailController.text.toString()}',
     );
 
 var  userResponse = await dio.get(
-      'http://192.168.2.221:8080/user/selectFromEmail/${_usernameController.text.toString()}',
+      'http://192.168.2.151:8080/user/selectFromEmail/${_usernameController.text.toString()}',
     );
 
 if (emailResponse.data.isEmpty && userResponse.data.isEmpty)
@@ -95,7 +95,7 @@ void googleSigIn() async {
     var user = await AuthService().signInWithGoogle();
     if (user != null) {
       final response = await dio.get(
-        'http://192.168.2.221:8080/user/selectFromEmail/${user.email.toString()}',
+        'http://192.168.2.151:8080/user/selectFromEmail/${user.email.toString()}',
       );
 
       if (response.statusCode == 200) {
