@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/widgets/header_container.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,6 +38,7 @@ var _weightController = TextEditingController();
   final _formkey = GlobalKey<FormState>();
   int _selectedGender = 1;
   DateTime date = DateTime(2024, 12, 1);
+    String url = AppConstants.BASE_URL;
   void signUp() async {
     print(widget.username);
     var regBody = {
@@ -52,7 +54,7 @@ var _weightController = TextEditingController();
       "isDisbel":0,
     };
     var response = await http.post(
-        Uri.parse('http://192.168.2.151:8080/user/register'),
+        Uri.parse('http://${url}/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 
@@ -70,13 +72,13 @@ var _weightController = TextEditingController();
             
         final dio = Dio();
          final response = await dio.get(
-        'http://192.168.2.151:8080/user/selectFromEmail/${widget.email.toString()}',
+        'http://${url}/user/selectFromEmail/${widget.email.toString()}',
       );
       var userModel = userModelFromJson(jsonEncode(response.data));
     if (response.statusCode == 200) {
   try {
     final progressRes = await dio.post(
-      'http://192.168.2.151:8080/progress/weightInsert',
+      'http://${url}/progress/weightInsert',
       data: {
         'uid': userModel.user.uid, // Assuming you have the user ID available
         'weight':double.parse(_weightController.text), // The weight data you want to insert

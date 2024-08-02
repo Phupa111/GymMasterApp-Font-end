@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/ExPostModel.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 
 class ExerciesePage extends StatefulWidget {
   final int tabelID;
@@ -21,6 +22,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
   late Future<void> loadData;
   var _setContron = TextEditingController();
   var _repContron = TextEditingController();
+    String url = AppConstants.BASE_URL;
 
   @override
   void initState() {
@@ -269,7 +271,7 @@ Future<void> addExPost(int eid) async {
 
   try {
     final response = await dio.post(
-      'http://192.168.2.151:8080/tabel/addExPosttoTabel',
+      'http://${url}/tabel/addExPosttoTabel',
       data: regBody, // Pass regBody directly
     );
 
@@ -293,7 +295,7 @@ Future<void> addExPost(int eid) async {
 
     try {
       final response =
-          await dio.get('http://192.168.2.151:8080/exPost/getExPost?tid=${widget.tabelID}&dayNum=${widget.dayNum}');
+          await dio.get('http://${url}/exPost/getExPost?tid=${widget.tabelID}&dayNum=${widget.dayNum}');
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       exPosts = jsonData.map((item) => ExPostModel.fromJson(item)).toList();

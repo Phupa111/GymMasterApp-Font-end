@@ -10,6 +10,7 @@ import 'package:gym_master_fontend/model/TabelModel.dart'; // Add import for Tab
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/adminTabel_page.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/style/state_color.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   late SharedPreferences _prefs;
   int? uid;
   int? role;
+  String url = AppConstants.BASE_URL;
   @override
   void initState() {
     super.initState();
@@ -197,7 +199,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final response =
-          await dio.get('http://192.168.2.151:8080/Tabel/getAdminTabel');
+          await dio.get('http://${url}/Tabel/getAdminTabel');
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       adminTabels = jsonData.map((item) => TabelModel.fromJson(item)).toList();

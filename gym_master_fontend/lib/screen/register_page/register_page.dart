@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/services/auth_service.dart';
 
 import 'package:gym_master_fontend/widgets/header_container.dart';
@@ -28,6 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
 final _formKey = GlobalKey<FormState>();
 var emailStatusCode = 0;
 var usernameStatusCode = 0 ;
+  String url = AppConstants.BASE_URL;
 
 
   @override
@@ -44,11 +46,11 @@ void checkEmailUsername() async {
   print(_emailController.text);
   try {
    var emailResponse = await dio.get(
-      'http://192.168.2.151:8080/user/selectFromEmail/${_emailController.text.toString()}',
+      'http://${url}/user/selectFromEmail/${_emailController.text.toString()}',
     );
 
 var  userResponse = await dio.get(
-      'http://192.168.2.151:8080/user/selectFromEmail/${_usernameController.text.toString()}',
+      'http://${url}/user/selectFromEmail/${_usernameController.text.toString()}',
     );
 
 if (emailResponse.data.isEmpty && userResponse.data.isEmpty)
@@ -95,7 +97,7 @@ void googleSigIn() async {
     var user = await AuthService().signInWithGoogle();
     if (user != null) {
       final response = await dio.get(
-        'http://192.168.2.151:8080/user/selectFromEmail/${user.email.toString()}',
+        'http://${url}/user/selectFromEmail/${user.email.toString()}',
       );
 
       if (response.statusCode == 200) {

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/model/UserEnabelCourseModel.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 
 class StartExPage extends StatefulWidget {
   final List<ExInTabelModel> exPosts; // Add 'final' to make it immutable
@@ -16,6 +17,7 @@ class StartExPage extends StatefulWidget {
   final int week;
   final int day;
   final int time_rest;
+  
 
   const StartExPage({
     super.key,
@@ -37,6 +39,7 @@ class _StartExPageState extends State<StartExPage> {
   int seconds = 0;
   bool isTimer = false;
   Timer? timer;
+    String url = AppConstants.BASE_URL;
 
   void nextExercise() {
     setState(() {
@@ -224,7 +227,7 @@ class _StartExPageState extends State<StartExPage> {
 
     try {
       final response = await dio.post(
-        'http://192.168.2.151:8080/enCouser/updateIsSuccess',
+        'http://${url}/enCouser/updateIsSuccess',
         data: regBody,
       );
 
@@ -246,7 +249,7 @@ class _StartExPageState extends State<StartExPage> {
   //       updateWeek();
   //     } else {
   //       final response = await dio.post(
-  //         'http://192.168.2.151:8080/enCouser/updateDay',
+  //         'http://${url}/enCouser/updateDay',
   //         data: {"utid": widget.userEnabelCourse.utid},
   //       );
 
@@ -268,7 +271,7 @@ class _StartExPageState extends State<StartExPage> {
   //   final dio = Dio();
   //   try {
   //     final response = await dio.post(
-  //       'http://192.168.2.151:8080/enCouser/updateWeek',
+  //       'http://${url}/enCouser/updateWeek',
   //       data: {"utid": widget.userEnabelCourse.utid},
   //     );
 
