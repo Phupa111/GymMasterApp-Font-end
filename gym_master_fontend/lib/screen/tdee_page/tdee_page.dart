@@ -1,25 +1,49 @@
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gym_master_fontend/model/tdeeModel.dart';
 import 'package:gym_master_fontend/screen/tdee_page/sub_page/bulking_tab_page.dart';
 import 'package:gym_master_fontend/screen/tdee_page/sub_page/cutting_tab_page.dart';
 import 'package:gym_master_fontend/screen/tdee_page/sub_page/maintain_tab_page.dart';
 import 'package:gym_master_fontend/style/font_style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class TdeePage extends StatelessWidget {
+class TdeePage extends StatefulWidget {
   TdeePage({super.key});
+
+  @override
+  State<TdeePage> createState() => _TdeePageState();
+}
+
+class _TdeePageState extends State<TdeePage> {
+  late SharedPreferences _prefs;
+  int? uid;
+  List<TdeeModel> tdee = [];
+  late Future<void> loadData;
+
   final tdeeTabs = <Tab>[
     const Tab(text: "Cutting"),
     const Tab(text: "Main"),
     const Tab(text: 'Bluking')
   ];
 
-  final tdeeTabsPage = <Widget>[
-    const CuttingTabPage(),
-    const MaintainTabPage(),
-    const BulkingTabPage()
-  ];
   @override
-  void initState() {}
+  void initState() {
+    _initializePreferences();
+    loadData = loadDataTdee();
+    log(uid.toString());
+  }
+
+  Future<void> _initializePreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    uid = _prefs.getInt("uid");
+    setState(() {
+      loadData = loadDataTdee();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -51,8 +75,48 @@ class TdeePage extends StatelessWidget {
           ),
           centerTitle: true,
         ),
-        body: TabBarView(children: tdeeTabsPage),
+        body: FutureBuilder<void>(
+          future: loadData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              return TabBarView(children: [
+                CuttingTabPage(
+                  tdeeData: tdee,
+                ),
+                MaintainTabPage(
+                  tdeeData: tdee,
+                ),
+                BulkingTabPage(
+                  tdeeData: tdee,
+                )
+              ]);
+            }
+          },
+        ),
       ),
     );
+  }
+
+  Future<void> loadDataTdee() async {
+    final dio = Dio();
+    log(uid.toString());
+    var userData = {
+      "uid": uid,
+    };
+    try {
+      final response = await dio.post(
+          "http://192.168.1.4:8080/calculate/getDayOfExercise",
+          data: userData);
+      final List<dynamic> tdeeJsonData = response.data;
+      tdee = tdeeJsonData.map((item) => TdeeModel.fromJson(item)).toList();
+      log(tdeeJsonData.length.toString());
+      log(tdee.length.toString());
+    } catch (error) {
+      log('Error fecthing Data ${error}');
+    }
   }
 }
