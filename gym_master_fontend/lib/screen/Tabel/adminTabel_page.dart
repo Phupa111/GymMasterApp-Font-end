@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:gym_master_fontend/model/TabelModel.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/widgets/menu_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,7 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
   late SharedPreferences prefs;
   int? uid;
   int? role;
+    String url = AppConstants.BASE_URL;
 
   @override
   void initState() {
@@ -201,7 +203,7 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
 
     try {
       final response = await dio.post(
-          'http://192.168.2.151:8080/enCouser/EnabelCouser',
+          'http://${url}/enCouser/EnabelCouser',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -229,7 +231,7 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
 
     try {
       final response = await dio.post(
-          'http://192.168.2.151:8080/enCouser/deleteUserCourse',
+          'http://${url}/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -257,13 +259,13 @@ class _AdminTabelPageState extends State<AdminTabelPage> with TickerProviderStat
       "uid": uid,
     };
     try {
-      final unusedResponse = await dio.get('http://192.168.2.151:8080/Tabel/getAdminTabel');
+      final unusedResponse = await dio.get('http://${url}/Tabel/getAdminTabel');
       final unusedJsonData = unusedResponse.data as List<dynamic>;
       adminUnUsedTabels = unusedJsonData.map((item) => TabelModel.fromJson(item)).toList();
       log(adminUnUsedTabels.length.toString());
 
       final activeResponse = await dio.post(
-        'http://192.168.2.151:8080/tabel/getEnnabelAdminTabel',
+        'http://${url}/tabel/getEnnabelAdminTabel',
         data: regBody,
       );
       final activeJsonData = activeResponse.data as List<dynamic>;

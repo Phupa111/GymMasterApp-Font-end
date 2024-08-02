@@ -8,6 +8,7 @@ import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EditTabelPage extends StatefulWidget {
@@ -37,6 +38,7 @@ class _EditTabelPageState extends State<EditTabelPage>
   late UserModel userModel = gs.read('userModel');
     late SharedPreferences prefs;
     int? uid;
+      String url = AppConstants.BASE_URL;
   @override
   void initState() {
     super.initState();
@@ -63,7 +65,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     for (int day = 1; day <= widget.dayPerWeek; day++) {
       try {
         final response = await dio.post(
-          'http://192.168.2.151:8080/tabel/getExercisesInTabel',
+          'http://${url}/tabel/getExercisesInTabel',
           data: {'tid': widget.tabelID, 'dayNum': day},
         );
         final jsonData = response.data as List<dynamic>;
@@ -199,7 +201,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     };
 
     try {
-      final response = await dio.post('http://192.168.2.151:8080/enCouser/EnabelCouser', data: regBody);
+      final response = await dio.post('http://${url}/enCouser/EnabelCouser', data: regBody);
 
       if (response.statusCode == 200) {
         // Course enabled successfully! (Handle success scenario)
