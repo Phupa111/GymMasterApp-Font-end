@@ -11,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/services/auth_service.dart';
 import 'package:gym_master_fontend/widgets/header_container.dart';
 import 'package:gym_master_fontend/widgets/menu_bar.dart';
@@ -32,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   late bool _isLoading;
   late SharedPreferences _prefs;
   String _captchaErrorText = "";
+  String url = AppConstants.BASE_URL;
 
   @override
   void initState() {
@@ -59,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var response = await http.post(
-        Uri.parse('http://192.168.2.151:8080/user/login'),
+        Uri.parse('http://${url}/user/login'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
@@ -106,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
       var user = await AuthService().signInWithGoogle();
       if (user != null) {
         final response = await dio.get(
-          'http://192.168.2.151:8080/user/selectFromEmail/${user.email}',
+          'http://${url}/user/selectFromEmail/${user.email}',
         );
 
         if (response.statusCode == 200) {

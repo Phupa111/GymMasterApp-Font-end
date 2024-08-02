@@ -9,6 +9,7 @@ import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateTabelPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   final TextEditingController _times = TextEditingController();
   final TextEditingController _dayPerWeek = TextEditingController();
   late SharedPreferences prefs;
+    String url = AppConstants.BASE_URL;
 
   int? uid = 0;
   @override
@@ -58,7 +60,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
     try {
       final dio = Dio();
       final response = await dio.post(
-        'http://192.168.2.151:8080/tabel/CreatTabel',
+        'http://${url}/tabel/CreatTabel',
         data: regBody,
       );
 

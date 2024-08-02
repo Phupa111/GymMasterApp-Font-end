@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gym_master_fontend/screen/adminScreen/admin_page.dart';
 import 'package:gym_master_fontend/screen/exercise_page.dart';
@@ -9,7 +10,7 @@ import 'package:gym_master_fontend/screen/profile_page.dart';
 import 'package:gym_master_fontend/screen/static_page.dart';
 
 class MenuNavBar extends StatefulWidget {
-  MenuNavBar({super.key});
+  const MenuNavBar({super.key});
 
   @override
   State<MenuNavBar> createState() => _MenuNavBarState();
@@ -24,6 +25,17 @@ class _MenuNavBarState extends State<MenuNavBar> {
   @override
   void initState() {
     super.initState();
+    _initializeNotificationService();
+    _initializeUser();
+  }
+
+  Future<void> _initializeNotificationService() async {
+    
+    DateTime scheduledDate = DateTime.now();
+ 
+  }
+
+  void _initializeUser() {
     auth.FirebaseAuth.instance.authStateChanges().listen((auth.User? updatedUser) {
       setState(() {
         currentUser = updatedUser;
@@ -35,15 +47,21 @@ class _MenuNavBarState extends State<MenuNavBar> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     role = prefs.getInt("role");
-    setState(() {
-      if (role == 1 && currentPageIndex >= 4) {
-        currentPageIndex = 0;
-      } else if (role == 2 && currentPageIndex >= 2) {
-        currentPageIndex = 0;
-      } else if (role == 0 && currentPageIndex >= 2) {
-        currentPageIndex = 0;
-      }
-    });
+    if (role != null) {
+      setState(() {
+        _updatePageIndexBasedOnRole();
+      });
+    }
+  }
+
+  void _updatePageIndexBasedOnRole() {
+    if (role == 1 && currentPageIndex >= 4) {
+      currentPageIndex = 0;
+    } else if (role == 2 && currentPageIndex >= 2) {
+      currentPageIndex = 0;
+    } else if (role == 0 && currentPageIndex >= 2) {
+      currentPageIndex = 0;
+    }
   }
 
   @override

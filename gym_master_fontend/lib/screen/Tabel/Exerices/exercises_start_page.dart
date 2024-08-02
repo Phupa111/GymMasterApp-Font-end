@@ -7,6 +7,7 @@ import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/model/UserEnabelCourseModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/start_exercies_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 
 class ExerciesStart extends StatefulWidget {
   final int tabelID;
@@ -36,6 +37,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
   bool isDone = false;
   List<UserEnabelCourse> userEnabelCourse = [];
   int currentIndex = 0;
+    String url = AppConstants.BASE_URL;
 
   @override
   void initState() {
@@ -206,7 +208,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
 
     try {
       final response = await dio.post(
-          'http://192.168.2.151:8080/enCouser/deleteUserCourse',
+          'http://${url}/enCouser/deleteUserCourse',
           data: regBody);
 
       if (response.statusCode == 200) {
@@ -227,7 +229,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     final dio = Dio();
     try {
       // final response = await dio.get(
-      //   'http://192.168.2.151:8080/enCouser/getAllUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+      //   'http://${url}/enCouser/getAllUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
       // );
       // final userEnabelCourseData = response.data as List<dynamic>;
       // if (userEnabelCourseData.isNotEmpty) {
@@ -240,7 +242,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
       // });
       //} else {
       final exercisesResponse = await dio.post(
-        'http://192.168.2.151:8080/tabel/getExercisesInTabel',
+        'http://${url}/tabel/getExercisesInTabel',
         data: {'tid': widget.tabelID, 'dayNum': widget.day},
       );
       if (exercisesResponse.statusCode == 200) {
