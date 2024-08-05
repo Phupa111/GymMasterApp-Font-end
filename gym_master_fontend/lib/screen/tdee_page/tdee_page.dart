@@ -7,6 +7,7 @@ import 'package:gym_master_fontend/model/tdeeModel.dart';
 import 'package:gym_master_fontend/screen/tdee_page/sub_page/bulking_tab_page.dart';
 import 'package:gym_master_fontend/screen/tdee_page/sub_page/cutting_tab_page.dart';
 import 'package:gym_master_fontend/screen/tdee_page/sub_page/maintain_tab_page.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/style/font_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -104,19 +105,19 @@ class _TdeePageState extends State<TdeePage> {
   Future<void> loadDataTdee() async {
     final dio = Dio();
     log(uid.toString());
+    const String url = AppConstants.BASE_URL;
     var userData = {
       "uid": uid,
     };
     try {
-      final response = await dio.post(
-          "http://192.168.1.4:8080/calculate/getDayOfExercise",
-          data: userData);
-      final List<dynamic> tdeeJsonData = response.data;
+      final response = await dio
+          .post("http://${url}/calculate/getDayOfExercise", data: userData);
+      final tdeeJsonData = response.data as List<dynamic>;
       tdee = tdeeJsonData.map((item) => TdeeModel.fromJson(item)).toList();
       log(tdeeJsonData.length.toString());
       log(tdee.length.toString());
     } catch (error) {
-      log('Error fecthing Data ${error}');
+      log('Error fecthing Data $error');
     }
   }
 }
