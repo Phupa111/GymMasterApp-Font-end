@@ -207,7 +207,7 @@ class _EditTabelPageState extends State<EditTabelPage>
         // Course enabled successfully! (Handle success scenario)
         log("Course with ID $tid enabled successfully!");
         setState(() {
-         Get.to(const UserTabelPage());// Reload the data
+         Get.back();// Reload the data
         });
       } else {
         // Handle error based on status code
