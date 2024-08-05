@@ -33,12 +33,12 @@ class InformationPage extends StatefulWidget {
 
 class _InformationPageState extends State<InformationPage> {
   final _date = TextEditingController();
-var _heightController = TextEditingController();
-var _weightController = TextEditingController();
+  var _heightController = TextEditingController();
+  var _weightController = TextEditingController();
   final _formkey = GlobalKey<FormState>();
   int _selectedGender = 1;
   DateTime date = DateTime(2024, 12, 1);
-    String url = AppConstants.BASE_URL;
+  String url = AppConstants.BASE_URL;
   void signUp() async {
     print(widget.username);
     var regBody = {
@@ -51,10 +51,9 @@ var _weightController = TextEditingController();
       "profile_pic": "",
       "day_success_exerice": 0,
       "role": 1,
-      "isDisbel":0,
+      "isDisbel": 0,
     };
-    var response = await http.post(
-        Uri.parse('http://${url}/user/register'),
+    var response = await http.post(Uri.parse('http://${url}/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 
@@ -63,40 +62,41 @@ var _weightController = TextEditingController();
 
       if (response.statusCode == 201) {
         // Try creating a Firebase Auth user with the provided email and passwor
-        // 
-        if(widget.isGoogleAcc == false)
-          {
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: widget.email, password: widget.password);
-          }
-            
-        final dio = Dio();
-         final response = await dio.get(
-        'http://${url}/user/selectFromEmail/${widget.email.toString()}',
-      );
-      var userModel = userModelFromJson(jsonEncode(response.data));
-    if (response.statusCode == 200) {
-  try {
-    final progressRes = await dio.post(
-      'http://${url}/progress/weightInsert',
-      data: {
-        'uid': userModel.user.uid, // Assuming you have the user ID available
-        'weight':double.parse(_weightController.text), // The weight data you want to insert
-      },
-    );
-    // Check if weight progress insertion was successful
-    if (progressRes.statusCode == 200) {
-      // Navigate to the login page
-      Get.to(const LoginPage());
-    }
-  } catch (e) {
-    // Handle any exceptions that occur during the HTTP request
-    print('Error while inserting weight progress: $e');
-    // Show an error message or take appropriate action
-  }
-}
+        //
+        if (widget.isGoogleAcc == false) {
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: widget.email, password: widget.password);
+        }
 
-      //n
+        final dio = Dio();
+        final response = await dio.get(
+          'http://${url}/user/selectFromEmail/${widget.email.toString()}',
+        );
+        var userModel = userModelFromJson(jsonEncode(response.data));
+        if (response.statusCode == 200) {
+          try {
+            final progressRes = await dio.post(
+              'http://${url}/progress/weightInsert',
+              data: {
+                'uid': userModel
+                    .user.uid, // Assuming you have the user ID available
+                'weight': double.parse(_weightController
+                    .text), // The weight data you want to insert
+              },
+            );
+            // Check if weight progress insertion was successful
+            if (progressRes.statusCode == 200) {
+              // Navigate to the login page
+              Get.to(const LoginPage());
+            }
+          } catch (e) {
+            // Handle any exceptions that occur during the HTTP request
+            print('Error while inserting weight progress: $e');
+            // Show an error message or take appropriate action
+          }
+        }
+
+        //n
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Failed to sign up. Please try again."),
@@ -122,16 +122,15 @@ var _weightController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-    body: SizedBox(
-         width: MediaQuery.of(context).size.width,
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
         child: SingleChildScrollView(
           child: Center(
             child: Form(
               key: _formkey,
               child: Column(
                 children: [
-                     HeaderContainer(
+                  HeaderContainer(
                     pageName: "Info",
                     onBackButtonPressed: () {
                       Navigator.pop(context);
@@ -207,79 +206,80 @@ var _weightController = TextEditingController();
                   const SizedBox(
                     height: 20,
                   ),
-              
-                                     Padding(
-                                       padding: const EdgeInsets.all(8.0),
-                                       child: TextFormField(
-                                                           readOnly: true,
-                                                           controller: _weightController,
-                                                           decoration: InputDecoration(
-                                                             focusColor: const Color(0xFFFFAC41),
-                                                             prefixIcon: const Icon(
-                                                               Icons.scale,
-                                                               color: Color(0xFFFFAC41),
-                                                             ),
-                                                             suffixIcon: const Padding(
-                                                               padding: EdgeInsets.only(top: 12.0),
-                                                               child: Text(
-                                                                 "กก.",
-                                                                 style: TextStyle(
-                                                                     fontSize: 16, color: Color(0xFFFFAC41)),
-                                                               ),
-                                                             ),
-                                                             contentPadding: const EdgeInsets.all(15.0),
-                                                             filled: true,
-                                                             fillColor: const Color(0xFFF1F0F0),
-                                                             border: InputBorder.none,
-                                                             hintText: "น้ำหนัก",
-                                                               
-                                                             hintStyle: const TextStyle(
-                                                               fontFamily: 'Kanit',
-                                                               color: Color(0xFFFFAC41),
-                                                             ),
-                                                             focusedBorder: OutlineInputBorder(
-                                                               borderSide: const BorderSide(
-                                                                   color: Colors
-                                                                       .transparent), // Change border color on focus
-                                                               borderRadius: BorderRadius.circular(15.0),
-                                                             ),
-                                                             enabledBorder: OutlineInputBorder(
-                                                               borderSide:
-                                                                   const BorderSide(color: Colors.transparent),
-                                                               borderRadius: BorderRadius.circular(25.0),
-                                                             ),
-                                                           ),
-                                                           onTap: () {
-                                                                showCupertinoModalPopup(
-                                                         context: context,
-                                                         builder: (BuildContext context) => SizedBox(
-                                                           height: 250,
-                                                           child: CupertinoPicker(
-                                                             backgroundColor: Colors.white,
-                                                             itemExtent: 30,
-                                                             scrollController: FixedExtentScrollController(initialItem: 70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
-                                                             onSelectedItemChanged: (value) {
-                                                               setState(() {
-                                                   _weightController.text = (value).toString();
-                                                               });
-                                                             },
-                                                             children: List.generate(
-                                                               151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
-                                                               (index) => Center(child: Text('${index} กก.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
-                                                             ),
-                                                           ),
-                                                         ),
-                                                       );
-                                                       
-                                                           },
-                                                           validator: (value) {
-                                                                 if (value == null || value.isEmpty) {
-      return 'กรุณาใส่น้ำหนักของคุณ';
-    }
-                                                           },
-                                                         ),
-                                     ),
-                      const SizedBox(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      readOnly: true,
+                      controller: _weightController,
+                      decoration: InputDecoration(
+                        focusColor: const Color(0xFFFFAC41),
+                        prefixIcon: const Icon(
+                          Icons.scale,
+                          color: Color(0xFFFFAC41),
+                        ),
+                        suffixIcon: const Padding(
+                          padding: EdgeInsets.only(top: 12.0),
+                          child: Text(
+                            "กก.",
+                            style: TextStyle(
+                                fontSize: 16, color: Color(0xFFFFAC41)),
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "น้ำหนัก",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors
+                                  .transparent), // Change border color on focus
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                      ),
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => SizedBox(
+                            height: 250,
+                            child: CupertinoPicker(
+                              backgroundColor: Colors.white,
+                              itemExtent: 30,
+                              scrollController: FixedExtentScrollController(
+                                  initialItem:
+                                      70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  _weightController.text = (value).toString();
+                                });
+                              },
+                              children: List.generate(
+                                151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
+                                (index) => Center(
+                                    child: Text(
+                                        '${index} กก.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่น้ำหนักของคุณ';
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(
                     height: 10,
                   ),
                   Padding(
@@ -306,7 +306,6 @@ var _weightController = TextEditingController();
                         fillColor: const Color(0xFFF1F0F0),
                         border: InputBorder.none,
                         hintText: "ส่วนสูง",
-                          
                         hintStyle: const TextStyle(
                           fontFamily: 'Kanit',
                           color: Color(0xFFFFAC41),
@@ -324,32 +323,37 @@ var _weightController = TextEditingController();
                         ),
                       ),
                       onTap: () {
-                           showCupertinoModalPopup(
-                    context: context,
-                    builder: (BuildContext context) => SizedBox(
-                      height: 250,
-                      child: CupertinoPicker(
-                        backgroundColor: Colors.white,
-                        itemExtent: 30,
-                        scrollController: FixedExtentScrollController(initialItem: 70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
-                        onSelectedItemChanged: (value) {
-                          setState(() {
-                                _heightController.text = (value + 100).toString();
-                          });
-                        },
-                        children: List.generate(
-                          151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
-                          (index) => Center(child: Text('${index + 100} ซม.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
-                        ),
-                      ),
-                    ),
-                                    );
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => SizedBox(
+                            height: 250,
+                            child: CupertinoPicker(
+                              backgroundColor: Colors.white,
+                              itemExtent: 30,
+                              scrollController: FixedExtentScrollController(
+                                  initialItem:
+                                      70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  _heightController.text =
+                                      (value + 100).toString();
+                                });
+                              },
+                              children: List.generate(
+                                151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
+                                (index) => Center(
+                                    child: Text(
+                                        '${index + 100} ซม.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
+                              ),
+                            ),
+                          ),
+                        );
                       },
-                        validator: (value) {
-                                                                 if (value == null || value.isEmpty) {
-      return 'กรุณาใส่ส่วนสูงของคุณ';
-    }
-                                                           },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่ส่วนสูงของคุณ';
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(
@@ -390,30 +394,29 @@ var _weightController = TextEditingController();
                         // print("clicked");
                         _selectDate();
                       },
-                        validator: (value) {
-                                                                 if (value == null || value.isEmpty) {
-      return 'กรุณาใส่ วัน/เดือน/ปีเกิด ของคุณ';
-    }
-                                                           },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่ วัน/เดือน/ปีเกิด ของคุณ';
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(
                     height: 20.0,
                   ),
-             
-                
                   FilledButton(
-                      onPressed: () {
-                        // _formkey.currentState!.validate();
-                        if(_formkey.currentState!.validate())
-                        {
-                          signUp();
-                        }
-                        
-                      },
-                      child: const Text("ตกลง"),style:ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFFFAC41)),
-              ),)
+                    onPressed: () {
+                      // _formkey.currentState!.validate();
+                      if (_formkey.currentState!.validate()) {
+                        signUp();
+                      }
+                    },
+                    child: const Text("ตกลง"),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color(0xFFFFAC41)),
+                    ),
+                  )
                 ],
               ),
             ),
