@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/TabelModel.dart'; // Add import for TabelModel
 import 'package:gym_master_fontend/model/UserModel.dart';
-import 'package:gym_master_fontend/screen/Tabel/adminTabel_page.dart';
+
 import 'package:gym_master_fontend/screen/adminScreen/admin_page.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';

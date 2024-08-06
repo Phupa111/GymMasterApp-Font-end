@@ -121,6 +121,7 @@ class _LoginPageState extends State<LoginPage> {
             await _prefs.setInt("uid", userModel.user.uid);
             await _prefs.setInt("role", userModel.user.role);
             _showCaptchaDialog();
+            log(userModel.user.uid.toString());
           }
         } else {
           log('Error fetching user data: ${response.statusCode}');
