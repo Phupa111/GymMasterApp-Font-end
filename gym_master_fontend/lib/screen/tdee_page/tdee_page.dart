@@ -104,15 +104,16 @@ class _TdeePageState extends State<TdeePage> {
 
   Future<void> loadDataTdee() async {
     final dio = Dio();
+    String url = AppConstants.BASE_URL;
     log(uid.toString());
     const String url = AppConstants.BASE_URL;
     var userData = {
       "uid": uid,
     };
     try {
-      final response = await dio
-          .post("http://${url}/calculate/getDayOfExercise", data: userData);
-      final tdeeJsonData = response.data as List<dynamic>;
+      final response = await dio.post("http://$url/calculate/getDayOfExercise",
+          data: userData);
+      final List<dynamic> tdeeJsonData = response.data;
       tdee = tdeeJsonData.map((item) => TdeeModel.fromJson(item)).toList();
       log(tdeeJsonData.length.toString());
       log(tdee.length.toString());

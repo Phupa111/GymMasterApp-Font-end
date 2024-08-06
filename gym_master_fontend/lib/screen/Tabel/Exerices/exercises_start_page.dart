@@ -178,7 +178,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
                             }
                           }
                         : () {
-                            deleteUserCourse();
+                            
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFAC41),
@@ -199,31 +199,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     );
   }
 
-  void deleteUserCourse() async {
-    final dio = Dio();
-    var regBody = {
-      "uid": widget.uid,
-      "tid": widget.tabelID,
-    };
 
-    try {
-      final response = await dio.post(
-          'http://${url}/enCouser/deleteUserCourse',
-          data: regBody);
-
-      if (response.statusCode == 200) {
-        log("Course deleted successfully!");
-        Get.to(UserTabelPage());
-        setState(() {
-          loadData = loadDataAsync(); // Reload the data
-        });
-      } else {
-        log("Error deleting course: ${response.statusCode}");
-      }
-    } catch (e) {
-      log("Error deleting course: $e");
-    }
-  }
 
   Future<void> loadDataAsync() async {
     final dio = Dio();
