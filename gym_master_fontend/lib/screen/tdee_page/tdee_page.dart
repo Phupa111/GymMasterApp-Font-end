@@ -106,7 +106,7 @@ class _TdeePageState extends State<TdeePage> {
     final dio = Dio();
     String url = AppConstants.BASE_URL;
     log(uid.toString());
-    const String url = AppConstants.BASE_URL;
+
     var userData = {
       "uid": uid,
     };
