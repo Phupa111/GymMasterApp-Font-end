@@ -7,7 +7,7 @@ import 'package:gym_master_fontend/screen/adminScreen/admin_page.dart';
 import 'package:gym_master_fontend/screen/exercise_page.dart';
 import 'package:gym_master_fontend/screen/hom_page.dart';
 import 'package:gym_master_fontend/screen/profile_page.dart';
-import 'package:gym_master_fontend/screen/static_page.dart';
+import 'package:gym_master_fontend/screen/staticScreen/static_page.dart';
 
 class MenuNavBar extends StatefulWidget {
   const MenuNavBar({super.key});
