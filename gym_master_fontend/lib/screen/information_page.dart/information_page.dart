@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
@@ -247,29 +248,45 @@ class _InformationPageState extends State<InformationPage> {
                         ),
                       ),
                       onTap: () {
-                        showCupertinoModalPopup(
+                        showDialog(
                           context: context,
-                          builder: (BuildContext context) => SizedBox(
-                            height: 250,
-                            child: CupertinoPicker(
-                              backgroundColor: Colors.white,
-                              itemExtent: 30,
-                              scrollController: FixedExtentScrollController(
-                                  initialItem:
-                                      70), // ตั้งค่าค่าเริ่มต้นเป็น 120 เพื่อแสดงค่าส่วนสูงที่ 120 (เช่น 120 ซม)
-                              onSelectedItemChanged: (value) {
-                                setState(() {
-                                  _weightController.text = (value).toString();
-                                });
-                              },
-                              children: List.generate(
-                                151, // จำนวนไอเทมที่ต้องการแสดง (0-150)
-                                (index) => Center(
-                                    child: Text(
-                                        '${index} กก.')), // เริ่มต้นที่ 100 เพื่อแสดงช่วง 100-250 ซม
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('บันทึกน้ำหนัก'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Form(
+                                    child: TextField(
+                                      controller: _weightController,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true),
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r'[0-9.]')),
+                                      ],
+                                      decoration: const InputDecoration(
+                                        hintText: 'ใส่ค่าน้ำหนัก',
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    double? weight =
+                                        double.tryParse(_weightController.text);
+
+                                    Navigator.of(context)
+                                        .pop(); // Close the dialog
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
                         );
                       },
                       validator: (value) {
