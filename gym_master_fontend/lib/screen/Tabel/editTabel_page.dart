@@ -16,6 +16,7 @@ class EditTabelPage extends StatefulWidget {
   final String tabelName;
   final int dayPerWeek;
   final bool isUnused;
+  final String tokenJWT;
 
   const EditTabelPage({
     super.key,
@@ -23,6 +24,7 @@ class EditTabelPage extends StatefulWidget {
     required this.tabelName,
     required this.dayPerWeek,
     required this.isUnused,
+    required this.tokenJWT,
   });
 
   @override
@@ -34,24 +36,16 @@ class _EditTabelPageState extends State<EditTabelPage>
   late TabController _tabController;
   List<List<ExInTabelModel>> exPosts = [];
   int dayNum = 1;
-    GetStorage gs = GetStorage();
+  GetStorage gs = GetStorage();
   late UserModel userModel = gs.read('userModel');
-    late SharedPreferences prefs;
-    int? uid;
-      String url = AppConstants.BASE_URL;
+  late SharedPreferences prefs;
+  int? uid;
+  String url = AppConstants.BASE_URL;
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: widget.dayPerWeek, vsync: this);
     fetchExercisesForAllDays();
-  }
-    Future<void> _initializePreferences() async {
-    prefs = await SharedPreferences.getInstance();
-    uid = prefs.getInt("uid");
-        setState(() {
-           
-      
-    });
   }
 
   @override
@@ -65,13 +59,22 @@ class _EditTabelPageState extends State<EditTabelPage>
     for (int day = 1; day <= widget.dayPerWeek; day++) {
       try {
         final response = await dio.post(
-          'http://${url}/tabel/getExercisesInTabel',
+          'http://$url/tabel/getExercisesInTabel',
           data: {'tid': widget.tabelID, 'dayNum': day},
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${widget.tokenJWT}',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ),
         );
         final jsonData = response.data as List<dynamic>;
-        exPosts.add(jsonData.map((item) => ExInTabelModel.fromJson(item)).toList());
+        exPosts.add(
+            jsonData.map((item) => ExInTabelModel.fromJson(item)).toList());
       } catch (e) {
-        print('Error fetching exercises for day $day: $e');
+        log('Error fetching exercises for day $day: $e');
         exPosts.add([]); // Add an empty list in case of error
       }
     }
@@ -113,7 +116,6 @@ class _EditTabelPageState extends State<EditTabelPage>
                             Icons.broken_image,
                             color: Colors.grey,
                           );
-                        
                         },
                       ),
                     ),
@@ -162,15 +164,17 @@ class _EditTabelPageState extends State<EditTabelPage>
                 if (widget.isUnused)
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-         child: ElevatedButton(
-                            onPressed: () {
-                              enabelUserCourse(widget.tabelID);
-                            },
-                            child: const Text("ใช้งาน", style: TextStyle(color: Colors.white)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightGreen, // Button background color
-                            ),
-                          ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        enabelUserCourse(widget.tabelID);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.lightGreen, // Button background color
+                      ),
+                      child: const Text("ใช้งาน",
+                          style: TextStyle(color: Colors.white)),
+                    ),
                   ),
               ],
             ),
@@ -179,7 +183,9 @@ class _EditTabelPageState extends State<EditTabelPage>
               onPressed: () {
                 Get.to(() => ExerciesePage(
                       tabelID: widget.tabelID,
-                      dayNum: _tabController.index + 1, // Pass the current tab index + 1 for day number
+                      dayNum: _tabController.index + 1,
+                      tokenJWT: widget
+                          .tokenJWT, // Pass the current tab index + 1 for day number
                     ));
               },
               backgroundColor: const Color(0xFFFFAC41),
@@ -191,7 +197,8 @@ class _EditTabelPageState extends State<EditTabelPage>
           : null,
     );
   }
-    void enabelUserCourse(int tid) async {
+
+  void enabelUserCourse(int tid) async {
     final dio = Dio();
     var regBody = {
       "uid": userModel.user.uid,
@@ -201,13 +208,24 @@ class _EditTabelPageState extends State<EditTabelPage>
     };
 
     try {
-      final response = await dio.post('http://${url}/enCouser/EnabelCouser', data: regBody);
+      final response = await dio.post(
+        'http://$url/enCouser/EnabelCouser',
+        data: regBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
 
       if (response.statusCode == 200) {
         // Course enabled successfully! (Handle success scenario)
         log("Course with ID $tid enabled successfully!");
         setState(() {
-         Get.back();// Reload the data
+          Get.back(); // Reload the data
         });
       } else {
         // Handle error based on status code

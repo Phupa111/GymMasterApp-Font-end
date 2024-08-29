@@ -18,7 +18,7 @@ class CourseDetailPage extends StatefulWidget {
   final int uid;
   final int time_rest;
   final String url = AppConstants.BASE_URL;
-
+  final String tokenJWT;
   const CourseDetailPage({
     super.key,
     required this.tabelID,
@@ -27,6 +27,7 @@ class CourseDetailPage extends StatefulWidget {
     required this.times,
     required this.uid,
     required this.time_rest,
+    required this.tokenJWT,
   });
 
   @override
@@ -55,24 +56,32 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   Future<void> loadDataAsync() async {
     final dio = Dio();
     try {
-      final weekResponse = await dio.get(
-        'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=1&day=1',
+      var options = Options(
+        headers: {
+          'Authorization': 'Bearer ${widget.tokenJWT}',
+        },
+        validateStatus: (status) {
+          return status! < 500; // Accept status codes less than 500
+        },
       );
+      final weekResponse = await dio.get(
+          'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=1&day=1',
+          options: options);
       if (weekResponse.statusCode == 200) {
         weeksDiffModel = WeeksDiffModel.fromJson(weekResponse.data[0]);
         week_count += weeksDiffModel!.weeksDiff;
         log("week count $week_count");
 
         final response = await dio.get(
-          'http://$url/enCouser/getIsNotSuccesUserEnCouserbyWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=$week_count',
-        );
+            'http://$url/enCouser/getIsNotSuccesUserEnCouserbyWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=$week_count',
+            options: options);
         userEnabelCourse = (response.data as List)
             .map((json) => UserEnabelCourse.fromJson(json))
             .toList();
 
         final userSuccessEnRes = await dio.get(
-          'http://$url/enCouser/getSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
-        );
+            'http://$url/enCouser/getSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+            options: options);
 
         succesUserEn = (userSuccessEnRes.data as List)
             .map((json) => UserEnabelCourse.fromJson(json))
@@ -80,15 +89,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         if (week_count > widget.times) {
           if (succesUserEn.length != allExcount) {
             final responseNotSucces = await dio.get(
-                'http://$url/enCouser/getNotSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}');
+                'http://$url/enCouser/getNotSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+                options: options);
+
             userNotSuccesCourse = (responseNotSucces.data as List)
                 .map((json) => UserEnabelCourse.fromJson(json))
                 .toList();
 
             if (userNotSuccesCourse.isNotEmpty) {
               final respones = await dio.get(
-                'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
-              );
+                  'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+                  options: options);
 
               userEnabelCourse = (respones.data as List)
                   .map((json) => UserEnabelCourse.fromJson(json))
@@ -100,8 +111,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
               if (userEnabelCourse.isNotEmpty) {
                 final weekResponse = await dio.get(
-                  'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=${userEnabelCourse[0].week}&day=${userEnabelCourse[0].day}',
-                );
+                    'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=${userEnabelCourse[0].week}&day=${userEnabelCourse[0].day}',
+                    options: options);
                 if (weekResponse.statusCode == 200) {
                   WeeksDiffModel weeksDiffModel =
                       WeeksDiffModel.fromJson(weekResponse.data[0]);
@@ -126,12 +137,20 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         });
       }
     } catch (e) {
-     log('Error loading data: $e');
+      log('Error loading data: $e');
     }
   }
 
   void updateWeekStart(List<UserEnabelCourse> userNotSuccesCourse) async {
     final dio = Dio();
+    var options = Options(
+      headers: {
+        'Authorization': 'Bearer ${widget.tokenJWT}',
+      },
+      validateStatus: (status) {
+        return status! < 500; // Accept status codes less than 500
+      },
+    );
 
     int iterations = widget.dayPerWeek < userNotSuccesCourse.length
         ? widget.dayPerWeek
@@ -149,9 +168,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
       try {
         final response = await dio.post(
-          'http://$url/enCouser/updateWeekStartDate',
-          data: regUpdateWeekBody,
-        );
+            'http://$url/enCouser/updateWeekStartDate',
+            data: regUpdateWeekBody,
+            options: options);
         if (response.statusCode == 200) {
           log("Week start date updated successfully for week: ${userNotSuccesCourse[i].week}, day: ${userNotSuccesCourse[i].day}");
         } else {
@@ -162,8 +181,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       }
     }
     final respones = await dio.get(
-      'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
-    );
+        'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+        options: options);
     setState(() {
       userEnabelCourse = (respones.data as List)
           .map((json) => UserEnabelCourse.fromJson(json))
@@ -176,12 +195,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-         leading: IconButton(
-    icon: const Icon(Icons.arrow_back),
-    onPressed: () {
-      Get.back(result: true);
-    },
-  ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back(result: true);
+          },
+        ),
       ),
       body: FutureBuilder<void>(
         future: loadData,
@@ -240,6 +259,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                                               uid: widget.uid,
                                                               time_rest: widget
                                                                   .time_rest,
+                                                              tokenJWT: widget
+                                                                  .tokenJWT,
                                                             ));
                                                             if (refresh ==
                                                                 true) {
@@ -330,13 +351,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                           if (index == 0) {
                                             var refresh = await Get.to(
                                               ExerciesStart(
-                                                tabelID: widget.tabelID,
-                                                tabelName: widget.tabelName,
-                                                week: userEn.week,
-                                                day: userEn.day,
-                                                uid: widget.uid,
-                                                time_rest: widget.time_rest,
-                                              ),
+                                                  tabelID: widget.tabelID,
+                                                  tabelName: widget.tabelName,
+                                                  week: userEn.week,
+                                                  day: userEn.day,
+                                                  uid: widget.uid,
+                                                  time_rest: widget.time_rest,
+                                                  tokenJWT: widget.tokenJWT),
                                             );
                                             if (refresh == true) {
                                               setState(() {
@@ -373,7 +394,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                       ),
                                     ),
                                   );
-                               
                                 },
                               )
                             : const Column(
@@ -386,10 +406,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                       color: Colors.orange,
                                     ),
                                   ),
-                                ],                                                                                    
+                                ],
                               ),
                       ),
-                      ElevatedButton(onPressed: (){deleteUserCourse();}, child: Text("ยกเลิก"))
+                      ElevatedButton(
+                          onPressed: () {
+                            deleteUserCourse();
+                          },
+                          child: Text("ยกเลิก"))
                     ],
                   );
           }
@@ -453,7 +477,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-    void deleteUserCourse() async {
+  void deleteUserCourse() async {
     final dio = Dio();
     var regBody = {
       "uid": widget.uid,
@@ -461,14 +485,21 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     };
 
     try {
-      final response = await dio.post(
-          'http://${url}/enCouser/deleteUserCourse',
-          data: regBody);
+      final response = await dio.post('http://${url}/enCouser/deleteUserCourse',
+          data: regBody,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${widget.tokenJWT}',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
 
       if (response.statusCode == 200) {
         // Course deleted successfully! (Handle success scenario)
         log("Course with ID ${widget.tabelID} deleted successfully!");
-         Get.back(result: true);
+        Get.back(result: true);
       } else {
         // Handle error based on status code
         log("Error deleting course: ${response.statusCode}");
@@ -479,5 +510,4 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       log("Error deleting course: $e");
     }
   }
-
 }

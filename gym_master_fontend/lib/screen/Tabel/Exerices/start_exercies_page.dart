@@ -17,7 +17,7 @@ class StartExPage extends StatefulWidget {
   final int week;
   final int day;
   final int time_rest;
-  
+  final String tokenJWT;
 
   const StartExPage({
     super.key,
@@ -26,7 +26,9 @@ class StartExPage extends StatefulWidget {
     required this.tabelName,
     required this.uid,
     required this.week,
-    required this.day, required this.time_rest,
+    required this.day,
+    required this.time_rest,
+    required this.tokenJWT,
   });
 
   @override
@@ -39,7 +41,7 @@ class _StartExPageState extends State<StartExPage> {
   int seconds = 0;
   bool isTimer = false;
   Timer? timer;
-    String url = AppConstants.BASE_URL;
+  String url = AppConstants.BASE_URL;
 
   void nextExercise() {
     setState(() {
@@ -229,6 +231,14 @@ class _StartExPageState extends State<StartExPage> {
       final response = await dio.post(
         'http://${url}/enCouser/updateIsSuccess',
         data: regBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
       );
 
       if (response.statusCode == 200) {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/model/tokenJwtModel.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/widgets/header_container.dart';
@@ -41,7 +43,7 @@ class _InformationPageState extends State<InformationPage> {
   DateTime date = DateTime(2024, 12, 1);
   String url = AppConstants.BASE_URL;
   void signUp() async {
-    print(widget.username);
+    log(widget.username);
     var regBody = {
       "username": widget.username,
       "email": widget.email,
@@ -54,7 +56,7 @@ class _InformationPageState extends State<InformationPage> {
       "role": 1,
       "isDisbel": 0,
     };
-    var response = await http.post(Uri.parse('http://${url}/user/register'),
+    var response = await http.post(Uri.parse('http://$url/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 
@@ -70,30 +72,62 @@ class _InformationPageState extends State<InformationPage> {
         }
 
         final dio = Dio();
-        final response = await dio.get(
-          'http://${url}/user/selectFromEmail/${widget.email.toString()}',
+
+        var regBody = {
+          "login": widget.email,
+          "password": widget.password,
+        };
+
+        final responseToken = await dio.post(
+          'http://$url/user/login',
+          data: regBody,
         );
-        var userModel = userModelFromJson(jsonEncode(response.data));
-        if (response.statusCode == 200) {
-          try {
-            final progressRes = await dio.post(
-              'http://${url}/progress/weightInsert',
-              data: {
-                'uid': userModel
-                    .user.uid, // Assuming you have the user ID available
-                'weight': double.parse(_weightController
-                    .text), // The weight data you want to insert
+
+        if (responseToken.statusCode == 200) {
+          log("token succes");
+          var tokenJWT = tokenJwtModelFromJson(jsonEncode(responseToken.data));
+
+          final response = await dio.get(
+            'http://$url/user/getUser/${widget.email}',
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
               },
-            );
-            // Check if weight progress insertion was successful
-            if (progressRes.statusCode == 200) {
-              // Navigate to the login page
-              Get.to(const LoginPage());
+              validateStatus: (status) {
+                return status! < 500; // Accept status codes less than 500
+              },
+            ),
+          );
+          var userModel = userModelFromJson(jsonEncode(response.data));
+          if (response.statusCode == 200) {
+            try {
+              final progressRes = await dio.post(
+                'http://${url}/progress/weightInsert',
+                data: {
+                  'uid': userModel
+                      .user.uid, // Assuming you have the user ID available
+                  'weight': double.parse(_weightController
+                      .text), // The weight data you want to insert
+                },
+                options: Options(
+                  headers: {
+                    'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
+                  },
+                  validateStatus: (status) {
+                    return status! < 500; // Accept status codes less than 500
+                  },
+                ),
+              );
+              // Check if weight progress insertion was successful
+              if (progressRes.statusCode == 200) {
+                // Navigate to the login page
+                Get.to(const LoginPage());
+              }
+            } catch (e) {
+              // Handle any exceptions that occur during the HTTP request
+              print('Error while inserting weight progress: $e');
+              // Show an error message or take appropriate action
             }
-          } catch (e) {
-            // Handle any exceptions that occur during the HTTP request
-            print('Error while inserting weight progress: $e');
-            // Show an error message or take appropriate action
           }
         }
 

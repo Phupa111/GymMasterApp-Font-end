@@ -24,7 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   int? uid;
   late Future<void> userProfileData;
   List<ProfileModel> profileData = [];
-
+  String? tokenJWT;
   @override
   void initState() {
     super.initState();
@@ -42,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     uid = prefs?.getInt("uid");
+    tokenJWT = prefs?.getString("tokenJwt");
     setState(() {
       userProfileData = loadProfile();
     });
@@ -55,10 +56,17 @@ class _ProfilePageState extends State<ProfilePage> {
       "uid": uid,
     };
     try {
-      final response = await dio.post(
-        "http://$url/calculate/getDataUserAndBodyFat",
-        data: userData,
-      );
+      final response =
+          await dio.post("http://$url/calculate/getDataUserAndBodyFat",
+              data: userData,
+              options: Options(
+                headers: {
+                  'Authorization': 'Bearer $tokenJWT',
+                },
+                validateStatus: (status) {
+                  return status! < 500; // Accept status codes less than 500
+                },
+              ));
       final List<dynamic> profileJson = response.data;
       profileData = profileJson.map((e) => ProfileModel.fromJson(e)).toList();
       log("datajson list = ${profileJson.length}");
