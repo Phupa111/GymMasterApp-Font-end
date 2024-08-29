@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/model/tokenJwtModel.dart';
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
@@ -44,9 +45,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _initializePreferences() async {
     _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   Future<void> _signUserIn() async {
@@ -54,42 +53,71 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      final dio = Dio();
       var regBody = {
         "login": _emailController.text,
-        "password": _passwordController.text
+        "password": _passwordController.text,
       };
 
-      var response = await http.post(
-        Uri.parse('http://${url}/user/login'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(regBody),
-      );
+      try {
+        // Login and get the token
+        final responseToken = await dio.post(
+          'http://$url/user/login',
+          data: regBody,
+        );
 
-      if (response.statusCode == 200) {
-        var userData = jsonDecode(response.body);
-        var userEmail = userData['user']['email'];
-        var userModel = userModelFromJson(jsonEncode(userData));
+        if (responseToken.statusCode == 200) {
+          log("token succes");
+          var tokenJWT = tokenJwtModelFromJson(jsonEncode(responseToken.data));
+          await _prefs.setString("tokenJwt", tokenJWT.tokenJwt);
 
-        await GetStorage().write('userModel', userModel);
-        await _prefs.setInt("uid", userModel.user.uid);
-        await _prefs.setInt("role", userModel.user.role);
-         await _prefs.setInt("isDisbel", userModel.user.isDisbel);
-
-        try {
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: userEmail,
-            password: _passwordController.text,
+          // Fetch user data
+          final response = await dio.get(
+            'http://$url/user/getUser/${_emailController.text}',
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
+              },
+              validateStatus: (status) {
+                return status! < 500; // Accept status codes less than 500
+              },
+            ),
           );
-          _showCaptchaDialog();
-        } catch (e) {
-          log("Error signing in: $e");
+
+          if (response.statusCode == 200) {
+            var userModel = userModelFromJson(jsonEncode(response.data));
+            await _prefs.setInt("uid", userModel.user.uid);
+            await _prefs.setInt("role", userModel.user.role);
+            await _prefs.setInt("isDisbel", userModel.user.isDisbel);
+
+            try {
+              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                email: userModel.user.email,
+                password: _passwordController.text,
+              );
+              _showCaptchaDialog();
+            } catch (e) {
+              log("Error signing in: $e");
+            }
+          } else if (response.statusCode == 404) {
+            log('User not found: ${response.statusCode}');
+            _showDialog("User not found", "The user could not be found.");
+          } else {
+            log('Error fetching user data: ${response.statusCode}');
+          }
+        } else {
+          log("Login failed: ${responseToken.statusCode}");
+          _showDialog("Login failed", "Invalid credentials.");
         }
-      } else {
-        _handleErrorResponse(response);
+      } catch (e) {
+        log("An error occurred: $e");
+        _showDialog("Error", "An unexpected error occurred.");
       }
     } else {
-      _showDialog("เข้าสู่ระบบไม่สำเร็จ", "กรุณาใส่ ชื่อผู้ใช้ หรือ อีเมล และ รหัสผ่าน");
+      _showDialog("เข้าสู่ระบบไม่สำเร็จ",
+          "กรุณาใส่ ชื่อผู้ใช้ หรือ อีเมล และ รหัสผ่าน");
     }
 
     setState(() {
@@ -107,24 +135,46 @@ class _LoginPageState extends State<LoginPage> {
     try {
       var user = await AuthService().signInWithGoogle();
       if (user != null) {
-        final response = await dio.get(
-          'http://${url}/user/selectFromEmail/${user.email}',
+        var regBody = {
+          "login": user.email,
+        };
+
+        final responseToken = await dio.post(
+          'http://$url/user/googleLogin',
+          data: regBody,
         );
 
-        if (response.statusCode == 200) {
-          var responseData = response.data;
-          if (response.data.isEmpty) {
-            Get.to(RegisterPage(email: user.email.toString()));
+        if (responseToken.statusCode == 200) {
+          log("token succes");
+          var tokenJWT = tokenJwtModelFromJson(jsonEncode(responseToken.data));
+          await _prefs.setString("tokenJwt", tokenJWT.tokenJwt);
+
+          final response = await dio.get(
+            'http://$url/user/getUser/${user.email}',
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
+              },
+              validateStatus: (status) {
+                return status! < 500; // Accept status codes less than 500
+              },
+            ),
+          );
+          if (response.statusCode == 200) {
+            var responseData = response.data;
+            if (response.data.isEmpty) {
+              Get.to(RegisterPage(email: user.email.toString()));
+            } else {
+              var userModel = userModelFromJson(jsonEncode(responseData));
+              await GetStorage().write('userModel', userModel);
+              await _prefs.setInt("uid", userModel.user.uid);
+              await _prefs.setInt("role", userModel.user.role);
+              _showCaptchaDialog();
+              log(userModel.user.uid.toString());
+            }
           } else {
-            var userModel = userModelFromJson(jsonEncode(responseData));
-            await GetStorage().write('userModel', userModel);
-            await _prefs.setInt("uid", userModel.user.uid);
-            await _prefs.setInt("role", userModel.user.role);
-            _showCaptchaDialog();
-            log(userModel.user.uid.toString());
+            log('Error fetching user data: ${response.statusCode}');
           }
-        } else {
-          log('Error fetching user data: ${response.statusCode}');
         }
       }
     } catch (e) {
@@ -219,6 +269,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -291,7 +342,8 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   hintText: 'รหัสผ่าน',
                                   hintStyle: const TextStyle(
-                                      fontFamily: 'Kanit', color: Colors.orange),
+                                      fontFamily: 'Kanit',
+                                      color: Colors.orange),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: const BorderSide(
                                         color: Colors
@@ -353,7 +405,7 @@ class _LoginPageState extends State<LoginPage> {
                             Column(
                               children: [
                                 IconButton(
-                                    onPressed: () async{
+                                    onPressed: () async {
                                       await _prefs.setInt("role", 0);
                                       Get.to(MenuNavBar());
                                     },

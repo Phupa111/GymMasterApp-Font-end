@@ -22,6 +22,7 @@ class _UserTabelPageState extends State<UserTabelPage>
   late SharedPreferences prefs;
   int? uid;
   int? role;
+  late String tokenJWT;
   String url = AppConstants.BASE_URL;
 
   @override
@@ -35,6 +36,7 @@ class _UserTabelPageState extends State<UserTabelPage>
     prefs = await SharedPreferences.getInstance();
     uid = prefs.getInt("uid");
     role = prefs.getInt("role");
+    tokenJWT = prefs.getString("tokenJwt")!;
     setState(() {});
   }
 
@@ -69,33 +71,18 @@ class _UserTabelPageState extends State<UserTabelPage>
               controller: _tabController,
               children: [
                 CourseView(
-                    uid: uid!,
-                    isAdminCouser: widget.isAdminCouser,
-                    isEnnabel: false),
+                  uid: uid!,
+                  isAdminCouser: widget.isAdminCouser,
+                  isEnnabel: false,
+                  tokenJWT: tokenJWT,
+                ),
                 CourseView(
                     uid: uid!,
                     isAdminCouser: widget.isAdminCouser,
-                    isEnnabel: true),
+                    isEnnabel: true,
+                    tokenJWT: tokenJWT),
               ],
             ),
-      floatingActionButton: Visibility(
-        visible: !widget.isAdminCouser,
-        child: FloatingActionButton(
-          onPressed: () async {
-            var refresh = await Get.to(const CreateTabelPage());
-            if (refresh == true) {
-              setState(() {
-                // Reload data if needed
-              });
-            }
-          },
-          backgroundColor: const Color(0xFFFFAC41),
-          foregroundColor: Colors.white,
-          elevation: 4,
-          tooltip: 'เพิ่มข้อมูล',
-          child: const Icon(Icons.add),
-        ),
-      ),
     );
   }
 }

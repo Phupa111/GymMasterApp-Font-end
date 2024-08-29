@@ -10,8 +10,12 @@ import 'package:gym_master_fontend/services/app_const.dart';
 class ExerciesePage extends StatefulWidget {
   final int tabelID;
   final int dayNum;
-  const ExerciesePage({Key? key, required this.tabelID, required this.dayNum})
-      : super(key: key);
+  final String tokenJWT;
+  const ExerciesePage(
+      {super.key,
+      required this.tabelID,
+      required this.dayNum,
+      required this.tokenJWT});
 
   @override
   State<ExerciesePage> createState() => _ExerciesePageState();
@@ -20,9 +24,9 @@ class ExerciesePage extends StatefulWidget {
 class _ExerciesePageState extends State<ExerciesePage> {
   List<ExPostModel> exPosts = [];
   late Future<void> loadData;
-  var _setContron = TextEditingController();
-  var _repContron = TextEditingController();
-    String url = AppConstants.BASE_URL;
+  final _setContron = TextEditingController();
+  final _repContron = TextEditingController();
+  String url = AppConstants.BASE_URL;
 
   @override
   void initState() {
@@ -144,158 +148,176 @@ class _ExerciesePageState extends State<ExerciesePage> {
     );
   }
 
-Future openDialog(int eid) => showDialog(
-  context: context,
-  builder: (context) => AlertDialog(
-    title: const Text('เพิ่มท่า'),
-    content: SizedBox(
-      width: MediaQuery.of(context).size.width * 0.8, // Set the width to 80% of the screen width
-      child: Form(
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // Adjust the size based on the content
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                    borderSide: const BorderSide(
-                      color: Colors.transparent,
-                      width: 2.0,
+  Future openDialog(int eid) => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('เพิ่มท่า'),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width *
+                0.8, // Set the width to 80% of the screen width
+            child: Form(
+              child: Column(
+                mainAxisSize:
+                    MainAxisSize.min, // Adjust the size based on the content
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "จำนวน set",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      controller: _setContron,
                     ),
                   ),
-                  contentPadding: const EdgeInsets.all(15.0),
-                  filled: true,
-                  fillColor: const Color(0xFFF1F0F0),
-                  border: InputBorder.none,
-                  hintText: "จำนวน set",
-                  hintStyle: const TextStyle(
-                    fontFamily: 'Kanit',
-                    color: Color(0xFFFFAC41),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Colors.transparent,
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "จำนวน ครั้ง (rep)",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      controller: _repContron,
                     ),
-                    borderRadius: BorderRadius.circular(25.0),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                     inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
                 ],
-                controller: _setContron,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                    borderSide: const BorderSide(
-                      color: Colors.transparent,
-                      width: 2.0,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.all(15.0),
-                  filled: true,
-                  fillColor: const Color(0xFFF1F0F0),
-                  border: InputBorder.none,
-                  hintText: "จำนวน ครั้ง (rep)",
-                  hintStyle: const TextStyle(
-                    fontFamily: 'Kanit',
-                    color: Color(0xFFFFAC41),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Colors.transparent,
-                    ),
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
-                controller:_repContron,
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                // Call the addExPost function and wait for it to complete
+                await addExPost(eid);
+
+                // Refresh the data and close the popup
+                setState(() {
+                  loadData = loadDataAsync();
+                });
+                Navigator.of(context).pop(); // Close the popup
+              },
+              child: const Text(
+                "ตกลง",
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color(0xFFFFAC41), // Button background color
               ),
             ),
           ],
         ),
-      ),
-    ),
-actions: [
-  ElevatedButton(
-    onPressed: () async {
-      // Call the addExPost function and wait for it to complete
-      await addExPost(eid);
-      
-      // Refresh the data and close the popup
-      setState(() {
-        loadData = loadDataAsync();
-      });
-      Navigator.of(context).pop(); // Close the popup
-    },
-    child: const Text(
-      "ตกลง",
-      style: TextStyle(color: Colors.white),
-    ),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFFFAC41), // Button background color
-    ),
-  ),
-],
+      );
 
-  ),
-);
+  Future<void> addExPost(int eid) async {
+    final dio = Dio();
+    var regBody = {
+      "tid": widget.tabelID,
+      "eid": eid,
+      "dayNum": widget.dayNum,
+      "set": int.parse(_setContron.text),
+      "rep": int.parse(_repContron.text)
+    };
 
-Future<void> addExPost(int eid) async {
-  final dio = Dio();
-  var regBody = {
-    "tid": widget.tabelID,
-    "eid": eid,
-    "dayNum": widget.dayNum,
-    "set": int.parse(_setContron.text),
-    "rep": int.parse(_repContron.text)
-  };
+    try {
+      final response = await dio.post(
+        'http://${url}/tabel/addExPosttoTabel',
+        data: regBody, // Pass regBody directly
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
 
-  try {
-    final response = await dio.post(
-      'http://${url}/tabel/addExPosttoTabel',
-      data: regBody, // Pass regBody directly
-    );
-
-    if (response.statusCode == 200) {
-      // Handle success
-      log('Exercise post added successfully');
- 
-    } else {
-      // Handle other status codes
-      log('Failed to add exercise post: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        // Handle success
+        log('Exercise post added successfully');
+      } else {
+        // Handle other status codes
+        log('Failed to add exercise post: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle error
+      log('Error adding exercise post: $e');
     }
-  } catch (e) {
-    // Handle error
-    log('Error adding exercise post: $e');
   }
-}
-
 
   Future<void> loadDataAsync() async {
     final dio = Dio();
 
     try {
-      final response =
-          await dio.get('http://${url}/exPost/getExPost?tid=${widget.tabelID}&dayNum=${widget.dayNum}');
+      final response = await dio.get(
+          'http://${url}/exPost/getExPost?tid=${widget.tabelID}&dayNum=${widget.dayNum}',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${widget.tokenJWT}',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       final jsonData =
           response.data as List<dynamic>; // Assuming the response is a list
       exPosts = jsonData.map((item) => ExPostModel.fromJson(item)).toList();

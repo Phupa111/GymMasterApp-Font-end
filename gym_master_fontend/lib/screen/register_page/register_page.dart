@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/model/tokenJwtModel.dart';
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/services/auth_service.dart';
@@ -26,11 +27,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _password = TextEditingController();
   Color orangeColors = Colors.orange;
-final _formKey = GlobalKey<FormState>();
-var emailStatusCode = 0;
-var usernameStatusCode = 0 ;
+  final _formKey = GlobalKey<FormState>();
+  var emailStatusCode = 0;
+  var usernameStatusCode = 0;
   String url = AppConstants.BASE_URL;
-
 
   @override
   void initState() {
@@ -41,95 +41,117 @@ var usernameStatusCode = 0 ;
     }
   }
 
-void checkEmailUsername() async {
-  final dio = Dio();
-  print(_emailController.text);
-  try {
-   var emailResponse = await dio.get(
-      'http://${url}/user/selectFromEmail/${_emailController.text.toString()}',
-    );
+  void checkEmailUsername() async {
+    final dio = Dio();
+    log(_emailController.text);
 
-var  userResponse = await dio.get(
-      'http://${url}/user/selectFromEmail/${_usernameController.text.toString()}',
-    );
+    try {
+      final responseToken = await dio.get('http://$url/user/getGuestToken');
+      TokenJwtModel tokenJWT =
+          tokenJwtModelFromJson(jsonEncode(responseToken.data));
 
-if (emailResponse.data.isEmpty && userResponse.data.isEmpty)
-{
-       Get.to(InformationPage(
-              username: _usernameController.text,
-              email: _emailController.text,
-              password: _password.text,
-              isGoogleAcc: false,
-            ));
-}
-else 
-{
-  if(emailResponse.data.isNotEmpty)
-  {
-    emailStatusCode = 200;
-  }
-  if(userResponse.data.isNotEmpty)
-  {
-    usernameStatusCode = 200;
-  }
+      if (responseToken.statusCode == 200) {
+        log("Token success");
+        log("Token: ${tokenJWT.tokenJwt}");
 
-}
-  } catch (e) {
-    print("Error: $e");
-    // Handle Dio exceptions or network errors here
-    // Show a snackbar or toast message indicating network error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("An error occurred. Please try again."),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-}
-void googleSigIn() async {
-  // setState(() {
-  //   _isLoading = true; // Set loading to true when starting the login process
-  // });
+        var emailResponse = await dio.get(
+          'http://$url/user/getUser/${_emailController.text}',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ),
+        );
 
-  final dio = Dio();
+        var userResponse = await dio.get(
+          'http://$url/user/getUser/${_usernameController.text}',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ),
+        );
 
-  try {
-    var user = await AuthService().signInWithGoogle();
-    if (user != null) {
-      final response = await dio.get(
-        'http://${url}/user/selectFromEmail/${user.email.toString()}',
-      );
-
-      if (response.statusCode == 200) {
-        var responseData = response.data;
-    
-        if (response.data.isEmpty) {
-         _emailController.text = user.email.toString();
+        log("email : ${emailResponse.data}");
+        if (emailResponse.data.isEmpty && userResponse.data.isEmpty) {
+          Get.to(InformationPage(
+            username: _usernameController.text,
+            email: _emailController.text,
+            password: _password.text,
+            isGoogleAcc: false,
+          ));
         } else {
-              var userModel = userModelFromJson(jsonEncode(responseData));
-          await GetStorage().write('userModel',userModel );
-          Get.to(MenuNavBar());
+          if (emailResponse.data.isNotEmpty) {
+            emailStatusCode = 200;
+          }
+          if (userResponse.data.isNotEmpty) {
+            usernameStatusCode = 200;
+          }
         }
       } else {
-        print('Error fetching user data: ${response.statusCode}');
+        log("Invalid credentials");
       }
+    } catch (e) {
+      log("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("An error occurred. Please try again."),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
-  } catch (e) {
-    print("Error signing in: $e");
-  } finally {
-    // setState(() {
-    //   _isLoading = false;
-    // });
   }
-}
+
+  void googleSigIn() async {
+    // setState(() {
+    //   _isLoading = true; // Set loading to true when starting the login process
+    // });
+
+    final dio = Dio();
+
+    try {
+      var user = await AuthService().signInWithGoogle();
+      if (user != null) {
+        final response = await dio.get(
+          'http://${url}/user/selectFromEmail/${user.email.toString()}',
+        );
+
+        if (response.statusCode == 200) {
+          var responseData = response.data;
+
+          if (response.data.isEmpty) {
+            _emailController.text = user.email.toString();
+          } else {
+            var userModel = userModelFromJson(jsonEncode(responseData));
+            await GetStorage().write('userModel', userModel);
+            Get.to(MenuNavBar());
+          }
+        } else {
+          print('Error fetching user data: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      print("Error signing in: $e");
+    } finally {
+      // setState(() {
+      //   _isLoading = false;
+      // });
+    }
+  }
 
   bool isValidEmail(String email) {
     // Regular expression for email validation
     // This is a basic example; you can use a more comprehensive regex pattern for email validation
-    final RegExp emailRegex =
-        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return emailRegex.hasMatch(email);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,7 +178,61 @@ void googleSigIn() async {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30.0),
                       child: TextFormField(
-                        controller: _usernameController,
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: const BorderSide(
+                                color: Colors.transparent,
+                                width: 2.0,
+                              ),
+                            ),
+                            prefixIcon: const Icon(Icons.person,
+                                color: Color(0xFFFFAC41)),
+                            contentPadding: const EdgeInsets.all(15.0),
+                            filled: true,
+                            fillColor: const Color(0xFFF1F0F0),
+                            border: InputBorder.none,
+                            hintText: "ชื่อผู้ใช้",
+                            hintStyle: const TextStyle(
+                              fontFamily: 'Kanit',
+                              color: Color(0xFFFFAC41),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors
+                                      .transparent), // Change border color on focus
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (usernameStatusCode == 200) {
+                              usernameStatusCode = 0;
+                              return 'มีชื่อผู้ใช้นี้อยู่แล้ว';
+                            } else {
+                              if (value == null || value.isEmpty) {
+                                return 'กรุณาใส่ชื่อผู้ใช้';
+                              }
+                              if (value.length < 6) {
+                                return 'ชื่อผู้ใช้ต้องมีมากกว่า 6 ตัวอักษร';
+                              }
+                              return null;
+                            }
+                            // Return null if the password is valid
+                          }),
+                    ),
+                    const SizedBox(
+                      height: 10.0,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                      child: TextFormField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25.0),
@@ -166,101 +242,45 @@ void googleSigIn() async {
                             ),
                           ),
                           prefixIcon:
-                              const Icon(Icons.person, color: Color(0xFFFFAC41)),
+                              const Icon(Icons.email, color: Color(0xFFFFAC41)),
                           contentPadding: const EdgeInsets.all(15.0),
                           filled: true,
                           fillColor: const Color(0xFFF1F0F0),
                           border: InputBorder.none,
-                          hintText: "ชื่อผู้ใช้",
+                          hintText: "Email",
                           hintStyle: const TextStyle(
                             fontFamily: 'Kanit',
                             color: Color(0xFFFFAC41),
                           ),
                           errorBorder: OutlineInputBorder(
                             borderSide: const BorderSide(
-                                color: Colors
-                                    .transparent), // Change border color on focus
+                              color: Colors.transparent,
+                            ), // Change border color on focus
                             borderRadius: BorderRadius.circular(25.0),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide:
                                 const BorderSide(color: Colors.transparent),
-                            borderRadius: BorderRadius.circular(15.0),
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
-                                  validator: (value) {
-                                    if(usernameStatusCode == 200)
-                                    {
-                                      usernameStatusCode = 0;
-                                      return 'มีชื่อผู้ใช้นี้อยู่แล้ว';
-                                    }
-                                    else{
-    if (value == null || value.isEmpty) {
-      return 'กรุณาใส่ชื่อผู้ใช้';
-    }
-    if (value.length < 6) {
-      return 'ชื่อผู้ใช้ต้องมีมากกว่า 6 ตัวอักษร';
-    }
-    return null;
-                                    }
- // Return null if the password is valid
-  }
+                        validator: (value) {
+                          if (emailStatusCode == 200) {
+                            emailStatusCode = 0;
+                            return 'มีอีเมลนี้อยู่แล้ว';
+                          } else {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณาใส่อีเมล';
+                            }
+                            if (!isValidEmail(value)) {
+                              return 'กรุณาใส่ อีเมล ที่ใช้ได้';
+                            }
+                            return null;
+                          }
+                          // Return null if the value is valid
+                        },
                       ),
                     ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                     Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 30.0),
-    child: TextFormField(
-      controller: _emailController,
-      decoration: InputDecoration(
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
-          borderSide: const BorderSide(
-            color: Colors.transparent,
-            width: 2.0,
-          ),
-        ),
-        prefixIcon: const Icon(Icons.email, color: Color(0xFFFFAC41)),
-        contentPadding: const EdgeInsets.all(15.0),
-        filled: true,
-        fillColor: const Color(0xFFF1F0F0),
-        border: InputBorder.none,
-        hintText: "Email",
-        hintStyle: const TextStyle(
-          fontFamily: 'Kanit',
-          color: Color(0xFFFFAC41),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(
-            color: Colors.transparent,
-          ), // Change border color on focus
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-      ),
-      validator: (value) {
-             if(emailStatusCode == 200)
-                                    {
-                                      emailStatusCode =0;
-                                      return 'มีอีเมลนี้อยู่แล้ว';
-                                    
-                                    }
-                                    else{    if (value == null || value.isEmpty) {
-          return 'กรุณาใส่อีเมล';
-        }
-        if (!isValidEmail(value)) {
-          return 'กรุณาใส่ อีเมล ที่ใช้ได้';
-        }
-        return null;}
-     // Return null if the value is valid
-      },
-    ),
-  ),
                     const SizedBox(
                       height: 10.0,
                     ),
@@ -300,15 +320,15 @@ void googleSigIn() async {
                           ),
                         ),
                         obscureText: true,
-                          validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'กรุณาใส่รหัสผ่าน';
-    }
-    if (value.length < 6) {
-      return 'รหัสผ่านต้องมีมากกว่า 6 ตัวอักษร';
-    }
-    return null; // Return null if the password is valid
-  },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'กรุณาใส่รหัสผ่าน';
+                          }
+                          if (value.length < 6) {
+                            return 'รหัสผ่านต้องมีมากกว่า 6 ตัวอักษร';
+                          }
+                          return null; // Return null if the password is valid
+                        },
                       ),
                     ),
                     const SizedBox(
@@ -349,15 +369,15 @@ void googleSigIn() async {
                           ),
                         ),
                         obscureText: true,
-                          validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'กรุณาใส่ การยืนยันรหัสผ่านของคุณ';
-    }
-    if (value != _password.text) {
-      return 'ยืนยันรหัสผ่านไม่ถูกต้อง';
-    }
-    return null; // Return null if the re-entered password is valid
-  },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'กรุณาใส่ การยืนยันรหัสผ่านของคุณ';
+                          }
+                          if (value != _password.text) {
+                            return 'ยืนยันรหัสผ่านไม่ถูกต้อง';
+                          }
+                          return null; // Return null if the re-entered password is valid
+                        },
                       ),
                     ),
                     const SizedBox(
@@ -368,9 +388,9 @@ void googleSigIn() async {
                       width: 150.0,
                       child: FilledButton(
                         onPressed: () {
-                         if (_formKey.currentState?.validate() ?? false) {
- checkEmailUsername();
-    }
+                          if (_formKey.currentState?.validate() ?? false) {
+                            checkEmailUsername();
+                          }
                         },
                         child: Text(
                           "Register",
@@ -387,7 +407,9 @@ void googleSigIn() async {
                     Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: ElevatedButton(
-                          onPressed: () {googleSigIn();},
+                          onPressed: () {
+                            googleSigIn();
+                          },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               side: const BorderSide(
@@ -402,7 +424,8 @@ void googleSigIn() async {
                                   'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'),
                               const Text('register with Google',
                                   style: TextStyle(
-                                      color: Colors.black, fontFamily: 'Kanit')),
+                                      color: Colors.black,
+                                      fontFamily: 'Kanit')),
                             ],
                           )),
                     ),

@@ -23,6 +23,7 @@ class _TdeePageState extends State<TdeePage> {
   int? uid;
   List<TdeeModel> tdee = [];
   late Future<void> loadData;
+  late String tokenJWT;
 
   final tdeeTabs = <Tab>[
     const Tab(text: "Cutting"),
@@ -40,6 +41,7 @@ class _TdeePageState extends State<TdeePage> {
   Future<void> _initializePreferences() async {
     _prefs = await SharedPreferences.getInstance();
     uid = _prefs.getInt("uid");
+    tokenJWT = _prefs.getString("tokenJwt")!;
     setState(() {
       loadData = loadDataTdee();
     });
@@ -112,7 +114,15 @@ class _TdeePageState extends State<TdeePage> {
     };
     try {
       final response = await dio.post("http://$url/calculate/getDayOfExercise",
-          data: userData);
+          data: userData,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJWT',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       final List<dynamic> tdeeJsonData = response.data;
       tdee = tdeeJsonData.map((item) => TdeeModel.fromJson(item)).toList();
       log(tdeeJsonData.length.toString());

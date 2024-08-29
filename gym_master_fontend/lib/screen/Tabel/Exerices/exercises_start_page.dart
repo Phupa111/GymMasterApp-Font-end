@@ -16,6 +16,7 @@ class ExerciesStart extends StatefulWidget {
   final int day;
   final int uid;
   final int time_rest;
+  final String tokenJWT;
 
   const ExerciesStart({
     super.key,
@@ -25,6 +26,7 @@ class ExerciesStart extends StatefulWidget {
     required this.week,
     required this.day,
     required this.time_rest,
+    required this.tokenJWT,
   });
 
   @override
@@ -37,7 +39,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
   bool isDone = false;
   List<UserEnabelCourse> userEnabelCourse = [];
   int currentIndex = 0;
-    String url = AppConstants.BASE_URL;
+  String url = AppConstants.BASE_URL;
 
   @override
   void initState() {
@@ -172,14 +174,13 @@ class _ExerciesStartState extends State<ExerciesStart> {
                                   week: widget.week,
                                   day: widget.day,
                                   time_rest: widget.time_rest,
+                                  tokenJWT: widget.tokenJWT,
                                 ));
                             if (refresh == true) {
                               Get.back(result: true);
                             }
                           }
-                        : () {
-                            
-                          },
+                        : () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFAC41),
                       fixedSize: const Size(300, 50),
@@ -199,8 +200,6 @@ class _ExerciesStartState extends State<ExerciesStart> {
     );
   }
 
-
-
   Future<void> loadDataAsync() async {
     final dio = Dio();
     try {
@@ -217,10 +216,17 @@ class _ExerciesStartState extends State<ExerciesStart> {
       //   isDone = true;
       // });
       //} else {
-      final exercisesResponse = await dio.post(
-        'http://${url}/tabel/getExercisesInTabel',
-        data: {'tid': widget.tabelID, 'dayNum': widget.day},
-      );
+      final exercisesResponse =
+          await dio.post('http://${url}/tabel/getExercisesInTabel',
+              data: {'tid': widget.tabelID, 'dayNum': widget.day},
+              options: Options(
+                headers: {
+                  'Authorization': 'Bearer ${widget.tokenJWT}',
+                },
+                validateStatus: (status) {
+                  return status! < 500; // Accept status codes less than 500
+                },
+              ));
       if (exercisesResponse.statusCode == 200) {
         final exerciseData = exercisesResponse.data as List<dynamic>;
         setState(() {

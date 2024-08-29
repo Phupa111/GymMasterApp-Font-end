@@ -24,7 +24,8 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   final TextEditingController _times = TextEditingController();
   final TextEditingController _dayPerWeek = TextEditingController();
   late SharedPreferences prefs;
-    String url = AppConstants.BASE_URL;
+  String url = AppConstants.BASE_URL;
+  late String tokenJWT;
 
   int? uid = 0;
   @override
@@ -36,11 +37,9 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
 
-
+    tokenJWT = prefs.getString("tokenJwt")!;
     uid = prefs.getInt("uid");
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   void createTabel() async {
@@ -62,15 +61,23 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
       final response = await dio.post(
         'http://${url}/tabel/CreatTabel',
         data: regBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $tokenJWT',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
         log("Success");
       }
-      print('Response status: ${response.statusCode}');
-      print('Response data: ${response.data}');
+      log('Response status: ${response.statusCode}');
+      log('Response data: ${response.data}');
     } catch (e) {
-      print('Error creating table: $e');
+      log('Error creating table: $e');
     }
   }
 
@@ -119,11 +126,13 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                               color: Color(0xFFFFAC41),
                             ),
                             errorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.transparent),
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
                               borderRadius: BorderRadius.circular(25.0),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.transparent),
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
                               borderRadius: BorderRadius.circular(15.0),
                             ),
                           ),
@@ -151,11 +160,13 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                               color: Color(0xFFFFAC41),
                             ),
                             errorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.transparent),
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
                               borderRadius: BorderRadius.circular(25.0),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.transparent),
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
                               borderRadius: BorderRadius.circular(15.0),
                             ),
                           ),
@@ -187,11 +198,13 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                               color: Color(0xFFFFAC41),
                             ),
                             errorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.transparent),
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
                               borderRadius: BorderRadius.circular(25.0),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.transparent),
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
                               borderRadius: BorderRadius.circular(15.0),
                             ),
                           ),
@@ -204,7 +217,8 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                                 child: CupertinoPicker(
                                   backgroundColor: Colors.white,
                                   itemExtent: 32.0,
-                                  scrollController: FixedExtentScrollController(initialItem: 0),
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: 0),
                                   onSelectedItemChanged: (value) {
                                     setState(() {
                                       _dayPerWeek.text = (value + 1).toString();
@@ -212,7 +226,8 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                                   },
                                   children: List.generate(
                                     7,
-                                    (index) => Center(child: Text('${index + 1} วัน')),
+                                    (index) =>
+                                        Center(child: Text('${index + 1} วัน')),
                                   ),
                                 ),
                               ),
@@ -229,14 +244,14 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     createTabel();
-                  Get.back(result: true);
+                    Get.back(result: true);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFAC41),
+                  ),
                   child: const Text(
                     "ตกลง",
                     style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFAC41),
                   ),
                 ),
               ),

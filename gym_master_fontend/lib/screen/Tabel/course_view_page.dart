@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/TabelEnModel.dart';
 import 'package:gym_master_fontend/model/TabelModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/course_detail_page.dart';
+import 'package:gym_master_fontend/screen/Tabel/createTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -13,11 +14,13 @@ class CourseView extends StatefulWidget {
   final int? uid;
   final bool isAdminCouser;
   final bool isEnnabel;
+  final String tokenJWT;
   const CourseView(
       {super.key,
       required this.uid,
       required this.isAdminCouser,
-      required this.isEnnabel});
+      required this.isEnnabel,
+      required this.tokenJWT});
 
   @override
   State<CourseView> createState() => _CourseViewState();
@@ -48,276 +51,310 @@ class _CourseViewState extends State<CourseView> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          return Column(
-            children: [
-              widget.isAdminCouser && !widget.isEnnabel
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width *
-                              0.8, // Adjust the width as needed
-                          child: SearchBar(
-                            padding: const MaterialStatePropertyAll<EdgeInsets>(
-                                EdgeInsets.symmetric(horizontal: 12.0)),
-                            controller: searchController,
-                            onTap: () {},
-                            onChanged: (value) {
-                              if (searchController.text.isEmpty) {
-                                unusedTabels.clear();
-                                setState(() {});
-                              }
-                            },
-                            onSubmitted: (value) {
-                              loadData = loadDataAsync();
-                            },
-                            leading: const Icon(Icons.search),
-                            trailing: <Widget>[
-                              Tooltip(
-                                message: 'Filter',
-                                child: IconButton(
-                                  onPressed: () {
-                                    showBottomSheet(context);
-                                  },
-                                  icon: const Icon(Icons.filter_alt_sharp),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                  : const SizedBox
-                      .shrink(), // Return an empty widget if not an admin course
-              !widget.isEnnabel
-                  ? Expanded(
-                      child: ListView.builder(
-                        itemCount: unusedTabels.length,
-                        itemBuilder: (context, index) {
-                          final tabel = unusedTabels[index];
-                          return Card(
-                            color: Colors.orange,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
+          return Scaffold(
+              body: Column(
+                children: [
+                  widget.isAdminCouser && !widget.isEnnabel
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width *
+                                  0.8, // Adjust the width as needed
+                              child: SearchBar(
+                                padding:
+                                    const MaterialStatePropertyAll<EdgeInsets>(
+                                        EdgeInsets.symmetric(horizontal: 12.0)),
+                                controller: searchController,
+                                onTap: () {},
+                                onChanged: (value) {
+                                  if (searchController.text.isEmpty) {
+                                    unusedTabels.clear();
+                                    setState(() {});
+                                  }
+                                },
+                                onSubmitted: (value) {
+                                  loadData = loadDataAsync();
+                                },
+                                leading: const Icon(Icons.search),
+                                trailing: <Widget>[
+                                  Tooltip(
+                                    message: 'Filter',
+                                    child: IconButton(
+                                      onPressed: () {
+                                        showBottomSheet(context);
+                                      },
+                                      icon: const Icon(Icons.filter_alt_sharp),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                            elevation: 8,
-                            child: InkWell(
-                              onTap: () {
-                                Get.to(EditTabelPage(
-                                  tabelID: tabel.tid,
-                                  tabelName: tabel.couserName,
-                                  dayPerWeek: tabel.dayPerWeek,
-                                  isUnused: true,
-                                ));
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      tabel.couserName,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Times: ${tabel.times}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Days per Week: ${tabel.dayPerWeek}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Row(
+                          ],
+                        )
+                      : const SizedBox
+                          .shrink(), // Return an empty widget if not an admin course
+                  !widget.isEnnabel
+                      ? Expanded(
+                          child: ListView.builder(
+                            itemCount: unusedTabels.length,
+                            itemBuilder: (context, index) {
+                              final tabel = unusedTabels[index];
+                              return Card(
+                                color: Colors.orange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                elevation: 8,
+                                child: InkWell(
+                                  onTap: () {
+                                    Get.to(EditTabelPage(
+                                      tabelID: tabel.tid,
+                                      tabelName: tabel.couserName,
+                                      dayPerWeek: tabel.dayPerWeek,
+                                      isUnused: true,
+                                      tokenJWT: widget.tokenJWT,
+                                    ));
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8, 10, 8, 0),
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              enabelUserCourse(
-                                                  tabel.tid,
-                                                  tabel.times,
-                                                  tabel.dayPerWeek);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.lightGreen,
-                                            ),
-                                            child: const Text(
-                                              "ใช้งาน",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
+                                        Text(
+                                          tabel.couserName,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
                                           ),
                                         ),
-                                        Visibility(
-                                          visible: !widget.isAdminCouser,
-                                          child: Padding(
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Times: ${tabel.times}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Days per Week: ${tabel.dayPerWeek}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      8, 10, 8, 0),
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  enabelUserCourse(
+                                                      tabel.tid,
+                                                      tabel.times,
+                                                      tabel.dayPerWeek);
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.lightGreen,
+                                                ),
+                                                child: const Text(
+                                                  "ใช้งาน",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: !widget.isAdminCouser,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        8, 10, 8, 0),
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    Get.to(EditTabelPage(
+                                                        tabelID: tabel.tid,
+                                                        tabelName:
+                                                            tabel.couserName,
+                                                        dayPerWeek:
+                                                            tabel.dayPerWeek,
+                                                        isUnused:
+                                                            widget.isEnnabel,
+                                                        tokenJWT:
+                                                            widget.tokenJWT));
+                                                  },
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                  ),
+                                                  child: const Text(
+                                                    "แก้ไข",
+                                                    style: TextStyle(
+                                                        color: Colors.orange),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                          itemCount: activeTabels.length,
+                          itemBuilder: (context, index) {
+                            final tabel = activeTabels[index];
+                            return Card(
+                              color: Colors.orange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              elevation: 8,
+                              child: InkWell(
+                                onTap: () async {
+                                  var refresh = await Get.to(CourseDetailPage(
+                                    tabelID: tabel.tid,
+                                    tabelName: tabel.couserName,
+                                    dayPerWeek: tabel.dayPerWeek,
+                                    times: tabel.times,
+                                    uid: widget.uid ?? 0,
+                                    time_rest: tabel.timeRest,
+                                    tokenJWT: widget.tokenJWT,
+                                  ));
+                                  if (refresh == true) {
+                                    setState(() {
+                                      loadData = loadDataAsync();
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        tabel.couserName,
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Times: ${tabel.times}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Days per Week: ${tabel.dayPerWeek}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            8, 10, 8, 0),
+                                        child: LinearPercentIndicator(
+                                          width: 300.0,
+                                          lineHeight: 14.0,
+                                          percent: tabel.count /
+                                              (tabel.dayPerWeek * tabel.times),
+                                          center: Text(
+                                            '${((tabel.count / (tabel.dayPerWeek * tabel.times)) * 100).toInt()} %',
+                                            style:
+                                                const TextStyle(fontSize: 12.0),
+                                          ),
+                                          barRadius: const Radius.circular(16),
+                                          backgroundColor: Colors.white,
+                                          progressColor: Colors.amber[400],
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                8, 10, 8, 0),
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                deleteUserCourse(tabel.tid);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors
+                                                    .red, // Button background color
+                                              ),
+                                              child: const Text("เลิกใช้งาน",
+                                                  style: TextStyle(
+                                                      color: Colors.white)),
+                                            ),
+                                          ),
+                                          Padding(
                                             padding: const EdgeInsets.fromLTRB(
                                                 8, 10, 8, 0),
                                             child: ElevatedButton(
                                               onPressed: () {
                                                 Get.to(EditTabelPage(
-                                                  tabelID: tabel.tid,
-                                                  tabelName: tabel.couserName,
-                                                  dayPerWeek: tabel.dayPerWeek,
-                                                  isUnused: widget.isEnnabel,
-                                                ));
+                                                    tabelID: tabel.tid,
+                                                    tabelName: tabel.couserName,
+                                                    dayPerWeek:
+                                                        tabel.dayPerWeek,
+                                                    isUnused: false,
+                                                    tokenJWT: widget.tokenJWT));
                                               },
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.white,
+                                                backgroundColor: Colors
+                                                    .white, // Button background color
                                               ),
-                                              child: const Text(
-                                                "แก้ไข",
-                                                style: TextStyle(
-                                                    color: Colors.orange),
-                                              ),
+                                              child: const Text("แก้ไข",
+                                                  style: TextStyle(
+                                                      color: Colors.orange)),
                                             ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : Expanded(
-                      child: ListView.builder(
-                      itemCount: activeTabels.length,
-                      itemBuilder: (context, index) {
-                        final tabel = activeTabels[index];
-                        return Card(
-                          color: Colors.orange,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          elevation: 8,
-                          child: InkWell(
-                            onTap: () async {
-                              var refresh = await Get.to(CourseDetailPage(
-                                tabelID: tabel.tid,
-                                tabelName: tabel.couserName,
-                                dayPerWeek: tabel.dayPerWeek,
-                                times: tabel.times,
-                                uid: widget.uid ?? 0,
-                                time_rest: tabel.timeRest,
-                              ));
-                              if (refresh == true) {
-                                setState(() {
-                                  loadData = loadDataAsync();
-                                });
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tabel.couserName,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Times: ${tabel.times}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Days per Week: ${tabel.dayPerWeek}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(8, 10, 8, 0),
-                                    child: LinearPercentIndicator(
-                                      width: 300.0,
-                                      lineHeight: 14.0,
-                                      percent: tabel.count /
-                                          (tabel.dayPerWeek * tabel.times),
-                                      center: Text(
-                                        '${((tabel.count / (tabel.dayPerWeek * tabel.times)) * 100).toInt()} %',
-                                        style: const TextStyle(fontSize: 12.0),
-                                      ),
-                                      barRadius: const Radius.circular(16),
-                                      backgroundColor: Colors.white,
-                                      progressColor: Colors.amber[400],
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            8, 10, 8, 0),
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            deleteUserCourse(tabel.tid);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors
-                                                .red, // Button background color
-                                          ),
-                                          child: const Text("เลิกใช้งาน",
-                                              style: TextStyle(
-                                                  color: Colors.white)),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            8, 10, 8, 0),
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            Get.to(EditTabelPage(
-                                              tabelID: tabel.tid,
-                                              tabelName: tabel.couserName,
-                                              dayPerWeek: tabel.dayPerWeek,
-                                              isUnused: false,
-                                            ));
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors
-                                                .white, // Button background color
-                                          ),
-                                          child: const Text("แก้ไข",
-                                              style: TextStyle(
-                                                  color: Colors.orange)),
-                                        ),
+                                          )
+                                        ],
                                       )
                                     ],
-                                  )
-                                ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ))
-            ],
-          );
+                            );
+                          },
+                        ))
+                ],
+              ),
+              floatingActionButton: Visibility(
+                visible: !widget.isAdminCouser,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    var refresh = await Get.to(const CreateTabelPage());
+                    if (refresh == true) {
+                      setState(() {
+                        loadData = loadDataAsync();
+                      });
+                    }
+                  },
+                  backgroundColor: const Color(0xFFFFAC41),
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  tooltip: 'เพิ่มข้อมูล',
+                  child: const Icon(Icons.add),
+                ),
+              ));
         }
       },
     );
@@ -451,8 +488,29 @@ class _CourseViewState extends State<CourseView> {
             : 'http://$url/tabel/getUnUesUserTabel';
 
         final response = widget.isAdminCouser
-            ? await dio.get(endpoint)
-            : await dio.post(endpoint, data: regBody);
+            ? await dio.get(
+                endpoint,
+                options: Options(
+                  headers: {
+                    'Authorization': 'Bearer ${widget.tokenJWT}',
+                  },
+                  validateStatus: (status) {
+                    return status! < 500; // Accept status codes less than 500
+                  },
+                ),
+              )
+            : await dio.post(
+                endpoint,
+                data: regBody,
+                options: Options(
+                  headers: {
+                    'Authorization': 'Bearer ${widget.tokenJWT}',
+                  },
+                  validateStatus: (status) {
+                    return status! < 500; // Accept status codes less than 500
+                  },
+                ),
+              );
 
         final List<dynamic> jsonData = response.data as List<dynamic>;
         unusedTabels =
@@ -462,7 +520,18 @@ class _CourseViewState extends State<CourseView> {
             ? 'http://$url/tabel/getEnnabelAdminTabel'
             : 'http://$url/tabel/getEnnabelUserTabel';
 
-        final response = await dio.post(endpoint, data: regBody);
+        final response = await dio.post(
+          endpoint,
+          data: regBody,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${widget.tokenJWT}',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ),
+        );
         final List<dynamic> jsonData = response.data as List<dynamic>;
         activeTabels =
             jsonData.map((item) => TabelEnModel.fromJson(item)).toList();
@@ -490,8 +559,16 @@ class _CourseViewState extends State<CourseView> {
 
         try {
           final response = await dio.post(
-            'http://${url}/enCouser/EnabelCouser',
+            'http://$url/enCouser/EnabelCouser',
             data: regBody,
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer ${widget.tokenJWT}',
+              },
+              validateStatus: (status) {
+                return status! < 500; // Accept status codes less than 500
+              },
+            ),
           );
 
           if (response.statusCode == 200) {
@@ -529,6 +606,14 @@ class _CourseViewState extends State<CourseView> {
       final response = await dio.post(
         'http://$url/enCouser/updateWeekStartDate',
         data: regUpdateWeekBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
       );
       if (response.statusCode == 200) {
         log("Week start date updated successfully");

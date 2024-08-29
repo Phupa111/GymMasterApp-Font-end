@@ -25,6 +25,7 @@ class _LineChartPageState extends State<LineChartPage> {
   int weightNum = 5;
   double? maxWeight;
   double? minWeight;
+  late String tokenJWT;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _LineChartPageState extends State<LineChartPage> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     uid = prefs.getInt("uid");
+    tokenJWT = prefs.getString("tokenJwt")!;
     if (uid != null) {
       loadData = loadDataAsync();
     } else {
@@ -227,8 +229,18 @@ class _LineChartPageState extends State<LineChartPage> {
         String date =
             "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
         log(date);
-        final updateWeigth = await dio.post('http://$url/progress/updateWeigth',
-            data: {"newWeight": weightAdd, "uid": uid, "dataProgress": date});
+        final updateWeigth = await dio.post(
+          'http://$url/progress/updateWeigth',
+          data: {"newWeight": weightAdd, "uid": uid, "dataProgress": date},
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJWT',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ),
+        );
         if (updateWeigth.statusCode == 200) {
           setState(() {
             loadData = loadDataAsync();
@@ -243,6 +255,14 @@ class _LineChartPageState extends State<LineChartPage> {
             'uid': uid, // Assuming you have the user ID available
             'weight': weightAdd, // The weight data you want to insert
           },
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJWT',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ),
         );
 
         // Check if weight progress insertion was successful
@@ -436,7 +456,17 @@ class _LineChartPageState extends State<LineChartPage> {
 
     try {
       final String endpoint = 'http://$url/progress/getWeightProgress?uid=$uid';
-      final response = await dio.get(endpoint);
+      final response = await dio.get(
+        endpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $tokenJWT',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
 
       final List<dynamic> jsonData = response.data as List<dynamic>;
       setState(() {
