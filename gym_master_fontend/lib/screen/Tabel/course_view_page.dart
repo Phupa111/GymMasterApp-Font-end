@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:gym_master_fontend/model/TabelEnModel.dart';
 import 'package:gym_master_fontend/model/TabelModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/course_detail_page.dart';
@@ -107,14 +108,19 @@ class _CourseViewState extends State<CourseView> {
                                 ),
                                 elevation: 8,
                                 child: InkWell(
-                                  onTap: () {
-                                    Get.to(EditTabelPage(
+                                  onTap: () async {
+                                    var refresh = await Get.to(EditTabelPage(
                                       tabelID: tabel.tid,
                                       tabelName: tabel.couserName,
                                       dayPerWeek: tabel.dayPerWeek,
                                       isUnused: true,
                                       tokenJWT: widget.tokenJWT,
+                                      uid: widget.uid,
+                                      times: tabel.times,
                                     ));
+                                    if (refresh == true) {
+                                      loadData = loadDataAsync();
+                                    }
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(16.0),
@@ -122,13 +128,63 @@ class _CourseViewState extends State<CourseView> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          tabel.couserName,
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              tabel.couserName,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            IconButton(
+                                                onPressed: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Text(
+                                                            "ลบคอร์สออกกำลังกาย"),
+                                                        content: const Text(
+                                                            "ท่านต้องการลบคคอร์สออกกำลงกายหรือไม่"),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop(); // Close the dialog
+                                                            },
+                                                            child: const Text(
+                                                                "ยกเลิก"),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              // Add your delete logic here
+                                                              deleteCouser(
+                                                                  tabel.tid);
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child: const Text(
+                                                                "ยืนยัน"),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                icon: const Icon(
+                                                  Icons.delete_forever,
+                                                  size: 30,
+                                                  color: Color.fromARGB(
+                                                      255, 243, 16, 0),
+                                                ))
+                                          ],
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
@@ -178,15 +234,17 @@ class _CourseViewState extends State<CourseView> {
                                                 child: ElevatedButton(
                                                   onPressed: () {
                                                     Get.to(EditTabelPage(
-                                                        tabelID: tabel.tid,
-                                                        tabelName:
-                                                            tabel.couserName,
-                                                        dayPerWeek:
-                                                            tabel.dayPerWeek,
-                                                        isUnused:
-                                                            widget.isEnnabel,
-                                                        tokenJWT:
-                                                            widget.tokenJWT));
+                                                      tabelID: tabel.tid,
+                                                      tabelName:
+                                                          tabel.couserName,
+                                                      dayPerWeek:
+                                                          tabel.dayPerWeek,
+                                                      isUnused:
+                                                          widget.isEnnabel,
+                                                      tokenJWT: widget.tokenJWT,
+                                                      uid: widget.uid,
+                                                      times: tabel.times,
+                                                    ));
                                                   },
                                                   style:
                                                       ElevatedButton.styleFrom(
@@ -310,12 +368,14 @@ class _CourseViewState extends State<CourseView> {
                                             child: ElevatedButton(
                                               onPressed: () {
                                                 Get.to(EditTabelPage(
-                                                    tabelID: tabel.tid,
-                                                    tabelName: tabel.couserName,
-                                                    dayPerWeek:
-                                                        tabel.dayPerWeek,
-                                                    isUnused: false,
-                                                    tokenJWT: widget.tokenJWT));
+                                                  tabelID: tabel.tid,
+                                                  tabelName: tabel.couserName,
+                                                  dayPerWeek: tabel.dayPerWeek,
+                                                  isUnused: false,
+                                                  tokenJWT: widget.tokenJWT,
+                                                  uid: widget.uid,
+                                                  times: tabel.times,
+                                                ));
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors
@@ -473,6 +533,42 @@ class _CourseViewState extends State<CourseView> {
         ),
       ),
     );
+  }
+
+  void deleteCouser(int tid) async {
+    final dio = Dio();
+    var regBody = {"tid": tid};
+
+    try {
+      final String endpoint = 'http://$url/tabel/deleteCouser';
+
+      final response = await dio.delete(
+        endpoint,
+        queryParameters: regBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        log('Course deleted successfully');
+        // Handle successful deletion (e.g., update UI or notify user)
+        setState(() {
+          loadData = loadDataAsync();
+        });
+      } else {
+        log('Failed to delete course: ${response.data}');
+        // Handle failure (e.g., show error message to user)
+      }
+    } catch (e) {
+      log('Error: $e');
+      // Handle exception (e.g., show error message to user)
+    }
   }
 
   Future<void> loadDataAsync() async {
