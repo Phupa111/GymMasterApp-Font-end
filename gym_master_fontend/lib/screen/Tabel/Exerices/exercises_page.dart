@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -39,6 +41,12 @@ class _ExerciesePageState extends State<ExerciesePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("TID ${widget.tabelID} DayNum ${widget.dayNum}"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back(result: true);
+          },
+        ),
       ),
       body: FutureBuilder<void>(
         future: loadData,
@@ -126,12 +134,12 @@ class _ExerciesePageState extends State<ExerciesePage> {
                                     onPressed: () {
                                       openDialog(exPost.eid);
                                     },
-                                    child: const Icon(Icons.add),
                                     style: ButtonStyle(
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
                                               const Color(0xFFFFAC41)),
-                                    )),
+                                    ),
+                                    child: const Icon(Icons.add)),
                               ],
                             ),
                           ),
@@ -254,13 +262,13 @@ class _ExerciesePageState extends State<ExerciesePage> {
                 });
                 Navigator.of(context).pop(); // Close the popup
               },
-              child: const Text(
-                "ตกลง",
-                style: TextStyle(color: Colors.white),
-              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     const Color(0xFFFFAC41), // Button background color
+              ),
+              child: const Text(
+                "ตกลง",
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ],
@@ -322,7 +330,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
           response.data as List<dynamic>; // Assuming the response is a list
       exPosts = jsonData.map((item) => ExPostModel.fromJson(item)).toList();
     } catch (e) {
-      print('Error loading data: $e');
+      log('Error loading data: $e');
       throw Exception('Error loading data');
     }
   }
