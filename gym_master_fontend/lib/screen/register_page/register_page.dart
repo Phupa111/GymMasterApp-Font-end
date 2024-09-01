@@ -100,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       log("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("An error occurred. Please try again."),
           duration: Duration(seconds: 3),
         ),
@@ -392,13 +392,13 @@ class _RegisterPageState extends State<RegisterPage> {
                             checkEmailUsername();
                           }
                         },
-                        child: Text(
-                          "Register",
-                          style: const TextStyle(fontSize: 18.0),
-                        ),
                         style: const ButtonStyle(
                             backgroundColor:
                                 MaterialStatePropertyAll(Color(0xFFFFAC41))),
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(fontSize: 18.0),
+                        ),
                       ),
                     ),
                     const SizedBox(
