@@ -5,10 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:gym_master_fontend/model/UserModel.dart';
-import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,10 +19,11 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   final TextEditingController _couserName = TextEditingController();
   final TextEditingController _times = TextEditingController();
   final TextEditingController _dayPerWeek = TextEditingController();
+  final TextEditingController _timeRest = TextEditingController();
   late SharedPreferences prefs;
   String url = AppConstants.BASE_URL;
   late String tokenJWT;
-
+  final _formKey = GlobalKey<FormState>();
   int? uid = 0;
   @override
   void initState() {
@@ -54,12 +51,13 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
       "description": "",
       "isCreatedByAdmin": 0,
       "dayPerWeek": int.parse(_dayPerWeek.text),
+      "time_rest": int.parse(_timeRest.text)
     };
 
     try {
       final dio = Dio();
       final response = await dio.post(
-        'http://${url}/tabel/CreatTabel',
+        'http://$url/tabel/CreatTabel',
         data: regBody,
         options: Options(
           headers: {
@@ -84,12 +82,13 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
               const Padding(
-                padding: EdgeInsets.only(top: 150),
+                padding: EdgeInsets.only(top: 15),
                 child: Text(
                   "สร้างตาราง",
                   style: TextStyle(
@@ -102,9 +101,11 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 40),
                 child: Form(
+                  key: _formKey, // Add a GlobalKey to the form for validation
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Field for Table Name
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: TextFormField(
@@ -137,8 +138,16 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                             ),
                           ),
                           controller: _couserName,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณาใส่ชื่อตาราง';
+                            }
+                            return null;
+                          },
                         ),
                       ),
+
+                      // Field for Duration (Weeks)
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: TextFormField(
@@ -172,11 +181,19 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                           ),
                           keyboardType: TextInputType.number,
                           inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
+                            FilteringTextInputFormatter.digitsOnly,
                           ],
                           controller: _times,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณาใส่ระยะเวลา';
+                            }
+                            return null;
+                          },
                         ),
                       ),
+
+                      // Field for Days Per Week
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: TextFormField(
@@ -209,29 +226,130 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                             ),
                           ),
                           controller: _dayPerWeek,
+                          readOnly: true,
                           onTap: () {
                             showCupertinoModalPopup(
                               context: context,
-                              builder: (BuildContext context) => SizedBox(
-                                height: 250,
-                                child: CupertinoPicker(
-                                  backgroundColor: Colors.white,
-                                  itemExtent: 32.0,
-                                  scrollController: FixedExtentScrollController(
-                                      initialItem: 0),
-                                  onSelectedItemChanged: (value) {
-                                    setState(() {
-                                      _dayPerWeek.text = (value + 1).toString();
-                                    });
-                                  },
-                                  children: List.generate(
-                                    7,
-                                    (index) =>
-                                        Center(child: Text('${index + 1} วัน')),
+                              builder: (BuildContext context) => Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  SizedBox(
+                                    height: 250,
+                                    child: CupertinoPicker(
+                                      backgroundColor: Colors.white,
+                                      itemExtent: 32.0,
+                                      scrollController:
+                                          FixedExtentScrollController(
+                                              initialItem: 0),
+                                      onSelectedItemChanged: (value) {
+                                        setState(() {
+                                          _dayPerWeek.text =
+                                              (value + 1).toString();
+                                        });
+                                      },
+                                      children: List.generate(
+                                        7,
+                                        (index) => Center(
+                                            child: Text('${index + 1} วัน')),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('ตกลง'),
+                                  ),
+                                ],
                               ),
                             );
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณาเลือกจำนวนวันที่ออกกกำลังกาย';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+
+                      // Field for Rest Time
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: const BorderSide(
+                                color: Colors.transparent,
+                                width: 2.0,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.all(15.0),
+                            filled: true,
+                            fillColor: const Color(0xFFF1F0F0),
+                            border: InputBorder.none,
+                            hintText: "ระยะเวลาพัก",
+                            hintStyle: const TextStyle(
+                              fontFamily: 'Kanit',
+                              color: Color(0xFFFFAC41),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                          ),
+                          controller: _timeRest,
+                          readOnly: true,
+                          onTap: () {
+                            showCupertinoModalPopup(
+                              context: context,
+                              builder: (BuildContext context) => Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  SizedBox(
+                                    height: 250,
+                                    child: CupertinoPicker(
+                                      backgroundColor: Colors.white,
+                                      itemExtent: 32.0,
+                                      scrollController:
+                                          FixedExtentScrollController(
+                                              initialItem: 0),
+                                      onSelectedItemChanged: (value) {
+                                        setState(() {
+                                          _timeRest.text =
+                                              (value + 30).toString();
+                                        });
+                                      },
+                                      children: List.generate(
+                                        91,
+                                        (index) => Center(
+                                            child:
+                                                Text('${index + 30} วินาที')),
+                                      ),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('ตกลง'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณาเลือกระยะเวลาพัก';
+                            }
+                            return null;
                           },
                         ),
                       ),
@@ -243,8 +361,10 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                 width: 250,
                 child: ElevatedButton(
                   onPressed: () {
-                    createTabel();
-                    Get.back(result: true);
+                    if (_formKey.currentState?.validate() ?? false) {
+                      createTabel();
+                      Get.back(result: true);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFAC41),
