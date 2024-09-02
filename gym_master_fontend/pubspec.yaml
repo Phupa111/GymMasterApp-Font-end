@@ -58,6 +58,7 @@ dependencies:
   percent_indicator: ^4.2.3
   flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^17.2.1+2
+  awesome_dialog: ^3.2.1
 
 
 
