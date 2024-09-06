@@ -224,99 +224,103 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       Text('Week $currentWeek'),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: List.generate(
-                                            widget.dayPerWeek, (dayIndex) {
-                                          int currentDay = dayIndex + 1;
-                                          bool isButtonEnabled =
-                                              userEnabelCourse.any((course) =>
-                                                  currentWeek == week_count &&
-                                                  currentDay == day &&
-                                                  course.isSuccess == 0);
-                                          bool isSuccessButton =
-                                              succesUserEn.any((course) =>
-                                                  course.week == currentWeek &&
-                                                  course.day == currentDay &&
-                                                  course.isSuccess == 1);
+                                      SingleChildScrollView(
+                                        scrollDirection: Axis
+                                            .horizontal, // Enable horizontal scrolling
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: List.generate(
+                                              widget.dayPerWeek, (dayIndex) {
+                                            int currentDay = dayIndex + 1;
+                                            bool isButtonEnabled =
+                                                userEnabelCourse.any((course) =>
+                                                    currentWeek == week_count &&
+                                                    currentDay == day &&
+                                                    course.isSuccess == 0);
+                                            bool isSuccessButton =
+                                                succesUserEn.any((course) =>
+                                                    course.week ==
+                                                        currentWeek &&
+                                                    course.day == currentDay &&
+                                                    course.isSuccess == 1);
 
-                                          return Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: isButtonEnabled
-                                                ? ElevatedButton(
-                                                    onPressed: isButtonEnabled
-                                                        ? () async {
-                                                            var refresh =
-                                                                await Get.to(
-                                                                    ExerciesStart(
-                                                              tabelID: widget
-                                                                  .tabelID,
-                                                              tabelName: widget
-                                                                  .tabelName,
-                                                              week: currentWeek,
-                                                              day: currentDay,
-                                                              uid: widget.uid,
-                                                              time_rest: widget
-                                                                  .time_rest,
-                                                              tokenJWT: widget
-                                                                  .tokenJWT,
-                                                            ));
-                                                            if (refresh ==
-                                                                true) {
-                                                              setState(() {
-                                                                loadData =
-                                                                    loadDataAsync();
-                                                              });
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: isButtonEnabled
+                                                  ? ElevatedButton(
+                                                      onPressed: isButtonEnabled
+                                                          ? () async {
+                                                              var refresh =
+                                                                  await Get.to(
+                                                                      ExerciesStart(
+                                                                tabelID: widget
+                                                                    .tabelID,
+                                                                tabelName: widget
+                                                                    .tabelName,
+                                                                week:
+                                                                    currentWeek,
+                                                                day: currentDay,
+                                                                uid: widget.uid,
+                                                                time_rest: widget
+                                                                    .time_rest,
+                                                                tokenJWT: widget
+                                                                    .tokenJWT,
+                                                              ));
+                                                              if (refresh ==
+                                                                  true) {
+                                                                setState(() {
+                                                                  loadData =
+                                                                      loadDataAsync();
+                                                                });
+                                                              }
                                                             }
-                                                          }
-                                                        : null,
-                                                    style: isButtonEnabled
-                                                        ? ElevatedButton.styleFrom(
-                                                            backgroundColor:
-                                                                const Color(
-                                                                    0xFFFFAC41),
-                                                            shape:
-                                                                const CircleBorder())
-                                                        : null,
-                                                    child: Text(
-                                                      '$currentDay',
-                                                      style: const TextStyle(
-                                                          color: Colors.white),
-                                                    ), // Default disabled style
-                                                  )
-                                                : isSuccessButton
-                                                    ? ElevatedButton(
-                                                        onPressed: () {},
-                                                        style: ElevatedButton.styleFrom(
-                                                            backgroundColor:
-                                                                const Color(
-                                                                    0xFFFFAC41),
-                                                            shape:
-                                                                const CircleBorder()),
-                                                        child: const Icon(
-                                                          Icons
-                                                              .check_circle_outline_outlined,
-                                                          color: Colors.white,
+                                                          : null,
+                                                      style: isButtonEnabled
+                                                          ? ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  const Color(
+                                                                      0xFFFFAC41),
+                                                              shape:
+                                                                  const CircleBorder())
+                                                          : null,
+                                                      child: Text(
+                                                        '$currentDay',
+                                                        style: const TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                    )
+                                                  : isSuccessButton
+                                                      ? ElevatedButton(
+                                                          onPressed: () {},
+                                                          style: ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  const Color(
+                                                                      0xFFFFAC41),
+                                                              shape:
+                                                                  const CircleBorder()),
+                                                          child: const Icon(
+                                                            Icons
+                                                                .check_circle_outline_outlined,
+                                                            color: Colors.white,
+                                                          ),
                                                         )
-
-                                                        // Default disabled style
-                                                        )
-                                                    : ElevatedButton(
-                                                        onPressed: null,
-                                                        style: ElevatedButton.styleFrom(
-                                                            backgroundColor:
-                                                                const Color(
-                                                                    0xFFFFAC41),
-                                                            shape:
-                                                                const CircleBorder()),
-                                                        child:
-                                                            Text('$currentDay')
-
-                                                        // Default disabled style
+                                                      : ElevatedButton(
+                                                          onPressed: null,
+                                                          style: ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  const Color(
+                                                                      0xFFFFAC41),
+                                                              shape:
+                                                                  const CircleBorder()),
+                                                          child: Text(
+                                                              '$currentDay'),
                                                         ),
-                                          );
-                                        }),
+                                            );
+                                          }),
+                                        ),
                                       ),
                                     ],
                                   );
