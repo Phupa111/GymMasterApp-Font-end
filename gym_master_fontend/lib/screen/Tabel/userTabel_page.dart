@@ -61,7 +61,7 @@ class _UserTabelPageState extends State<UserTabelPage>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Get.back();
+            Get.back(result: true);
           },
         ),
       ),
