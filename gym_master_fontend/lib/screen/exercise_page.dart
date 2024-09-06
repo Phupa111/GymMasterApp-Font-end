@@ -7,8 +7,7 @@ import 'package:gym_master_fontend/model/TabelEnModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/course_detail_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
-import 'package:gym_master_fontend/screen/hom_page.dart';
-import 'package:gym_master_fontend/screen/tdee_page/tdee_page.dart';
+
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/widgets/card.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -23,6 +22,7 @@ class ExercisePage extends StatefulWidget {
 
 class _ExercisePageState extends State<ExercisePage> {
   int? uid;
+  int? role;
   String url = AppConstants.BASE_URL;
   late SharedPreferences prefs;
   late String tokenJWT;
@@ -38,7 +38,7 @@ class _ExercisePageState extends State<ExercisePage> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     uid = prefs.getInt("uid");
-
+    role = prefs.getInt("role");
     tokenJWT = prefs.getString("tokenJwt")!;
     await loadDataAsync();
     setState(() {});
@@ -217,6 +217,7 @@ class _ExercisePageState extends State<ExercisePage> {
                                             tokenJWT: tokenJWT,
                                             uid: uid,
                                             times: tabel.times,
+                                            role: role,
                                           ));
                                         },
                                         style: ElevatedButton.styleFrom(

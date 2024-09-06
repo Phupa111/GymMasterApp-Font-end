@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+
 import 'package:gym_master_fontend/model/ExInTabelModel.dart';
-import 'package:gym_master_fontend/model/UserModel.dart';
+
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_page.dart';
 
 import 'package:gym_master_fontend/services/app_const.dart';
@@ -21,6 +21,7 @@ class EditTabelPage extends StatefulWidget {
   final int times;
   final bool isUnused;
   final String tokenJWT;
+  final int? role;
 
   const EditTabelPage({
     super.key,
@@ -31,6 +32,7 @@ class EditTabelPage extends StatefulWidget {
     required this.tokenJWT,
     required this.uid,
     required this.times,
+    required this.role,
   });
 
   @override
@@ -42,8 +44,7 @@ class _EditTabelPageState extends State<EditTabelPage>
   late TabController _tabController;
   List<List<ExInTabelModel>> exPosts = [];
   int dayNum = 1;
-  GetStorage gs = GetStorage();
-  late UserModel userModel = gs.read('userModel');
+
   late SharedPreferences prefs;
   late Future<void> loadData;
   late Future<void> genload;
@@ -264,16 +265,19 @@ class _EditTabelPageState extends State<EditTabelPage>
                   if (widget.isUnused)
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          enabelUserCourse(widget.tabelID);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.lightGreen, // Button background color
+                      child: Visibility(
+                        visible: widget.role == 1,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            enabelUserCourse(widget.tabelID);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Colors.lightGreen, // Button background color
+                          ),
+                          child: const Text("ใช้งาน",
+                              style: TextStyle(color: Colors.white)),
                         ),
-                        child: const Text("ใช้งาน",
-                            style: TextStyle(color: Colors.white)),
                       ),
                     ),
                 ],

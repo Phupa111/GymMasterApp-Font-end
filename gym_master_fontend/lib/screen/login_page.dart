@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/model/tokenJwtModel.dart';
+import 'package:gym_master_fontend/screen/Tabel/course_view_page.dart';
 import 'package:gym_master_fontend/screen/information_page.dart/information_page.dart';
 import 'package:gym_master_fontend/screen/register_page/register_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
@@ -204,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
             onConfirm: (value) async {
               if (value) {
                 Navigator.pop(context);
-                Get.to(MenuNavBar());
+                Get.to(const MenuNavBar());
                 setState(() {
                   _captchaErrorText = "";
                 });
@@ -406,8 +407,7 @@ class _LoginPageState extends State<LoginPage> {
                               children: [
                                 IconButton(
                                     onPressed: () async {
-                                      await _prefs.setInt("role", 0);
-                                      Get.to(MenuNavBar());
+                                      geustMode();
                                     },
                                     icon: const Icon(
                                       Icons.person,
@@ -450,5 +450,27 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
+  }
+
+  void geustMode() async {
+    final dio = Dio();
+    try {
+      final responeGusetToken = await dio.get('http://$url/user/getGuestToken');
+      TokenJwtModel tokenJWT =
+          tokenJwtModelFromJson(jsonEncode(responeGusetToken.data));
+
+      if (responeGusetToken.statusCode == 200) {
+        await _prefs.setInt("role", 0);
+
+        Get.to(CourseView(
+            uid: 0,
+            isAdminCouser: true,
+            isEnnabel: false,
+            tokenJWT: tokenJWT.tokenJwt));
+      }
+    } catch (e) {
+      log("An error occurred: $e");
+      _showDialog("Error", "An unexpected error occurred.");
+    }
   }
 }

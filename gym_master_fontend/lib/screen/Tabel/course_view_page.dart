@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:gym_master_fontend/model/TabelEnModel.dart';
@@ -10,6 +11,7 @@ import 'package:gym_master_fontend/screen/Tabel/createTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CourseView extends StatefulWidget {
   final int? uid;
@@ -35,11 +37,21 @@ class _CourseViewState extends State<CourseView> {
   final TextEditingController searchController = TextEditingController();
   String gender = '';
   String level = '';
-
+  late SharedPreferences prefs;
+  int? role;
   @override
   void initState() {
     super.initState();
-    loadData = loadDataAsync(); // Initialize the Future
+    loadData = loadDataAsync();
+    _initializePreferences(); // Initialize the Future
+  }
+
+  Future<void> _initializePreferences() async {
+    prefs = await SharedPreferences.getInstance();
+
+    role = prefs.getInt("role");
+
+    setState(() {});
   }
 
   @override
@@ -53,6 +65,7 @@ class _CourseViewState extends State<CourseView> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
           return Scaffold(
+              appBar: role == 0 ? AppBar() : null,
               body: Column(
                 children: [
                   widget.isAdminCouser && !widget.isEnnabel
@@ -117,6 +130,7 @@ class _CourseViewState extends State<CourseView> {
                                       tokenJWT: widget.tokenJWT,
                                       uid: widget.uid,
                                       times: tabel.times,
+                                      role: role,
                                     ));
                                     if (refresh == true) {
                                       loadData = loadDataAsync();
@@ -140,50 +154,53 @@ class _CourseViewState extends State<CourseView> {
                                                 color: Colors.white,
                                               ),
                                             ),
-                                            IconButton(
-                                                onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: const Text(
-                                                            "ลบคอร์สออกกำลังกาย"),
-                                                        content: const Text(
-                                                            "ท่านต้องการลบคคอร์สออกกำลงกายหรือไม่"),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop(); // Close the dialog
-                                                            },
-                                                            child: const Text(
-                                                                "ยกเลิก"),
-                                                          ),
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              // Add your delete logic here
-                                                              deleteCouser(
-                                                                  tabel.tid);
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child: const Text(
-                                                                "ยืนยัน"),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                icon: const Icon(
-                                                  Icons.delete_forever,
-                                                  size: 30,
-                                                  color: Color.fromARGB(
-                                                      255, 243, 16, 0),
-                                                ))
+                                            Visibility(
+                                              visible: role == 2,
+                                              child: IconButton(
+                                                  onPressed: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              "ลบคอร์สออกกำลังกาย"),
+                                                          content: const Text(
+                                                              "ท่านต้องการลบคคอร์สออกกำลงกายหรือไม่"),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop(); // Close the dialog
+                                                              },
+                                                              child: const Text(
+                                                                  "ยกเลิก"),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                // Add your delete logic here
+                                                                deleteCouser(
+                                                                    tabel.tid);
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              child: const Text(
+                                                                  "ยืนยัน"),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.delete_forever,
+                                                    size: 30,
+                                                    color: Color.fromARGB(
+                                                        255, 243, 16, 0),
+                                                  )),
+                                            )
                                           ],
                                         ),
                                         const SizedBox(height: 8),
@@ -207,21 +224,25 @@ class _CourseViewState extends State<CourseView> {
                                               padding:
                                                   const EdgeInsets.fromLTRB(
                                                       8, 10, 8, 0),
-                                              child: ElevatedButton(
-                                                onPressed: () {
-                                                  enabelUserCourse(
-                                                      tabel.tid,
-                                                      tabel.times,
-                                                      tabel.dayPerWeek);
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      Colors.lightGreen,
-                                                ),
-                                                child: const Text(
-                                                  "ใช้งาน",
-                                                  style: TextStyle(
-                                                      color: Colors.white),
+                                              child: Visibility(
+                                                visible: role != 0,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    enabelUserCourse(
+                                                        tabel.tid,
+                                                        tabel.times,
+                                                        tabel.dayPerWeek);
+                                                  },
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.lightGreen,
+                                                  ),
+                                                  child: const Text(
+                                                    "ใช้งาน",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -244,6 +265,7 @@ class _CourseViewState extends State<CourseView> {
                                                       tokenJWT: widget.tokenJWT,
                                                       uid: widget.uid,
                                                       times: tabel.times,
+                                                      role: role,
                                                     ));
                                                   },
                                                   style:
@@ -375,6 +397,7 @@ class _CourseViewState extends State<CourseView> {
                                                   tokenJWT: widget.tokenJWT,
                                                   uid: widget.uid,
                                                   times: tabel.times,
+                                                  role: role,
                                                 ));
                                               },
                                               style: ElevatedButton.styleFrom(
