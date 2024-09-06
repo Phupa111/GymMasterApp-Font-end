@@ -30,13 +30,13 @@ class _MenuNavBarState extends State<MenuNavBar> {
   }
 
   Future<void> _initializeNotificationService() async {
-    
     DateTime scheduledDate = DateTime.now();
- 
   }
 
   void _initializeUser() {
-    auth.FirebaseAuth.instance.authStateChanges().listen((auth.User? updatedUser) {
+    auth.FirebaseAuth.instance
+        .authStateChanges()
+        .listen((auth.User? updatedUser) {
       setState(() {
         currentUser = updatedUser;
       });
@@ -141,9 +141,11 @@ class _MenuNavBarState extends State<MenuNavBar> {
     }
 
     return PopScope(
-      canPop:  role ==0 ?true:false,
+      canPop: role == 0 ? true : false,
       child: Scaffold(
-        body: role != null ? pages[currentPageIndex] : Center(child: CircularProgressIndicator()),
+        body: role != null
+            ? pages[currentPageIndex]
+            : Center(child: CircularProgressIndicator()),
         bottomNavigationBar: NavigationBar(
           indicatorShape: const CircleBorder(),
           backgroundColor: Colors.orange,
