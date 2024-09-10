@@ -7,9 +7,12 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/WeigthModel.dart';
 
 import 'package:gym_master_fontend/screen/photo_page.dart';
+import 'package:gym_master_fontend/screen/showImageScreen/show_image_screen.dart';
 import 'package:gym_master_fontend/screen/staticScreen/lineChart_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:intl/intl.dart';
@@ -57,9 +60,29 @@ class _StaticPageState extends State<StaticPage> {
         ),
         body: uid == null
             ? const Center(child: CircularProgressIndicator())
-            : const SingleChildScrollView(
+            : SingleChildScrollView(
                 child: Column(
-                  children: [LineChartPage()],
+                  children: [
+                    LineChartPage(),
+                    SizedBox(
+                      width: 140.0,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            Get.to(() => const ShowImageScreen());
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              FaIcon(FontAwesomeIcons.image),
+                              Text(
+                                "ดูรูป",
+                                style: TextStyle(
+                                    fontFamily: 'Kanit', fontSize: 18.0),
+                              )
+                            ],
+                          )),
+                    )
+                  ],
                 ),
               ));
   }

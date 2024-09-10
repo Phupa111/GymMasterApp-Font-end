@@ -9,10 +9,14 @@ import 'package:gym_master_fontend/services/user/edit_service.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 
 class SelectGenderRadio extends StatefulWidget {
-  const SelectGenderRadio({super.key, required this.uid, required this.gender});
+  const SelectGenderRadio(
+      {super.key,
+      required this.uid,
+      required this.gender,
+      required this.tokenJWT});
   final int uid;
   final int gender;
-
+  final String tokenJWT;
   @override
   State<SelectGenderRadio> createState() => _SelectGenderRadioState();
 }
@@ -21,6 +25,7 @@ class _SelectGenderRadioState extends State<SelectGenderRadio> {
   List<int> _gender = [1, 2];
   late int currentGender;
   late int uid_u;
+  late String tokenJwt;
 
   Future<void> updateGender(int uid, int gender) async {
     const String ip = AppConstants.BASE_URL;
@@ -30,10 +35,16 @@ class _SelectGenderRadioState extends State<SelectGenderRadio> {
       "gender": gender,
     };
     try {
-      final response = await dio.post(
-        "http://$ip/user/update/gender",
-        data: json,
-      );
+      final response = await dio.post("http://$ip/user/update/gender",
+          data: json,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJwt',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
 
       log(response.data.toString());
       if (mounted) {
@@ -50,6 +61,7 @@ class _SelectGenderRadioState extends State<SelectGenderRadio> {
     super.initState();
     currentGender = widget.gender;
     uid_u = widget.uid;
+    tokenJwt = widget.tokenJWT;
   }
 
   @override

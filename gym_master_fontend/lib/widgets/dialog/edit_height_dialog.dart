@@ -6,8 +6,10 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/user/edit_service.dart';
 
 class EditHeightDialog extends StatefulWidget {
-  const EditHeightDialog({super.key, required this.uid});
+  const EditHeightDialog(
+      {super.key, required this.uid, required this.tokenJWT});
   final int uid;
+  final String tokenJWT;
 
   @override
   State<EditHeightDialog> createState() => _EditHeightDialogState();
@@ -19,16 +21,18 @@ class _EditHeightDialogState extends State<EditHeightDialog> {
 
   late int uid;
   late int status = 0;
+  late String tokenjwt;
 
   @override
   void initState() {
     super.initState();
     uid = widget.uid;
+    tokenjwt = widget.tokenJWT;
   }
 
-  void updateHeight(int uid, int height) async {
+  void updateHeight(int uid, int height, String token) async {
     try {
-      status = await EditService().updateHeight(uid, height);
+      status = await EditService().updateHeight(uid, height, token);
       log("status : $status");
       if (status == 1) {
         Get.back(result: height);
@@ -129,7 +133,10 @@ class _EditHeightDialogState extends State<EditHeightDialog> {
                         onPressed: () {
                           if (_formkey.currentState!.validate()) {
                             updateHeight(
-                                uid, int.parse(_heightController.text));
+                              uid,
+                              int.parse(_heightController.text),
+                              tokenjwt,
+                            );
                           }
                         },
                         child: const Text(

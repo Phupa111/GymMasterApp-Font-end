@@ -3,6 +3,7 @@
 import 'dart:developer';
 import 'dart:io';
 // ignore: depend_on_referenced_packages
+import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart' as dio;
@@ -32,10 +33,10 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
   late int currentGender;
   final String url = AppConstants.BASE_URL;
 
-  final _fromkey = GlobalKey<FormState>();
   late int usernamecheckStatus = 0;
   late int uid;
   SharedPreferences? prefs;
+  late String? tokenJWT;
 
   late Future<List<UserProfileEditModel>> profileAsync;
   //imagePicker
@@ -79,10 +80,16 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
         )
       });
 
-      final response = await dioInstance.post(
-        "http://$url/photo/uploadImage",
-        data: formData,
-      );
+      final response = await dioInstance.post("http://$url/photo/uploadImage",
+          data: formData,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJWT',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       log(response.data.toString());
     } catch (e) {
       log("Error: $e");
@@ -98,8 +105,9 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
     }
   }
 
-  void _initializePreferences() async {
+  Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
+    tokenJWT = prefs!.getString("tokenJwt");
   }
 
   void updatePictureProfile(XFile image) async {
@@ -122,7 +130,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Get.back();
+            Get.back(result: "refresh");
           },
           icon: const FaIcon(
             FontAwesomeIcons.angleLeft,
@@ -211,6 +219,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                               builder: (context) => SelectGenderRadio(
                                     uid: uid,
                                     gender: userData[index].gender,
+                                    tokenJWT: tokenJWT!,
                                   ));
 
                           if (updategender != null) {
@@ -256,6 +265,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                           final updateUser =
                               await Get.dialog(EditUsernameDialog(
                             uid: uid,
+                            tokenJWT: tokenJWT!,
                           ));
 
                           if (updateUser != null) {
@@ -287,6 +297,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                           final updatePassword =
                               await Get.dialog(EditPasswordDialog(
                             uid: uid,
+                            tokenJWT: tokenJWT!,
                           ));
 
                           if (updatePassword != null) {
@@ -319,6 +330,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                           final updateHeight =
                               await Get.dialog(EditHeightDialog(
                             uid: uid,
+                            tokenJWT: tokenJWT!,
                           ));
                           if (updateHeight != null) {
                             if (updateHeight != 0) {
@@ -351,6 +363,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                           final updateWeight = await Get.dialog(
                             EditWeightDialog(
                               uid: uid,
+                              tokenJWT: tokenJWT!,
                             ),
                           );
 
