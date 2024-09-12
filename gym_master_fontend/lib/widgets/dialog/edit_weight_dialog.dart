@@ -6,9 +6,10 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/user/edit_service.dart';
 
 class EditWeightDialog extends StatefulWidget {
-  const EditWeightDialog({super.key, required this.uid});
+  const EditWeightDialog(
+      {super.key, required this.uid, required this.tokenJWT});
   final int uid;
-
+  final String tokenJWT;
   @override
   State<EditWeightDialog> createState() => _EditWeightDialogState();
 }
@@ -18,17 +19,18 @@ class _EditWeightDialogState extends State<EditWeightDialog> {
   final _formkey = GlobalKey<FormState>();
   late int uid;
   late int status = 0;
+  late String tokenJwt;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     uid = widget.uid;
+    tokenJwt = widget.tokenJWT;
   }
 
-  void updateWeight(int uid, double weight) async {
+  void updateWeight(int uid, double weight, String tokenJwt) async {
     try {
-      status = await EditService().updateWeight(uid, weight);
+      status = await EditService().updateWeight(uid, weight, tokenJwt);
       log(status.toString());
       if (status == 1) {
         log(weight.toString());
@@ -47,7 +49,7 @@ class _EditWeightDialogState extends State<EditWeightDialog> {
       key: _formkey,
       child: Dialog(
         child: Padding(
-          padding: EdgeInsets.all(18.0),
+          padding: const EdgeInsets.all(18.0),
           child: SizedBox(
             height: 180.0,
             child: Column(
@@ -63,8 +65,8 @@ class _EditWeightDialogState extends State<EditWeightDialog> {
                 SizedBox(
                   width: 100,
                   child: TextFormField(
-                    decoration: InputDecoration(
-                      suffixIcon: const Padding(
+                    decoration: const InputDecoration(
+                      suffixIcon: Padding(
                         padding: EdgeInsets.only(top: 12.0),
                         child: Text(
                           "กก.",
@@ -130,8 +132,8 @@ class _EditWeightDialogState extends State<EditWeightDialog> {
                       TextButton(
                         onPressed: () {
                           if (_formkey.currentState!.validate()) {
-                            updateWeight(
-                                uid, double.parse(_weightController.text));
+                            updateWeight(uid,
+                                double.parse(_weightController.text), tokenJwt);
                           }
                         },
                         child: const Text(

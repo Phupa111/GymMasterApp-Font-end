@@ -26,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
   late Future<void> userProfileData;
   List<ProfileModel> profileData = [];
   String? tokenJWT;
+
   @override
   void initState() {
     super.initState();
@@ -68,12 +69,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   return status! < 500; // Accept status codes less than 500
                 },
               ));
+      print(response.data);
       final List<dynamic> profileJson = response.data;
       profileData = profileJson.map((e) => ProfileModel.fromJson(e)).toList();
-      log("datajson list = ${profileJson.length}");
-      log(profileJson.toString());
+      // log("datajson list = ${profileJson.length}");
+      // log(profileJson.toString());
     } catch (error) {
-      log("fetching data Error : $error");
+      // log("fetching data Error : $error 1");
+      throw Exception("Failed to load data1S");
     }
   }
 
@@ -176,11 +179,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ),
                                     ),
                                     IconButton(
-                                        onPressed: () {
-                                          final updatePage = Get.to(
+                                        onPressed: () async {
+                                          final updatePage = await Get.to(
                                               () => ProfilePageEdit(uid: uid!));
 
-                                          if (updatePage == null) {
+                                          if (updatePage == "refresh") {
                                             setState(() {
                                               userProfileData = loadProfile();
                                             });

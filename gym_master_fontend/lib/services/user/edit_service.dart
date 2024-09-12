@@ -33,17 +33,23 @@ class EditService {
     }
   }
 
-  Future<int> updatePassword(int uid, String password) async {
+  Future<int> updatePassword(int uid, String password, String tokenJwt) async {
     var json = {
       "uid": uid,
       "password": password,
     };
 
     try {
-      final response = await dio.post(
-        "http://$ip/user/update/password",
-        data: json,
-      );
+      final response = await dio.post("http://$ip/user/update/password",
+          data: json,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJwt',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
 
       if (response.statusCode == 200) {
         return response.data as int;
@@ -55,16 +61,22 @@ class EditService {
     }
   }
 
-  Future<int> updateHeight(int uid, int height) async {
+  Future<int> updateHeight(int uid, int height, String tokenJwt) async {
     var json = {
       "uid": uid,
       "height": height,
     };
     try {
-      final response = await dio.post(
-        "http://$ip/user/update/height",
-        data: json,
-      );
+      final response = await dio.post("http://$ip/user/update/height",
+          data: json,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJwt',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       if (response.statusCode == 200) {
         return response.data as int;
       } else {
@@ -75,16 +87,22 @@ class EditService {
     }
   }
 
-  Future<int> updateWeight(int uid, double weight) async {
+  Future<int> updateWeight(int uid, double weight, String tokenJwt) async {
     var json = {
       "uid": uid,
       "weight": weight,
     };
     try {
-      final response = await dio.post(
-        "http://$ip/progress/weightInsert",
-        data: json,
-      );
+      final response = await dio.post("http://$ip/progress/weightInsert",
+          data: json,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJwt',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       if (response.statusCode == 200) {
         return 1;
       } else {

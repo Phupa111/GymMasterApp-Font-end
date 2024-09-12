@@ -7,8 +7,10 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 
 class EditUsernameDialog extends StatefulWidget {
-  const EditUsernameDialog({super.key, required this.uid});
+  const EditUsernameDialog(
+      {super.key, required this.uid, required this.tokenJWT});
   final int uid;
+  final String tokenJWT;
   @override
   State<EditUsernameDialog> createState() => _EditUsernameDialogState();
 }
@@ -18,24 +20,39 @@ class _EditUsernameDialogState extends State<EditUsernameDialog> {
   final _fromkey = GlobalKey<FormState>();
   late int uid;
   int usernamecheckStatus = 0;
+  late String tokenJwt;
 
-  void checkUsername(String username, int uid) async {
+  void checkUsername(String username, int uid, String tokenJwt) async {
     final dioInstance = Dio();
     final dateNow = DateTime.now();
     const String url = AppConstants.BASE_URL;
     // log("${dateNow.toString().split(" ")[0]}_$uid");
     try {
-      var response =
-          await dioInstance.get('http://$url/user/selectFromEmail/$username');
+      var response = await dioInstance.get('http://$url/user/getUser/$username',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJwt',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       if (response.data.isEmpty) {
         var json = {
           "uid": uid,
           "username": username,
         };
-        final responseChangeUsername = await dioInstance.post(
-          "http://$url/user/update/username",
-          data: json,
-        );
+        final responseChangeUsername =
+            await dioInstance.post("http://$url/user/update/username",
+                data: json,
+                options: Options(
+                  headers: {
+                    'Authorization': 'Bearer $tokenJwt',
+                  },
+                  validateStatus: (status) {
+                    return status! < 500; // Accept status codes less than 500
+                  },
+                ));
         log(responseChangeUsername.data.toString());
 
         Get.back(result: username);
@@ -69,6 +86,7 @@ class _EditUsernameDialogState extends State<EditUsernameDialog> {
   void initState() {
     super.initState();
     uid = widget.uid;
+    tokenJwt = widget.tokenJWT;
   }
 
   @override
@@ -121,7 +139,8 @@ class _EditUsernameDialogState extends State<EditUsernameDialog> {
                       TextButton(
                           onPressed: () {
                             if (_fromkey.currentState?.validate() ?? false) {
-                              checkUsername(_usernameController.text, uid);
+                              checkUsername(
+                                  _usernameController.text, uid, tokenJwt);
                             }
                           },
                           child: const Text(

@@ -5,8 +5,10 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/user/edit_service.dart';
 
 class EditPasswordDialog extends StatefulWidget {
-  const EditPasswordDialog({super.key, required this.uid});
+  const EditPasswordDialog(
+      {super.key, required this.uid, required this.tokenJWT});
   final int uid;
+  final String tokenJWT;
 
   @override
   State<EditPasswordDialog> createState() => _EditPasswordDialogState();
@@ -18,16 +20,18 @@ class _EditPasswordDialogState extends State<EditPasswordDialog> {
   final _formkey = GlobalKey<FormState>();
   late int uid;
   late int status = 0;
+  late String tokenJwt;
 
   @override
   void initState() {
     super.initState();
     uid = widget.uid;
+    tokenJwt = widget.tokenJWT;
   }
 
-  void checkAndUpdatePassword(int uid, String password) async {
+  void checkAndUpdatePassword(int uid, String password, String token) async {
     try {
-      status = await EditService().updatePassword(uid, password);
+      status = await EditService().updatePassword(uid, password, token);
       log("status : $status");
       if (status == 1) {
         Get.back(result: 1);
@@ -47,7 +51,7 @@ class _EditPasswordDialogState extends State<EditPasswordDialog> {
         child: SizedBox(
           height: 300,
           child: Padding(
-            padding: EdgeInsets.all(18.0),
+            padding: const EdgeInsets.all(18.0),
             child: Column(
               children: [
                 const Row(
@@ -110,7 +114,7 @@ class _EditPasswordDialogState extends State<EditPasswordDialog> {
                         onPressed: () {
                           if (_formkey.currentState!.validate()) {
                             checkAndUpdatePassword(
-                                uid, _passwordController.text);
+                                uid, _passwordController.text, tokenJwt);
                           }
                         },
                         child: const Text(
