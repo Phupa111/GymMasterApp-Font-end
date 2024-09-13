@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:gym_master_fontend/model/UserModel.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gym_master_fontend/screen/adminScreen/admin_page.dart';
@@ -21,16 +27,18 @@ class _MenuNavBarState extends State<MenuNavBar> {
   auth.User? currentUser;
   late SharedPreferences prefs;
   int? role;
-
+  int? uid;
+  int? isDisble;
+  String? tokenJWT;
+  String? username;
+  String url = AppConstants.BASE_URL;
+  UserModel? user;
+  late Future<void> loadData;
   @override
   void initState() {
     super.initState();
-    _initializeNotificationService();
-    _initializeUser();
-  }
 
-  Future<void> _initializeNotificationService() async {
-    DateTime scheduledDate = DateTime.now();
+    _initializeUser();
   }
 
   void _initializeUser() {
@@ -47,9 +55,16 @@ class _MenuNavBarState extends State<MenuNavBar> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     role = prefs.getInt("role");
+    uid = prefs.getInt("uid");
+    isDisble = prefs.getInt("isDisbel");
+    tokenJWT = prefs.getString("tokenJwt");
+    username = prefs.getString("username");
+
+    log("usernaem $username");
     if (role != null) {
       setState(() {
         _updatePageIndexBasedOnRole();
+        loadData = loadDataAsync();
       });
     }
   }
@@ -68,19 +83,19 @@ class _MenuNavBarState extends State<MenuNavBar> {
   Widget build(BuildContext context) {
     final List<Widget> pagesRole1 = [
       HomePage(),
-      StaticPage(),
-      ExercisePage(),
-      ProfilePage(),
+      const StaticPage(),
+      const ExercisePage(),
+      const ProfilePage(),
     ];
 
     final List<Widget> pagesRole2 = [
-      AdminPage(),
-      ProfilePage(),
+      const AdminPage(),
+      const ProfilePage(),
     ];
 
     final List<Widget> pagesRole0 = [
       HomePage(),
-      ProfilePage(),
+      const ProfilePage(),
     ];
 
     final List<Widget> pages;
@@ -140,24 +155,81 @@ class _MenuNavBarState extends State<MenuNavBar> {
       ];
     }
 
-    return PopScope(
-      canPop: role == 0 ? true : false,
-      child: Scaffold(
-        body: role != null
-            ? pages[currentPageIndex]
-            : Center(child: CircularProgressIndicator()),
-        bottomNavigationBar: NavigationBar(
-          indicatorShape: const CircleBorder(),
-          backgroundColor: Colors.orange,
-          selectedIndex: currentPageIndex,
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentPageIndex = index;
-            });
+    return FutureBuilder<void>(
+        future: loadData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return PopScope(
+              canPop: role == 0 || user?.user.isDisbel == 1 ? true : false,
+              child: user?.user.isDisbel == 0
+                  ? Scaffold(
+                      body: role != null
+                          ? pages[currentPageIndex]
+                          : const Center(child: CircularProgressIndicator()),
+                      bottomNavigationBar: NavigationBar(
+                        indicatorShape: const CircleBorder(),
+                        backgroundColor: Colors.orange,
+                        selectedIndex: currentPageIndex,
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            currentPageIndex = index;
+                          });
+                        },
+                        destinations: destinations,
+                      ),
+                    )
+                  : Scaffold(
+                      appBar: AppBar(),
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('บัญชีของคุณถูกปิดใช้งาน'),
+                            ElevatedButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text("Login"))
+                          ],
+                        ),
+                      ),
+                    ),
+            );
+          }
+        });
+  }
+
+  Future<void> loadDataAsync() async {
+    final dio = Dio();
+
+    try {
+      log("username : $username");
+
+      final response = await dio.get(
+        'http://$url/user/getUser/$username',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $tokenJWT',
           },
-          destinations: destinations,
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
         ),
-      ),
-    );
+      );
+
+      if (response.statusCode == 200) {
+        user = userModelFromJson(jsonEncode(response.data));
+
+        log("disble ${user?.user.isDisbel}");
+      } else {
+        log("Error fetching user data: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error during loadDataAsync: $e");
+    }
   }
 }

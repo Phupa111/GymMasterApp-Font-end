@@ -91,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
             var userModel = userModelFromJson(jsonEncode(response.data));
             await _prefs.setInt("uid", userModel.user.uid);
             await _prefs.setInt("role", userModel.user.role);
+            await _prefs.setString("username", userModel.user.username);
             await _prefs.setInt("isDisbel", userModel.user.isDisbel);
 
             try {
@@ -170,6 +171,8 @@ class _LoginPageState extends State<LoginPage> {
               await GetStorage().write('userModel', userModel);
               await _prefs.setInt("uid", userModel.user.uid);
               await _prefs.setInt("role", userModel.user.role);
+              await _prefs.setString("username", userModel.user.username);
+              await _prefs.setInt("isDisbel", userModel.user.isDisbel);
               _showCaptchaDialog();
               log(userModel.user.uid.toString());
             }
