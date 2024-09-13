@@ -1,30 +1,16 @@
 // To parse this JSON data, do
 //
-//     final userModel = userModelFromJson(jsonString);
+//     final usersModels = usersModelsFromJson(jsonString);
 
 import 'dart:convert';
 
-UserModel userModelFromJson(String str) => UserModel.fromJson(json.decode(str));
+List<UsersModels> usersModelsFromJson(String str) => List<UsersModels>.from(
+    json.decode(str).map((x) => UsersModels.fromJson(x)));
 
-String userModelToJson(UserModel data) => json.encode(data.toJson());
+String usersModelsToJson(List<UsersModels> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class UserModel {
-  User user;
-
-  UserModel({
-    required this.user,
-  });
-
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        user: User.fromJson(json["user"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "user": user.toJson(),
-      };
-}
-
-class User {
+class UsersModels {
   int uid;
   String username;
   String email;
@@ -33,11 +19,11 @@ class User {
   DateTime birthday;
   int gender;
   String profilePic;
-  int daySuscessExerice;
+  int? daySuscessExerice;
   int role;
   int isDisbel;
 
-  User({
+  UsersModels({
     required this.uid,
     required this.username,
     required this.email,
@@ -51,12 +37,12 @@ class User {
     required this.isDisbel,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
+  factory UsersModels.fromJson(Map<String, dynamic> json) => UsersModels(
         uid: json["uid"],
         username: json["username"],
         email: json["email"],
         password: json["password"],
-        height: (json["height"] as num).toDouble(),
+        height: json["height"]?.toDouble(),
         birthday: DateTime.parse(json["birthday"]),
         gender: json["gender"],
         profilePic: json["profile_pic"],
