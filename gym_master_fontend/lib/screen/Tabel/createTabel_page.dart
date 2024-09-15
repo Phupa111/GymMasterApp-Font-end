@@ -4,12 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateTabelPage extends StatefulWidget {
-  const CreateTabelPage({super.key});
+  final int? role;
+  const CreateTabelPage({super.key, required this.role});
 
   @override
   State<CreateTabelPage> createState() => _CreateTabelPageState();
@@ -20,6 +22,9 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   final TextEditingController _times = TextEditingController();
   final TextEditingController _dayPerWeek = TextEditingController();
   final TextEditingController _timeRest = TextEditingController();
+  final TextEditingController _gender = TextEditingController();
+  final TextEditingController _discription = TextEditingController();
+  final TextEditingController _level = TextEditingController();
   late SharedPreferences prefs;
   String url = AppConstants.BASE_URL;
   late String tokenJWT;
@@ -49,7 +54,19 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
       "gender": 0,
       "level": 0,
       "description": "",
-      "isCreatedByAdmin": 0,
+      "isCreateByAdmin": 0,
+      "dayPerWeek": int.parse(_dayPerWeek.text),
+      "time_rest": int.parse(_timeRest.text)
+    };
+
+    var regBodyAdmin = {
+      "uid": uid,
+      "couserName": _couserName.text,
+      "times": int.parse(_times.text),
+      "gender": int.parse(_gender.text),
+      "level": int.parse(_level.text),
+      "description": _discription.text,
+      "isCreateByAdmin": 1,
       "dayPerWeek": int.parse(_dayPerWeek.text),
       "time_rest": int.parse(_timeRest.text)
     };
@@ -58,7 +75,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
       final dio = Dio();
       final response = await dio.post(
         'http://$url/tabel/CreatTabel',
-        data: regBody,
+        data: widget.role == 2 ? regBodyAdmin : regBody,
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJWT',
@@ -88,7 +105,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
           child: Column(
             children: [
               const Padding(
-                padding: EdgeInsets.only(top: 15),
+                padding: EdgeInsets.only(top: 5),
                 child: Text(
                   "สร้างตาราง",
                   style: TextStyle(
@@ -99,7 +116,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 40),
+                padding: const EdgeInsets.only(top: 10),
                 child: Form(
                   key: _formKey, // Add a GlobalKey to the form for validation
                   child: Column(
@@ -193,7 +210,231 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                         ),
                       ),
 
+                      Visibility(
+                        visible: widget.role == 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0),
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                  width: 2.0,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.all(15.0),
+                              filled: true,
+                              fillColor: const Color(0xFFF1F0F0),
+                              border: InputBorder.none,
+                              hintText: "เพศ",
+                              hintStyle: const TextStyle(
+                                fontFamily: 'Kanit',
+                                color: Color(0xFFFFAC41),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(25.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                            ),
+                            controller: _gender,
+                            readOnly: true,
+                            onTap: () {
+                              showCupertinoModalPopup(
+                                context: context,
+                                builder: (BuildContext context) => Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    SizedBox(
+                                      height: 250,
+                                      child: CupertinoPicker(
+                                        backgroundColor: Colors.white,
+                                        itemExtent: 32.0,
+                                        scrollController:
+                                            FixedExtentScrollController(
+                                                initialItem: 0),
+                                        onSelectedItemChanged: (value) {
+                                          setState(() {
+                                            _gender.text =
+                                                (value + 1).toString();
+                                            log(_gender.text);
+                                          });
+                                        },
+                                        children: List.generate(
+                                          2,
+                                          (index) => Center(
+                                            child: Text(index == 0
+                                                ? ' 1 ชาย'
+                                                : ' 2 หญิง'), // Use ternary directly for the text
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        if (_gender.text.isEmpty) {
+                                          _gender.text = "1";
+                                        }
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('ตกลง'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'กรุณาเลือกเพศ';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+
+                      Visibility(
+                        visible: widget.role == 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0),
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                  width: 2.0,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.all(15.0),
+                              filled: true,
+                              fillColor: const Color(0xFFF1F0F0),
+                              border: InputBorder.none,
+                              hintText: "ความยาก",
+                              hintStyle: const TextStyle(
+                                fontFamily: 'Kanit',
+                                color: Color(0xFFFFAC41),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(25.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                            ),
+                            controller: _level,
+                            readOnly: true,
+                            onTap: () {
+                              showCupertinoModalPopup(
+                                context: context,
+                                builder: (BuildContext context) => Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    SizedBox(
+                                      height: 250,
+                                      child: CupertinoPicker(
+                                        backgroundColor: Colors.white,
+                                        itemExtent: 32.0,
+                                        scrollController:
+                                            FixedExtentScrollController(
+                                                initialItem: 0),
+                                        onSelectedItemChanged: (value) {
+                                          setState(() {
+                                            _level.text =
+                                                (value + 1).toString();
+                                          });
+                                        },
+                                        children: List.generate(
+                                          3,
+                                          (index) => Center(
+                                            child: Text(
+                                              index == 0
+                                                  ? '1 Beginner'
+                                                  : index == 1
+                                                      ? '2 Intermediate'
+                                                      : '3 Advanced', // Nested ternary operators for 3 conditions
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        if (_level.text.isEmpty) {
+                                          _level.text = "1";
+                                        }
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('ตกลง'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'กรุณาเลือกความยาก';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
                       // Field for Days Per Week
+
+                      Visibility(
+                        visible: widget.role == 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0),
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                  width: 2.0,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.all(15.0),
+                              filled: true,
+                              fillColor: const Color(0xFFF1F0F0),
+                              border: InputBorder.none,
+                              hintText: "คำอธิบายคอร์ส",
+                              hintStyle: const TextStyle(
+                                fontFamily: 'Kanit',
+                                color: Color(0xFFFFAC41),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(25.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                            ),
+                            controller: _discription,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'กรุณาใส่คำอธิบายคอร์ส';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: TextFormField(
@@ -256,6 +497,9 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
+                                      if (_dayPerWeek.text.isEmpty) {
+                                        _dayPerWeek.text = "1";
+                                      }
                                       Navigator.pop(context);
                                     },
                                     child: const Text('ตกลง'),
@@ -337,6 +581,9 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
+                                      if (_timeRest.text.isEmpty) {
+                                        _timeRest.text = "30";
+                                      }
                                       Navigator.pop(context);
                                     },
                                     child: const Text('ตกลง'),
