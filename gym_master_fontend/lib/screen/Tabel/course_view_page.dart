@@ -65,7 +65,7 @@ class _CourseViewState extends State<CourseView> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
           return Scaffold(
-              appBar: role == 0 ? AppBar() : null,
+              appBar: role == 0 || role == 2 ? AppBar() : null,
               body: Column(
                 children: [
                   widget.isAdminCouser && !widget.isEnnabel
@@ -126,7 +126,7 @@ class _CourseViewState extends State<CourseView> {
                                       tabelID: tabel.tid,
                                       tabelName: tabel.couserName,
                                       dayPerWeek: tabel.dayPerWeek,
-                                      isUnused: true,
+                                      isUnused: role == 2 ? false : true,
                                       tokenJWT: widget.tokenJWT,
                                       uid: widget.uid,
                                       times: tabel.times,
@@ -225,7 +225,7 @@ class _CourseViewState extends State<CourseView> {
                                                   const EdgeInsets.fromLTRB(
                                                       8, 10, 8, 0),
                                               child: Visibility(
-                                                visible: role != 0,
+                                                visible: role == 1,
                                                 child: ElevatedButton(
                                                   onPressed: () {
                                                     enabelUserCourse(
@@ -247,7 +247,8 @@ class _CourseViewState extends State<CourseView> {
                                               ),
                                             ),
                                             Visibility(
-                                              visible: !widget.isAdminCouser,
+                                              visible: !widget.isAdminCouser ||
+                                                  role == 2,
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
@@ -421,10 +422,10 @@ class _CourseViewState extends State<CourseView> {
                 ],
               ),
               floatingActionButton: Visibility(
-                visible: !widget.isAdminCouser,
+                visible: !widget.isAdminCouser || role == 2,
                 child: FloatingActionButton(
                   onPressed: () async {
-                    var refresh = await Get.to(const CreateTabelPage());
+                    var refresh = await Get.to(CreateTabelPage(role: role));
                     if (refresh == true) {
                       setState(() {
                         loadData = loadDataAsync();
