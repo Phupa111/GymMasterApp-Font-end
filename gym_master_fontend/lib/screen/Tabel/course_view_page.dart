@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -155,7 +156,8 @@ class _CourseViewState extends State<CourseView> {
                                               ),
                                             ),
                                             Visibility(
-                                              visible: role == 2,
+                                              visible: role == 2 ||
+                                                  widget.uid == tabel.uid,
                                               child: IconButton(
                                                   onPressed: () {
                                                     showDialog(
@@ -385,29 +387,34 @@ class _CourseViewState extends State<CourseView> {
                                                       color: Colors.white)),
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 10, 8, 0),
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                Get.to(EditTabelPage(
-                                                  tabelID: tabel.tid,
-                                                  tabelName: tabel.couserName,
-                                                  dayPerWeek: tabel.dayPerWeek,
-                                                  isUnused: false,
-                                                  tokenJWT: widget.tokenJWT,
-                                                  uid: widget.uid,
-                                                  times: tabel.times,
-                                                  role: role,
-                                                ));
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors
-                                                    .white, // Button background color
+                                          Visibility(
+                                            visible: !widget.isAdminCouser,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      8, 10, 8, 0),
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  Get.to(EditTabelPage(
+                                                    tabelID: tabel.tid,
+                                                    tabelName: tabel.couserName,
+                                                    dayPerWeek:
+                                                        tabel.dayPerWeek,
+                                                    isUnused: false,
+                                                    tokenJWT: widget.tokenJWT,
+                                                    uid: widget.uid,
+                                                    times: tabel.times,
+                                                    role: role,
+                                                  ));
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors
+                                                      .white, // Button background color
+                                                ),
+                                                child: const Text("แก้ไข",
+                                                    style: TextStyle(
+                                                        color: Colors.orange)),
                                               ),
-                                              child: const Text("แก้ไข",
-                                                  style: TextStyle(
-                                                      color: Colors.orange)),
                                             ),
                                           )
                                         ],

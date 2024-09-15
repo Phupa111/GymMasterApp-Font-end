@@ -47,26 +47,14 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
   void createTabel() async {
     log(uid.toString());
     log(_couserName.text);
-    var regBody = {
-      "uid": uid,
-      "couserName": _couserName.text,
-      "times": int.parse(_times.text),
-      "gender": 0,
-      "level": 0,
-      "description": "",
-      "isCreateByAdmin": 0,
-      "dayPerWeek": int.parse(_dayPerWeek.text),
-      "time_rest": int.parse(_timeRest.text)
-    };
-
     var regBodyAdmin = {
       "uid": uid,
       "couserName": _couserName.text,
       "times": int.parse(_times.text),
-      "gender": int.parse(_gender.text),
-      "level": int.parse(_level.text),
+      "gender": _gender.text.isEmpty ? 0 : int.parse(_gender.text),
+      "level": _level.text.isEmpty ? 0 : int.parse(_level.text),
       "description": _discription.text,
-      "isCreateByAdmin": 1,
+      "isCreateByAdmin": widget.role == 2 ? 1 : 0,
       "dayPerWeek": int.parse(_dayPerWeek.text),
       "time_rest": int.parse(_timeRest.text)
     };
@@ -75,7 +63,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
       final dio = Dio();
       final response = await dio.post(
         'http://$url/tabel/CreatTabel',
-        data: widget.role == 2 ? regBodyAdmin : regBody,
+        data: regBodyAdmin,
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJWT',
