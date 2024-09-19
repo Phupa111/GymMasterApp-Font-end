@@ -181,15 +181,18 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                                   height: 150,
                                   fit: BoxFit.cover,
                                 )
-                              : Container(
-                                  decoration:
-                                      const BoxDecoration(color: Colors.orange),
-                                  child: Image.network(
-                                    userData[index].profilePic,
-                                    width: 150,
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                  )),
+                              : userData[index].profilePic.isNotEmpty
+                                  ? Image.network(
+                                      userData[index].profilePic,
+                                      width: 150,
+                                      height: 150,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const Icon(
+                                      Icons.account_circle,
+                                      size: 150,
+                                      color: Colors.orange,
+                                    ),
                         ),
                       ),
                       ElevatedButton(

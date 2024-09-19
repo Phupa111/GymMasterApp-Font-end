@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/photo_service.dart';
@@ -62,106 +63,115 @@ class _ConfirmImageScreenState extends State<ConfirmImageScreen> {
         ),
         backgroundColor: Colors.orange,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(8.0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    child: Image.file(
-                      height: 300.0,
-                      File(imageFile.path),
-                      fit: BoxFit.cover,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(8.0),
+                      ),
+                      child: Image.file(
+                        height: 300.0,
+                        File(imageFile.path),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "น้ำหนัก",
-                    style: TextStyle(fontFamily: "Kanit"),
-                  ),
-                  const SizedBox(
-                    width: 10.0,
-                  ),
-                  SizedBox(
-                    width: 200,
-                    child: TextField(
-                      controller: _weightCovtroller,
-                      decoration: const InputDecoration(
-                        hintText: "(ไม่จำเป็นต้องใส่)",
-                        suffixIcon: Padding(
-                          padding: EdgeInsets.only(top: 12.0),
-                          child: Text(
-                            "กก.",
-                            style: TextStyle(fontFamily: "Kanit"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "น้ำหนัก",
+                      style: TextStyle(fontFamily: "Kanit"),
+                    ),
+                    const SizedBox(
+                      width: 10.0,
+                    ),
+                    SizedBox(
+                      width: 200,
+                      child: TextField(
+                        controller: _weightCovtroller,
+                        decoration: const InputDecoration(
+                          hintText: "(ไม่จำเป็นต้องใส่)",
+                          suffixIcon: Padding(
+                            padding: EdgeInsets.only(top: 12.0),
+                            child: Text(
+                              "กก.",
+                              style: TextStyle(fontFamily: "Kanit"),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 12.0,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      padding:
-                          const EdgeInsets.all(16), // ปรับระยะห่างรอบๆ ไอคอน
-                      constraints: const BoxConstraints(
-                        minWidth: 60, // ความกว้างขั้นต่ำ
-                        minHeight: 60, // ความสูงขั้นต่ำ
-                      ),
-                      style: IconButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 208, 208, 208)),
-                      onPressed: () {
-                        Get.back();
-                      },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.x,
-                        color: Colors.white,
-                      ),
-                    ),
-                    IconButton(
-                      padding:
-                          const EdgeInsets.all(16), // ปรับระยะห่างรอบๆ ไอคอน
-                      constraints: const BoxConstraints(
-                        minWidth: 60, // ความกว้างขั้นต่ำ
-                        minHeight: 60, // ความสูงขั้นต่ำ
-                      ),
-                      style: IconButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 107, 248, 114)),
-                      onPressed: () {
-                        insertPicture(uid, imageFile,
-                            _weightCovtroller.text.toString(), tokenJwt);
-                      },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.check,
-                        color: Colors.white,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[0-9.]'),
+                          ), // อนุญาตเฉพาะตัวเลขและจุดทศนิยม
+                        ],
                       ),
                     ),
                   ],
                 ),
-              )
-            ],
+                const SizedBox(
+                  height: 12.0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      IconButton(
+                        padding:
+                            const EdgeInsets.all(16), // ปรับระยะห่างรอบๆ ไอคอน
+                        constraints: const BoxConstraints(
+                          minWidth: 60, // ความกว้างขั้นต่ำ
+                          minHeight: 60, // ความสูงขั้นต่ำ
+                        ),
+                        style: IconButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 208, 208, 208)),
+                        onPressed: () {
+                          Get.back();
+                        },
+                        icon: const FaIcon(
+                          FontAwesomeIcons.x,
+                          color: Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        padding:
+                            const EdgeInsets.all(16), // ปรับระยะห่างรอบๆ ไอคอน
+                        constraints: const BoxConstraints(
+                          minWidth: 60, // ความกว้างขั้นต่ำ
+                          minHeight: 60, // ความสูงขั้นต่ำ
+                        ),
+                        style: IconButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 107, 248, 114)),
+                        onPressed: () {
+                          insertPicture(uid, imageFile,
+                              _weightCovtroller.text.toString(), tokenJwt);
+                        },
+                        icon: const FaIcon(
+                          FontAwesomeIcons.check,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
