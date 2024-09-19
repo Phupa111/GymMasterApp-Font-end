@@ -86,11 +86,14 @@ class _ProfilePageState extends State<ProfilePage> {
       if (prefs != null) {
         await prefs!.remove('uid');
         await prefs!.remove('role');
+        await prefs!.remove('username');
+        await prefs!.remove('isDisbel');
+        await prefs!.remove('tokenJwt');
       }
       Get.to(const LoginPage());
     } catch (e) {
       // Handle sign-out errors
-      print("Error signing out: $e");
+      log("Error signing out: $e");
     }
   }
 

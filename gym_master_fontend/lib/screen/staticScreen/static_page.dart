@@ -19,7 +19,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StaticPage extends StatefulWidget {
-  const StaticPage({super.key});
+  final int? day_suscess;
+  const StaticPage({super.key, required this.day_suscess});
 
   @override
   State<StaticPage> createState() => _StaticPageState();
@@ -51,6 +52,50 @@ class _StaticPageState extends State<StaticPage> {
     setState(() {});
   }
 
+  Widget header() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7.0),
+      child: Container(
+        height: 80,
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.orange, Color(0xFFFFB74D)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(50),
+            bottomRight: Radius.circular(50),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Center(
+              child: Text("จำนวนวันที่ออกกำลังกาย",
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.white,
+                  )),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text("${widget.day_suscess}",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                  )),
+            ),
+            const SizedBox(
+                height:
+                    8), // Adding some space between text and the progress bar
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +108,8 @@ class _StaticPageState extends State<StaticPage> {
             : SingleChildScrollView(
                 child: Column(
                   children: [
-                    LineChartPage(),
+                    header(),
+                    const LineChartPage(),
                     SizedBox(
                       width: 140.0,
                       child: ElevatedButton(

@@ -142,10 +142,19 @@ class _ExerciesStartState extends State<ExerciesStart> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Text(exPost.name),
-                                          Text(
-                                              'Sets: ${exPost.exInTabelModelSet}'),
-                                          Text('Reps: ${exPost.rep}'),
+                                          Flexible(
+                                              child: Text(exPost.name,
+                                                  overflow:
+                                                      TextOverflow.ellipsis)),
+                                          Flexible(
+                                              child: Text(
+                                                  'Sets: ${exPost.exInTabelModelSet}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis)),
+                                          Flexible(
+                                              child: Text('Reps: ${exPost.rep}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis)),
                                         ],
                                       ),
                                     ),

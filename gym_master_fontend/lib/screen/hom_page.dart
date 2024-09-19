@@ -95,9 +95,14 @@ class _HomePageState extends State<HomePage> {
                       image:
                           "https://media.istockphoto.com/id/937415802/photo/time-for-exercising-clock-calendar-and-dumbbell-with-blue-yoga-mat-background.jpg?s=612x612&w=0&k=20&c=nY2FYJ8Q63vENr5zYbTyCpo_PICEMLk9eiBbJ-Qp9-E=",
                       button: ElevatedButton(
-                        onPressed: () {
-                          Get.to(
+                        onPressed: () async {
+                          var refresh = await Get.to(
                               () => const UserTabelPage(isAdminCouser: false));
+                          if (refresh == true) {
+                            setState(() {
+                              loadData = _initializePreferences();
+                            });
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFAC41),

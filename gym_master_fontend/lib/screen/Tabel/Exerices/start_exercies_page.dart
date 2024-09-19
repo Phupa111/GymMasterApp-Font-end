@@ -229,7 +229,7 @@ class _StartExPageState extends State<StartExPage> {
 
     try {
       final response = await dio.post(
-        'http://${url}/enCouser/updateIsSuccess',
+        'http://$url/enCouser/updateIsSuccess',
         data: regBody,
         options: Options(
           headers: {
@@ -243,7 +243,7 @@ class _StartExPageState extends State<StartExPage> {
 
       if (response.statusCode == 200) {
         log("Sucees");
-        Get.back(result: true);
+        updateDaySucees();
       } else {
         log("Error enabling course: ${response.statusCode}");
       }
@@ -252,48 +252,34 @@ class _StartExPageState extends State<StartExPage> {
     }
   }
 
-  // void updateDay() async {
-  //   final dio = Dio();
-  //   try {
-  //     if (widget.userEnabelCourse.day >= widget.dayPerWeek) {
-  //       updateWeek();
-  //     } else {
-  //       final response = await dio.post(
-  //         'http://${url}/enCouser/updateDay',
-  //         data: {"utid": widget.userEnabelCourse.utid},
-  //       );
+  void updateDaySucees() async {
+    final dio = Dio();
 
-  //       if (response.statusCode == 200) {
-  //         log('Day updated successfully: ${response.data}');
-  //         // Optionally, refresh data or update UI
-  //         Get.back(result: true);
-  //       } else {
-  //         log('Error: ${response.statusCode}, ${response.data}');
-  //       }
-  //     }
-  //     setState(() {});
-  //   } catch (e) {
-  //     log('Error updating day: $e');
-  //   }
-  // }
+    var regBody = {
+      "uid": widget.uid,
+    };
 
-  // void updateWeek() async {
-  //   final dio = Dio();
-  //   try {
-  //     final response = await dio.post(
-  //       'http://${url}/enCouser/updateWeek',
-  //       data: {"utid": widget.userEnabelCourse.utid},
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       log('Day updated successfully: ${response.data}');
-  //       // Optionally, refresh data or update UI
-  //       Get.back(result: true);
-  //     } else {
-  //       log('Error: ${response.statusCode}, ${response.data}');
-  //     }
-  //   } catch (e) {
-  //     log('Error updating day: $e');
-  //   }
-  // }
+    try {
+      final response = await dio.post(
+        'http://$url/user/updateDaySucess',
+        data: regBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        log("Sucees");
+        Get.back(result: true);
+      } else {
+        log("Error enabling course: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error enabling course: $e");
+    }
+  }
 }
