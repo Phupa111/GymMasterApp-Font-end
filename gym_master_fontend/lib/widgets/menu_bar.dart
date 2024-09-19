@@ -83,7 +83,14 @@ class _MenuNavBarState extends State<MenuNavBar> {
   Widget build(BuildContext context) {
     final List<Widget> pagesRole1 = [
       HomePage(),
-      const StaticPage(),
+      if (user != null) // Only include the StaticPage if user is not null
+        StaticPage(
+          day_suscess: user!.user.daySuscessExerice,
+        )
+      else
+        const Center(
+            child:
+                CircularProgressIndicator()), // Show a loading indicator if user is null
       const ExercisePage(),
       const ProfilePage(),
     ];
@@ -165,7 +172,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
           } else {
             return PopScope(
               canPop: role == 0 || user?.user.isDisbel == 1 ? true : false,
-              child: user?.user.isDisbel == 0
+              child: user?.user.isDisbel == 0 || user == null
                   ? Scaffold(
                       body: role != null
                           ? pages[currentPageIndex]
@@ -177,6 +184,10 @@ class _MenuNavBarState extends State<MenuNavBar> {
                         onDestinationSelected: (int index) {
                           setState(() {
                             currentPageIndex = index;
+                            log(index.toString());
+                            if (index == 1) {
+                              loadData = loadDataAsync();
+                            }
                           });
                         },
                         destinations: destinations,
@@ -230,6 +241,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
       }
     } catch (e) {
       log("Error during loadDataAsync: $e");
+      user = null;
     }
   }
 }
