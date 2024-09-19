@@ -195,7 +195,7 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
               return Center(
                 child: Text('Error: ${snapshot.error}'),
               );
-            } else if (!snapshot.hasData && snapshot.data!.isEmpty) {
+            } else if (snapshot.data!.isEmpty) {
               return const Center(
                   child: Text(
                 'ไม่มีรูปกดเพื่อถ่าย',
@@ -203,6 +203,7 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
               )); // If no data
             } else {
               final data = snapshot.data!;
+              log("show image : $data");
               final groupedData = groupByMonthYear(data);
               return ListView.builder(
                 itemCount: groupedData.keys.length, // จำนวนกลุ่มเดือนและปี

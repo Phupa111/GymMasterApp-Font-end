@@ -14,7 +14,7 @@ String photoProgressModelToJson(List<PhotoProgressModel> data) =>
 class PhotoProgressModel {
   int pid;
   int uid;
-  int? weight;
+  double? weight;
   String picture;
   String dataProgress;
 
@@ -30,7 +30,7 @@ class PhotoProgressModel {
       PhotoProgressModel(
         pid: json["pid"],
         uid: json["uid"],
-        weight: json["weight"],
+        weight: json["weight"]?.toDouble(),
         picture: json["picture"],
         dataProgress: json["data_progress"],
       );

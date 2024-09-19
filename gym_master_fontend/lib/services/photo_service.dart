@@ -64,14 +64,23 @@ class PhotoService {
         ),
       );
 
-      final List<dynamic> data = response.data;
+      // final List<dynamic> data = response.data;
       // log("progress Data: ${response.data}");
-      if (data.isNotEmpty) {
-        return data.map((e) => PhotoProgressModel.fromJson(e)).toList();
-      } else {
+      if (response.data is List) {
+        final List<dynamic> data = response.data;
+        if (data.isNotEmpty) {
+          return data.map((e) => PhotoProgressModel.fromJson(e)).toList();
+        } else {
+          return [];
+        }
+      } else if (response.data is Map && response.data.containsKey("error")) {
+        log("Error: ${response.data["error"]}");
         return [];
+      } else {
+        throw Exception('Unexpected response format: ${response.data}');
       }
     } catch (e) {
+      log(e.toString());
       throw Exception('Failed to load photo Progress: $e');
     }
   }
@@ -96,13 +105,13 @@ class PhotoService {
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data != null) {
         return 1;
       } else {
         return 0;
       }
     } catch (e) {
-      throw Exception('Failed to load photo Progress: $e');
+      throw Exception('Failed to delete photo Progress: $e');
     }
   }
 }
