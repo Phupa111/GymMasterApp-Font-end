@@ -7,12 +7,15 @@ import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/PhotoProgressModel.dart';
 import 'package:gym_master_fontend/screen/confirm_image_screen/confirm_image_screen.dart';
 import 'package:gym_master_fontend/services/photo_service.dart';
+import 'package:gym_master_fontend/widgets/dialog/show_detail_image_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ShowImageScreen extends StatefulWidget {
-  const ShowImageScreen({super.key});
+  const ShowImageScreen({super.key, required this.uid, required this.tokenJwt});
+
+  final int uid;
+  final String tokenJwt;
   @override
   State<ShowImageScreen> createState() => _ShowImageScreenState();
 }
@@ -20,7 +23,6 @@ class ShowImageScreen extends StatefulWidget {
 class _ShowImageScreenState extends State<ShowImageScreen> {
   final ImagePicker _picker = ImagePicker();
   XFile? fileImage;
-  SharedPreferences? prefs;
   int? uid;
   String? tokenJwt;
 
@@ -29,16 +31,9 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
   @override
   void initState() {
     super.initState();
-    _initializePreferences();
-  }
-
-  Future<void> _initializePreferences() async {
-    prefs = await SharedPreferences.getInstance();
-    uid = prefs?.getInt("uid");
-    tokenJwt = prefs?.getString("tokenJwt");
-    setState(() {
-      photoAsync = PhotoService().getPhotoPregress(uid!, tokenJwt!);
-    });
+    uid = widget.uid;
+    tokenJwt = widget.tokenJwt;
+    photoAsync = PhotoService().getPhotoPregress(uid!, tokenJwt!);
   }
 
   pickWithGallery() async {
@@ -191,18 +186,21 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: FutureBuilder(
+        child: FutureBuilder<List<PhotoProgressModel>>(
           future: photoAsync,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return const LinearProgressIndicator();
             } else if (snapshot.hasError) {
               return Center(
                 child: Text('Error: ${snapshot.error}'),
               );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            } else if (!snapshot.hasData && snapshot.data!.isEmpty) {
               return const Center(
-                  child: Text('No progress available')); // If no data
+                  child: Text(
+                'ไม่มีรูปกดเพื่อถ่าย',
+                style: TextStyle(fontFamily: 'Kanit'),
+              )); // If no data
             } else {
               final data = snapshot.data!;
               final groupedData = groupByMonthYear(data);
@@ -212,7 +210,7 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
                   String monthYear = groupedData.keys.elementAt(index);
                   log(monthYear);
                   List<PhotoProgressModel> monthlyProgress =
-                      groupedData[monthYear]!;
+                      groupedData[monthYear]!.reversed.toList();
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,14 +237,47 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
                         itemCount: monthlyProgress.length,
                         itemBuilder: (context, index) {
                           final progress = monthlyProgress[index];
-                          return Card(
-                            child: Container(
-                              height: 100,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.0),
-                                image: DecorationImage(
-                                  image: NetworkImage(progress.picture),
-                                  fit: BoxFit.cover,
+                          final currentContext = context;
+                          return GestureDetector(
+                            onTap: () async {
+                              final update = await Get.to(
+                                () => ShowDetailImageDialog(
+                                  pid: progress.pid,
+                                  picture: progress.picture,
+                                  dateprogress: progress.dataProgress,
+                                  tokenJwt: tokenJwt!,
+                                  uid: uid!,
+                                ),
+                                fullscreenDialog: true,
+                                transition: Transition.downToUp,
+                              );
+
+                              if (mounted && update != null) {
+                                if (update == 1) {
+                                  setState(() {
+                                    photoAsync = PhotoService()
+                                        .getPhotoPregress(uid!, tokenJwt!);
+                                  });
+                                } else if (update == 0) {
+                                  AwesomeDialog(
+                                    context: context,
+                                    dialogType: DialogType.error,
+                                    title: "เกิดข้อผิดพลาด",
+                                    desc: "ไม่สามารถลบรูปได้",
+                                    btnOkOnPress: () {},
+                                  ).show();
+                                }
+                              }
+                            },
+                            child: Card(
+                              child: Container(
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  image: DecorationImage(
+                                    image: NetworkImage(progress.picture),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ),

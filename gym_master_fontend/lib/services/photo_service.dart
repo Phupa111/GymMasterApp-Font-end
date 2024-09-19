@@ -65,11 +65,41 @@ class PhotoService {
       );
 
       final List<dynamic> data = response.data;
-      log("progress Data: ${response.data}");
+      // log("progress Data: ${response.data}");
       if (data.isNotEmpty) {
         return data.map((e) => PhotoProgressModel.fromJson(e)).toList();
       } else {
         return [];
+      }
+    } catch (e) {
+      throw Exception('Failed to load photo Progress: $e');
+    }
+  }
+
+  Future<int> deleteImage(int uid, int pid, String tokenJwt) async {
+    var json = {
+      "uid": uid,
+      "pid": pid,
+    };
+
+    try {
+      final response = await dio.post(
+        "http://$url/progress/deleteImageProgress",
+        data: json,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $tokenJwt',
+          },
+          validateStatus: (status) {
+            return status! < 500;
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return 1;
+      } else {
+        return 0;
       }
     } catch (e) {
       throw Exception('Failed to load photo Progress: $e');

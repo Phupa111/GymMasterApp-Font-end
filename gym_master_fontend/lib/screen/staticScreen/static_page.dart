@@ -67,8 +67,12 @@ class _StaticPageState extends State<StaticPage> {
                     SizedBox(
                       width: 140.0,
                       child: ElevatedButton(
-                          onPressed: () {
-                            Get.to(() => const ShowImageScreen());
+                          onPressed: () async {
+                            String? token = prefs.getString("tokenJwt");
+                            Get.to(() => ShowImageScreen(
+                                  uid: uid!,
+                                  tokenJwt: token!,
+                                ));
                           },
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
