@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -44,10 +46,12 @@ class _EditTabelPageState extends State<EditTabelPage>
   late TabController _tabController;
   List<List<ExInTabelModel>> exPosts = [];
   int dayNum = 1;
-
+  final _setContron = TextEditingController();
+  final _repContron = TextEditingController();
   late SharedPreferences prefs;
   late Future<void> loadData;
   late Future<void> genload;
+  final _formKey = GlobalKey<FormState>();
 
   String url = AppConstants.BASE_URL;
   @override
@@ -154,6 +158,19 @@ class _EditTabelPageState extends State<EditTabelPage>
                             visible: !widget.isUnused,
                             child: IconButton(
                                 onPressed: () {
+                                  log("${exPost.cpid}");
+                                  openDialog(exPost.cpid);
+                                },
+                                icon: const Icon(
+                                  Icons.edit,
+                                  size: 30,
+                                  color: Colors.orange,
+                                )),
+                          ),
+                          Visibility(
+                            visible: !widget.isUnused,
+                            child: IconButton(
+                                onPressed: () {
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
@@ -187,7 +204,7 @@ class _EditTabelPageState extends State<EditTabelPage>
                                   size: 30,
                                   color: Color.fromARGB(255, 243, 16, 0),
                                 )),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -197,6 +214,248 @@ class _EditTabelPageState extends State<EditTabelPage>
             }
           });
     });
+  }
+
+  Future openDialog(int cpid) => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('แก้ไขท่าออกกำลังกาย'),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width *
+                0.8, // Set the width to 80% of the screen width
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize:
+                    MainAxisSize.min, // Adjust the size based on the content
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "จำนวน set",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      controller: _setContron,
+                      readOnly: true,
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 250,
+                                child: CupertinoPicker(
+                                  backgroundColor: Colors.white,
+                                  itemExtent: 32.0,
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: 0),
+                                  onSelectedItemChanged: (value) {
+                                    setState(() {
+                                      _setContron.text = (value + 1).toString();
+                                    });
+                                  },
+                                  children: List.generate(
+                                    10,
+                                    (index) =>
+                                        Center(child: Text('${index + 1} set')),
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (_setContron.text.isEmpty) {
+                                    _setContron.text = "1";
+                                  }
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('ตกลง'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่จำนวน sets';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(15.0),
+                        filled: true,
+                        fillColor: const Color(0xFFF1F0F0),
+                        border: InputBorder.none,
+                        hintText: "จำนวน ครั้ง (rep)",
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Kanit',
+                          color: Color(0xFFFFAC41),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      controller: _repContron,
+                      readOnly: true,
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 250,
+                                child: CupertinoPicker(
+                                  backgroundColor: Colors.white,
+                                  itemExtent: 32.0,
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: 0),
+                                  onSelectedItemChanged: (value) {
+                                    setState(() {
+                                      _repContron.text = (value + 1).toString();
+                                    });
+                                  },
+                                  children: List.generate(
+                                    10,
+                                    (index) => Center(
+                                        child: Text('${index + 1} reps')),
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (_repContron.text.isEmpty) {
+                                    _repContron.text = "1";
+                                  }
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('ตกลง'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่จำนวน reps';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                // Call the addExPost function and wait for it to complete
+                if (_formKey.currentState?.validate() ?? false) {
+                  updateTabel(cpid, int.parse(_setContron.text),
+                      int.parse(_repContron.text));
+                  // setState(() {
+                  //   exPosts.clear();
+                  //   loadData = fetchExercisesForAllDays();
+                  // });
+                  Navigator.of(context).pop();
+                }
+
+                // Refresh the data and close the popup
+
+                // Close the popup
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color(0xFFFFAC41), // Button background color
+              ),
+              child: const Text(
+                "ตกลง",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+  void updateTabel(int cpid, int sets, int rep) async {
+    final dio = Dio();
+    var regBody = {"set": sets, "rep": rep, "cpid": cpid};
+
+    try {
+      final String endpoint = 'http://$url/tabel/UpdateExercisesInTabel';
+      final response = await dio.post(
+        endpoint,
+        data: regBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          exPosts.clear();
+          loadData = fetchExercisesForAllDays();
+        });
+      }
+    } catch (e) {}
   }
 
   void deleteExInCouser(int cpid) async {
