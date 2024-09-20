@@ -184,6 +184,47 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                               borderRadius: BorderRadius.circular(15.0),
                             ),
                           ),
+                          readOnly: true,
+                          onTap: () {
+                            showCupertinoModalPopup(
+                              context: context,
+                              builder: (BuildContext context) => Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  SizedBox(
+                                    height: 250,
+                                    child: CupertinoPicker(
+                                      backgroundColor: Colors.white,
+                                      itemExtent: 32.0,
+                                      scrollController:
+                                          FixedExtentScrollController(
+                                              initialItem: 0),
+                                      onSelectedItemChanged: (value) {
+                                        setState(() {
+                                          _times.text = (value + 1).toString();
+                                        });
+                                      },
+                                      children: List.generate(
+                                        53,
+                                        (index) => Center(
+                                            child:
+                                                Text('${index + 1} สัปดาห์')),
+                                      ),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      if (_dayPerWeek.text.isEmpty) {
+                                        _times.text = "1";
+                                      }
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('ตกลง'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                           keyboardType: TextInputType.number,
                           inputFormatters: <TextInputFormatter>[
                             FilteringTextInputFormatter.digitsOnly,
@@ -597,8 +638,37 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      createTabel();
-                      Get.back(result: true);
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("ยืนยันการสร้างตาราง"),
+                            content: const Text(
+                                "ท่านต้องการสร้างตารางออกกำลังกายหรือไม่"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
+                                },
+                                child: const Text("ยกเลิก"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  // Add your create table logic here
+                                  createTabel();
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
+                                  Get.back(
+                                      result:
+                                          true); // If using GetX, navigate back
+                                },
+                                child: const Text("ยืนยัน"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -609,7 +679,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),

@@ -37,6 +37,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
   final TextEditingController searchController = TextEditingController();
   String equipmentValue = '';
   String muscleValue = '';
+  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
@@ -258,7 +259,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("TID ${widget.tabelID} DayNum ${widget.dayNum}"),
+        title: const Text("ท่าออกกำลังกาย"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -441,6 +442,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
             width: MediaQuery.of(context).size.width *
                 0.8, // Set the width to 80% of the screen width
             child: Form(
+              key: _formKey,
               child: Column(
                 mainAxisSize:
                     MainAxisSize.min, // Adjust the size based on the content
@@ -482,6 +484,51 @@ class _ExerciesePageState extends State<ExerciesePage> {
                         FilteringTextInputFormatter.digitsOnly
                       ],
                       controller: _setContron,
+                      readOnly: true,
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 250,
+                                child: CupertinoPicker(
+                                  backgroundColor: Colors.white,
+                                  itemExtent: 32.0,
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: 0),
+                                  onSelectedItemChanged: (value) {
+                                    setState(() {
+                                      _setContron.text = (value + 1).toString();
+                                    });
+                                  },
+                                  children: List.generate(
+                                    10,
+                                    (index) =>
+                                        Center(child: Text('${index + 1} set')),
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (_setContron.text.isEmpty) {
+                                    _setContron.text = "1";
+                                  }
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('ตกลง'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่จำนวน sets';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   Padding(
@@ -521,6 +568,51 @@ class _ExerciesePageState extends State<ExerciesePage> {
                         FilteringTextInputFormatter.digitsOnly
                       ],
                       controller: _repContron,
+                      readOnly: true,
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 250,
+                                child: CupertinoPicker(
+                                  backgroundColor: Colors.white,
+                                  itemExtent: 32.0,
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: 0),
+                                  onSelectedItemChanged: (value) {
+                                    setState(() {
+                                      _repContron.text = (value + 1).toString();
+                                    });
+                                  },
+                                  children: List.generate(
+                                    10,
+                                    (index) => Center(
+                                        child: Text('${index + 1} reps')),
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (_repContron.text.isEmpty) {
+                                    _repContron.text = "1";
+                                  }
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('ตกลง'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'กรุณาใส่จำนวน reps';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
@@ -531,13 +623,16 @@ class _ExerciesePageState extends State<ExerciesePage> {
             ElevatedButton(
               onPressed: () async {
                 // Call the addExPost function and wait for it to complete
-                await addExPost(eid);
 
+                if (_formKey.currentState?.validate() ?? false) {
+                  await addExPost(eid);
+                  setState(() {
+                    loadData = loadDataAsync();
+                  });
+                  Navigator.of(context).pop();
+                }
                 // Refresh the data and close the popup
-                setState(() {
-                  loadData = loadDataAsync();
-                });
-                Navigator.of(context).pop(); // Close the popup
+                // Close the popup
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor:
@@ -594,7 +689,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
 
     try {
       final response = await dio.get(
-          'http://$url/exPost/getExPosts?tid=60&dayNum=1&nameFilter=${searchController.text}&equipmentFilter=$equipmentValue&muscleFilter=$muscleValue',
+          'http://$url/exPost/getExPosts?tid=${widget.tabelID}&dayNum=${widget.dayNum}&nameFilter=${searchController.text}&equipmentFilter=$equipmentValue&muscleFilter=$muscleValue',
           options: Options(
             headers: {
               'Authorization': 'Bearer ${widget.tokenJWT}',
