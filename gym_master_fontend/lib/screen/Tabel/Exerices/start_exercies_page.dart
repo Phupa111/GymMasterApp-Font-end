@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/model/UserEnabelCourseModel.dart';
+import 'package:gym_master_fontend/screen/Tabel/Exerices/course_detail_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 
 class StartExPage extends StatefulWidget {
   final List<ExInTabelModel> exPosts; // Add 'final' to make it immutable
   final int tabelID;
   final String tabelName;
-
+  final int dayPerWeek;
+  final int times;
   final int uid;
   final int week;
   final int day;
@@ -29,6 +31,8 @@ class StartExPage extends StatefulWidget {
     required this.day,
     required this.time_rest,
     required this.tokenJWT,
+    required this.dayPerWeek,
+    required this.times,
   });
 
   @override
@@ -53,6 +57,12 @@ class _StartExPageState extends State<StartExPage> {
       }
     });
     startTimer();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   void startTimer() {
@@ -201,6 +211,9 @@ class _StartExPageState extends State<StartExPage> {
                 ElevatedButton(
                     onPressed: () {
                       updateIsSucces();
+                      if (widget.day == 1 && widget.week == 1) {
+                        updateWeekStart();
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFAC41),
@@ -252,6 +265,38 @@ class _StartExPageState extends State<StartExPage> {
     }
   }
 
+  void updateWeekStart() async {
+    var regUpdateWeekBody = {
+      "uid": widget.uid, // Use widget.uid for the current user ID
+      "tid": widget.tabelID,
+      "week": 1,
+      "day": 1
+    };
+    final dio = Dio();
+
+    try {
+      final response = await dio.post(
+        'http://$url/enCouser/updateWeekStartDate',
+        data: regUpdateWeekBody,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        log("Week start date updated successfully");
+      } else {
+        log("Failed to update week start date: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error updating week start date: $e");
+    }
+  }
+
   void updateDaySucees() async {
     final dio = Dio();
 
@@ -275,6 +320,16 @@ class _StartExPageState extends State<StartExPage> {
       if (response.statusCode == 200) {
         log("Sucees");
         Get.back(result: true);
+        Get.back(result: true);
+        Get.back(result: true);
+        Get.to(CourseDetailPage(
+            tabelID: widget.tabelID,
+            tabelName: widget.tabelName,
+            dayPerWeek: widget.dayPerWeek,
+            times: widget.times,
+            uid: widget.uid,
+            time_rest: widget.time_rest,
+            tokenJWT: widget.tokenJWT));
       } else {
         log("Error enabling course: ${response.statusCode}");
       }

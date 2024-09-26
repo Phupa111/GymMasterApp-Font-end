@@ -366,20 +366,20 @@ class _EditTabelPageState extends State<EditTabelPage>
                                       initialItem: 0),
                                   onSelectedItemChanged: (value) {
                                     setState(() {
-                                      _repContron.text = (value + 1).toString();
+                                      _repContron.text = (value + 6).toString();
                                     });
                                   },
                                   children: List.generate(
                                     10,
                                     (index) => Center(
-                                        child: Text('${index + 1} reps')),
+                                        child: Text('${index + 6} reps')),
                                   ),
                                 ),
                               ),
                               ElevatedButton(
                                 onPressed: () {
                                   if (_repContron.text.isEmpty) {
-                                    _repContron.text = "1";
+                                    _repContron.text = "6";
                                   }
                                   Navigator.pop(context);
                                 },

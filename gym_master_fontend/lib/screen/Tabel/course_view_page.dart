@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:gym_master_fontend/screen/Tabel/Exerices/course_detail_page.dart
 import 'package:gym_master_fontend/screen/Tabel/createTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
+import 'package:gym_master_fontend/services/notification_service.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -229,11 +231,22 @@ class _CourseViewState extends State<CourseView> {
                                               child: Visibility(
                                                 visible: role == 1,
                                                 child: ElevatedButton(
-                                                  onPressed: () {
+                                                  onPressed: () async {
                                                     enabelUserCourse(
                                                         tabel.tid,
                                                         tabel.times,
                                                         tabel.dayPerWeek);
+                                                    await NotificationService
+                                                        .showNotification(
+                                                            notificationId:
+                                                                tabel.tid,
+                                                            title:
+                                                                "แจ้งเตือนการออกกำลังกาย",
+                                                            body:
+                                                                "คุณมีการออกกำลังกายที่คอร์ส ${tabel.couserName}",
+                                                            scheduled: true,
+                                                            hour: 8,
+                                                            minute: 30);
                                                   },
                                                   style:
                                                       ElevatedButton.styleFrom(
@@ -375,8 +388,10 @@ class _CourseViewState extends State<CourseView> {
                                             padding: const EdgeInsets.fromLTRB(
                                                 8, 10, 8, 0),
                                             child: ElevatedButton(
-                                              onPressed: () {
+                                              onPressed: () async {
                                                 deleteUserCourse(tabel.tid);
+                                                await AwesomeNotifications()
+                                                    .cancel(tabel.tid);
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors
