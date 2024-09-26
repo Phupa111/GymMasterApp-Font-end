@@ -13,6 +13,8 @@ class ExerciesStart extends StatefulWidget {
   final int tabelID;
   final String tabelName;
   final int week;
+  final int dayPerWeek;
+  final int times;
   final int day;
   final int uid;
   final int time_rest;
@@ -27,6 +29,8 @@ class ExerciesStart extends StatefulWidget {
     required this.day,
     required this.time_rest,
     required this.tokenJWT,
+    required this.dayPerWeek,
+    required this.times,
   });
 
   @override
@@ -184,10 +188,10 @@ class _ExerciesStartState extends State<ExerciesStart> {
                                   day: widget.day,
                                   time_rest: widget.time_rest,
                                   tokenJWT: widget.tokenJWT,
+                                  dayPerWeek: widget.dayPerWeek,
+                                  times: widget.times,
                                 ));
-                            if (refresh == true) {
-                              Get.back(result: true);
-                            }
+                            if (refresh == true) {}
                           }
                         : () {},
                     style: ElevatedButton.styleFrom(

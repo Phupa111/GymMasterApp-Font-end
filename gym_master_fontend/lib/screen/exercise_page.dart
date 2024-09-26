@@ -7,7 +7,7 @@ import 'package:gym_master_fontend/model/TabelEnModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/course_detail_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/editTabel_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
-
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/widgets/card.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -57,61 +57,63 @@ class _ExercisePageState extends State<ExercisePage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             return activeTabels.isEmpty
-                ? Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: CardWidget(
-                          name: "คอร์สออกกำลังกาย",
-                          image:
-                              "https://swequity.vn/wp-content/uploads/2019/07/tap-gym-yeu-sinh-ly.jpg",
-                          button: ElevatedButton(
-                            onPressed: () async {
-                              var refresh = await Get.to(() =>
-                                  const UserTabelPage(isAdminCouser: true));
-                              if (refresh == true) {
-                                setState(() {
-                                  loadData = _initializePreferences();
-                                });
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFAC41),
-                            ),
-                            child: const Text(
-                              "ดูเพิ่มเติม",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: CardWidget(
-                          name: "ตารางของฉัน",
-                          image:
-                              "https://media.istockphoto.com/id/937415802/photo/time-for-exercising-clock-calendar-and-dumbbell-with-blue-yoga-mat-background.jpg?s=612x612&w=0&k=20&c=nY2FYJ8Q63vENr5zYbTyCpo_PICEMLk9eiBbJ-Qp9-E=",
-                          button: ElevatedButton(
-                            onPressed: () async {
-                              var refresh = await Get.to(() =>
-                                  const UserTabelPage(isAdminCouser: false));
-                              if (refresh == true) {
-                                setState(() {
-                                  loadData = _initializePreferences();
-                                });
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFAC41),
-                            ),
-                            child: const Text(
-                              "ดูเพิ่มเติม",
-                              style: TextStyle(color: Colors.white),
+                ? Flexible(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                          child: CardWidget(
+                            name: "คอร์สออกกำลังกาย",
+                            image:
+                                "https://swequity.vn/wp-content/uploads/2019/07/tap-gym-yeu-sinh-ly.jpg",
+                            button: ElevatedButton(
+                              onPressed: () async {
+                                var refresh = await Get.to(() =>
+                                    const UserTabelPage(isAdminCouser: true));
+                                if (refresh == true) {
+                                  setState(() {
+                                    loadData = _initializePreferences();
+                                  });
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFAC41),
+                              ),
+                              child: const Text(
+                                "ดูเพิ่มเติม",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                          child: CardWidget(
+                            name: "ตารางของฉัน",
+                            image:
+                                "https://media.istockphoto.com/id/937415802/photo/time-for-exercising-clock-calendar-and-dumbbell-with-blue-yoga-mat-background.jpg?s=612x612&w=0&k=20&c=nY2FYJ8Q63vENr5zYbTyCpo_PICEMLk9eiBbJ-Qp9-E=",
+                            button: ElevatedButton(
+                              onPressed: () async {
+                                var refresh = await Get.to(() =>
+                                    const UserTabelPage(isAdminCouser: false));
+                                if (refresh == true) {
+                                  setState(() {
+                                    loadData = _initializePreferences();
+                                  });
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFAC41),
+                              ),
+                              child: const Text(
+                                "ดูเพิ่มเติม",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : Expanded(
                     child: ListView.builder(
@@ -192,8 +194,10 @@ class _ExercisePageState extends State<ExercisePage> {
                                       padding: const EdgeInsets.fromLTRB(
                                           8, 10, 8, 0),
                                       child: ElevatedButton(
-                                        onPressed: () {
+                                        onPressed: () async {
                                           deleteUserCourse(tabel.tid);
+                                          await AwesomeNotifications()
+                                              .cancel(tabel.tid);
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors

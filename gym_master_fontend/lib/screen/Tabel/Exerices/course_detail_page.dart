@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +10,9 @@ import 'package:gym_master_fontend/model/UserEnabelCourseModel.dart';
 import 'package:gym_master_fontend/model/weekDiffModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_start_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
+import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final int tabelID;
@@ -49,8 +53,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
   void initState() {
     super.initState();
-    allExcount = widget.times * widget.dayPerWeek;
     loadData = loadDataAsync();
+    initializeDateFormatting('th').then((_) {
+      allExcount = widget.times * widget.dayPerWeek;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> loadDataAsync() async {
@@ -64,33 +75,96 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           return status! < 500; // Accept status codes less than 500
         },
       );
+
       final weekResponse = await dio.get(
-          'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=1&day=1',
-          options: options);
+        'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=1&day=1',
+        options: options,
+      );
+
       if (weekResponse.statusCode == 200) {
         weeksDiffModel = WeeksDiffModel.fromJson(weekResponse.data[0]);
-        week_count += weeksDiffModel!.weeksDiff;
-        log("week count $week_count");
-
-        final response = await dio.get(
-            'http://$url/enCouser/getIsNotSuccesUserEnCouserbyWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=$week_count',
-            options: options);
-        userEnabelCourse = (response.data as List)
-            .map((json) => UserEnabelCourse.fromJson(json))
-            .toList();
-
         final userSuccessEnRes = await dio.get(
-            'http://$url/enCouser/getSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
-            options: options);
+          'http://$url/enCouser/getSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+          options: options,
+        );
 
         succesUserEn = (userSuccessEnRes.data as List)
             .map((json) => UserEnabelCourse.fromJson(json))
             .toList();
+
+        if (succesUserEn.isNotEmpty) {
+          week_count += weeksDiffModel!.weeksDiff;
+          log("week count $week_count");
+        }
+
+        final response = await dio.get(
+          'http://$url/enCouser/getIsNotSuccesUserEnCouserbyWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=$week_count',
+          options: options,
+        );
+        userEnabelCourse = (response.data as List)
+            .map((json) => UserEnabelCourse.fromJson(json))
+            .toList();
+
+        // Ensure the widget is still mounted before calling setState
+        if (mounted) {
+          setState(() {
+            if (userEnabelCourse.isNotEmpty) {
+              day = userEnabelCourse[0].day;
+              log("Current day: $day");
+            } else {
+              if (allExcount != succesUserEn.length) {
+                if (week_count > widget.times) {
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.info,
+                    title: "คุณกำลังใช้งานโปรแกรมซ้อม",
+                    btnOkOnPress: () {},
+                  ).show();
+                } else {
+                  if (succesUserEn[0].weekStartDate != null) {
+                    DateTime newDate = succesUserEn[0]
+                        .weekStartDate!
+                        .add(const Duration(days: 8));
+
+                    // Format the date to display in Thai
+                    String formattedDate =
+                        DateFormat('d MMMM y', 'th').format(newDate);
+
+                    log(formattedDate); // Log the formatted date
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.info,
+                      title:
+                          "คุณจะสามารถใช้งานคอร์สอีกได้ในวันที่ $formattedDate",
+                      btnOkOnPress: () {},
+                    ).show();
+                  } else {
+                    log("weekStartDate is null");
+                  }
+                }
+              } else {
+                AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.success,
+                  title: "คอร์สสิ้นสุดแล้ว",
+                  btnOkOnPress: () async {
+                    deleteUserCourse();
+
+                    await AwesomeNotifications().cancel(widget.tabelID);
+                  },
+                ).show();
+              }
+            }
+            log("Success courses count: ${succesUserEn.length}");
+          });
+        }
+
         if (week_count > widget.times) {
           if (succesUserEn.length != allExcount) {
             final responseNotSucces = await dio.get(
-                'http://$url/enCouser/getNotSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
-                options: options);
+              'http://$url/enCouser/getNotSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+              options: options,
+            );
 
             userNotSuccesCourse = (responseNotSucces.data as List)
                 .map((json) => UserEnabelCourse.fromJson(json))
@@ -98,8 +172,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
             if (userNotSuccesCourse.isNotEmpty) {
               final respones = await dio.get(
-                  'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
-                  options: options);
+                'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+                options: options,
+              );
 
               userEnabelCourse = (respones.data as List)
                   .map((json) => UserEnabelCourse.fromJson(json))
@@ -111,14 +186,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
               if (userEnabelCourse.isNotEmpty) {
                 final weekResponse = await dio.get(
-                    'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=${userEnabelCourse[0].week}&day=${userEnabelCourse[0].day}',
-                    options: options);
+                  'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=${userEnabelCourse[0].week}&day=${userEnabelCourse[0].day}',
+                  options: options,
+                );
+
                 if (weekResponse.statusCode == 200) {
                   WeeksDiffModel weeksDiffModel =
                       WeeksDiffModel.fromJson(weekResponse.data[0]);
                   int weekCount = 1;
-                  weekCount += weeksDiffModel!.weeksDiff;
-                  log("week_diff : ${weekCount}");
+                  weekCount += weeksDiffModel.weeksDiff;
+                  log("week_diff : $weekCount");
+
                   if (weekCount > 1) {
                     updateWeekStart(userNotSuccesCourse);
                   }
@@ -127,17 +205,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             }
           }
         }
-
-        setState(() {
-          if (userEnabelCourse.isNotEmpty) {
-            day = userEnabelCourse[0].day;
-            log("Current day: $day");
-          }
-          log("Success courses count: ${succesUserEn.length}");
-        });
       }
-    } catch (e) {
-      log('Error loading data: $e');
+    } catch (error) {
+      log("Error loading data: $error");
     }
   }
 
@@ -183,11 +253,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     final respones = await dio.get(
         'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
         options: options);
-    setState(() {
-      userEnabelCourse = (respones.data as List)
-          .map((json) => UserEnabelCourse.fromJson(json))
-          .toList();
-    });
+    if (mounted) {
+      setState(() {
+        userEnabelCourse = (respones.data as List)
+            .map((json) => UserEnabelCourse.fromJson(json))
+            .toList();
+      });
+    }
   }
 
   @override
@@ -280,9 +352,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                                                       tokenJWT:
                                                                           widget
                                                                               .tokenJWT,
+                                                                      dayPerWeek:
+                                                                          widget
+                                                                              .dayPerWeek,
+                                                                      times: widget
+                                                                          .times,
                                                                     ));
                                                                     if (refresh ==
-                                                                        true) {
+                                                                            true &&
+                                                                        mounted) {
                                                                       setState(
                                                                           () {
                                                                         loadData =
@@ -344,8 +422,18 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                 ),
                               ),
                             )
-                          : const Column(
-                              children: [Text("คอรส สิ้นสุด")],
+                          : Column(
+                              children: [
+                                const Text("คอรส สิ้นสุด"),
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      deleteUserCourse();
+
+                                      await AwesomeNotifications()
+                                          .cancel(widget.tabelID);
+                                    },
+                                    child: const Text("สิ้นสุด"))
+                              ],
                             ),
                     ],
                   )
@@ -372,15 +460,18 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                           if (index == 0) {
                                             var refresh = await Get.to(
                                               ExerciesStart(
-                                                  tabelID: widget.tabelID,
-                                                  tabelName: widget.tabelName,
-                                                  week: userEn.week,
-                                                  day: userEn.day,
-                                                  uid: widget.uid,
-                                                  time_rest: widget.time_rest,
-                                                  tokenJWT: widget.tokenJWT),
+                                                tabelID: widget.tabelID,
+                                                tabelName: widget.tabelName,
+                                                week: userEn.week,
+                                                day: userEn.day,
+                                                uid: widget.uid,
+                                                time_rest: widget.time_rest,
+                                                tokenJWT: widget.tokenJWT,
+                                                dayPerWeek: widget.dayPerWeek,
+                                                times: widget.times,
+                                              ),
                                             );
-                                            if (refresh == true) {
+                                            if (refresh == true && mounted) {
                                               setState(() {
                                                 loadData = loadDataAsync();
                                               });
@@ -431,10 +522,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                               ),
                       ),
                       ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             deleteUserCourse();
+                            await AwesomeNotifications().cancel(widget.tabelID);
                           },
-                          child: Text("ยกเลิก"))
+                          child: const Text("ยกเลิกคอร์ส"))
                     ],
                   );
           }
@@ -506,7 +598,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     };
 
     try {
-      final response = await dio.post('http://${url}/enCouser/deleteUserCourse',
+      final response = await dio.post('http://$url/enCouser/deleteUserCourse',
           data: regBody,
           options: Options(
             headers: {

@@ -5,10 +5,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gym_master_fontend/firebase_options.dart';
 import 'package:gym_master_fontend/screen/auth_page.dart';
-
+import 'package:gym_master_fontend/services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initializeNotification();
   await GetStorage.init();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
