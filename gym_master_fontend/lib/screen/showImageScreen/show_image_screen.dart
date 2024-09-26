@@ -170,7 +170,7 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Get.back();
+            Get.back(result: 1);
           },
           icon: const FaIcon(
             FontAwesomeIcons.angleLeft,
