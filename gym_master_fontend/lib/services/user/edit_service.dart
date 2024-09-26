@@ -22,7 +22,6 @@ class EditService {
       if (response.statusCode == 200) {
         // Parse the JSON data and convert it to a list of UserProfileEditModel objects
         final List<dynamic> data = response.data;
-        print('Raw API Response: ${response.data}');
         return data.map((e) => UserProfileEditModel.fromJson(e)).toList();
       } else {
         throw Exception('Failed to load data');

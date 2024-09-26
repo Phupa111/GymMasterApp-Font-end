@@ -64,6 +64,15 @@ class _ShowDetailImageDialogState extends State<ShowDetailImageDialog> {
     }
   }
 
+  Future<void> setBeforeProgress(int uid, int pid, String tokenJwt) async {
+    status = await PhotoService().setBeforeImageProgress(uid, pid, tokenJwt);
+    if (status == 1) {
+      Get.back(result: 2);
+    } else {
+      Get.back(result: 0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -174,26 +183,19 @@ class _ShowDetailImageDialogState extends State<ShowDetailImageDialog> {
                                     Colors.orangeAccent,
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  AwesomeDialog(
+                                    context: context,
+                                    dialogType: DialogType.warning,
+                                    title: "ยืนยันการตั้งเป็น Before",
+                                    btnOkText: "ยืนยัน",
+                                    btnOkOnPress: () {
+                                      setBeforeProgress(uid, pid, tokenJwt);
+                                    },
+                                  ).show();
+                                },
                                 child: const Text(
                                   "Before",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Kanit',
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                              ElevatedButton(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Colors.orangeAccent,
-                                  ),
-                                ),
-                                onPressed: () {},
-                                child: const Text(
-                                  "After",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Kanit',

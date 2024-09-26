@@ -14,6 +14,7 @@ import 'package:gym_master_fontend/model/WeigthModel.dart';
 import 'package:gym_master_fontend/screen/photo_page.dart';
 import 'package:gym_master_fontend/screen/showImageScreen/show_image_screen.dart';
 import 'package:gym_master_fontend/screen/staticScreen/lineChart_page.dart';
+import 'package:gym_master_fontend/screen/staticScreen/show_compare_progress.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,7 @@ class _StaticPageState extends State<StaticPage> {
 
   late SharedPreferences prefs;
   int? uid;
+  String? tokenJwt;
   String url = AppConstants.BASE_URL;
   @override
   void initState() {
@@ -42,6 +44,7 @@ class _StaticPageState extends State<StaticPage> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     uid = prefs.getInt("uid");
+    tokenJwt = prefs.getString("tokenJwt");
     if (uid != null) {
     } else {
       // Handle the case where UID is not set
@@ -110,28 +113,10 @@ class _StaticPageState extends State<StaticPage> {
                   children: [
                     header(),
                     const LineChartPage(),
-                    SizedBox(
-                      width: 140.0,
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            String? token = prefs.getString("tokenJwt");
-                            Get.to(() => ShowImageScreen(
-                                  uid: uid!,
-                                  tokenJwt: token!,
-                                ));
-                          },
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              FaIcon(FontAwesomeIcons.image),
-                              Text(
-                                "ดูรูป",
-                                style: TextStyle(
-                                    fontFamily: 'Kanit', fontSize: 18.0),
-                              )
-                            ],
-                          )),
-                    )
+                    ShowCompareProgress(
+                      uid: uid!,
+                      tokenJwt: tokenJwt!,
+                    ),
                   ],
                 ),
               ));
