@@ -106,7 +106,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
   Future<void> loadEqiument() async {
     final dio = Dio();
     try {
-      final String endpoint = 'http://$url/exPost/getEqiumentList';
+      final String endpoint = '$url/exPost/getEqiumentList';
 
       final response = await dio.get(
         endpoint,
@@ -659,7 +659,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
 
     try {
       final response = await dio.post(
-        'http://$url/tabel/addExPosttoTabel',
+        '$url/tabel/addExPosttoTabel',
         data: regBody, // Pass regBody directly
         options: Options(
           headers: {
@@ -689,7 +689,7 @@ class _ExerciesePageState extends State<ExerciesePage> {
 
     try {
       final response = await dio.get(
-          'http://$url/exPost/getExPosts?tid=${widget.tabelID}&dayNum=${widget.dayNum}&nameFilter=${searchController.text}&equipmentFilter=$equipmentValue&muscleFilter=$muscleValue',
+          '$url/exPost/getExPosts?tid=${widget.tabelID}&dayNum=${widget.dayNum}&nameFilter=${searchController.text}&equipmentFilter=$equipmentValue&muscleFilter=$muscleValue',
           options: Options(
             headers: {
               'Authorization': 'Bearer ${widget.tokenJWT}',

@@ -24,6 +24,8 @@ class EditTabelPage extends StatefulWidget {
   final bool isUnused;
   final String tokenJWT;
   final int? role;
+  final bool isAdmin;
+  final String descrestion;
 
   const EditTabelPage({
     super.key,
@@ -35,6 +37,8 @@ class EditTabelPage extends StatefulWidget {
     required this.uid,
     required this.times,
     required this.role,
+    required this.isAdmin,
+    required this.descrestion,
   });
 
   @override
@@ -72,7 +76,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     for (int day = 1; day <= widget.dayPerWeek; day++) {
       try {
         final response = await dio.post(
-          'http://$url/tabel/getExercisesInTabel',
+          '$url/tabel/getExercisesInTabel',
           data: {'tid': widget.tabelID, 'dayNum': day},
           options: Options(
             headers: {
@@ -436,7 +440,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     var regBody = {"set": sets, "rep": rep, "cpid": cpid};
 
     try {
-      final String endpoint = 'http://$url/tabel/UpdateExercisesInTabel';
+      final String endpoint = '$url/tabel/UpdateExercisesInTabel';
       final response = await dio.post(
         endpoint,
         data: regBody,
@@ -463,7 +467,7 @@ class _EditTabelPageState extends State<EditTabelPage>
     var regBody = {"cpid": cpid};
 
     try {
-      final String endpoint = 'http://$url/tabel/deleteExInCouser';
+      final String endpoint = '$url/tabel/deleteExInCouser';
 
       final response = await dio.delete(
         endpoint,
@@ -508,6 +512,42 @@ class _EditTabelPageState extends State<EditTabelPage>
             return Scaffold(
               appBar: AppBar(
                 title: Text(widget.tabelName),
+                actions: [
+                  Visibility(
+                    visible: widget.isAdmin,
+                    child: IconButton(
+                      icon: const Icon(Icons.info_outline),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("คำอธิบายคอร์ส"),
+                              content: Text(widget.descrestion),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    // Add your delete logic here
+
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("ยืนยัน"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  Visibility(
+                    visible: !widget.isUnused,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {},
+                    ),
+                  ),
+                ],
                 bottom: TabBar(
                   controller: _tabController,
                   tabs: _generateTabs(),
@@ -583,7 +623,7 @@ class _EditTabelPageState extends State<EditTabelPage>
 
         try {
           final response = await dio.post(
-            'http://$url/enCouser/EnabelCouser',
+            '$url/enCouser/EnabelCouser',
             data: regBody,
             options: Options(
               headers: {
@@ -626,7 +666,7 @@ class _EditTabelPageState extends State<EditTabelPage>
 
     try {
       final response = await dio.post(
-        'http://$url/enCouser/updateWeekStartDate',
+        '$url/enCouser/updateWeekStartDate',
         data: regUpdateWeekBody,
         options: Options(
           headers: {

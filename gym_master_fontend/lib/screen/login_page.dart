@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
       try {
         // Login and get the token
         final responseToken = await dio.post(
-          'http://$url/user/login',
+          '$url/user/login',
           data: regBody,
         );
 
@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
 
           // Fetch user data
           final response = await dio.get(
-            'http://$url/user/getUser/${_emailController.text}',
+            '$url/user/getUser/${_emailController.text}',
             options: Options(
               headers: {
                 'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
         };
 
         final responseToken = await dio.post(
-          'http://$url/user/googleLogin',
+          '$url/user/googleLogin',
           data: regBody,
         );
 
@@ -152,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
           await _prefs.setString("tokenJwt", tokenJWT.tokenJwt);
 
           final response = await dio.get(
-            'http://$url/user/getUser/${user.email}',
+            '$url/user/getUser/${user.email}',
             options: Options(
               headers: {
                 'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
@@ -458,7 +458,7 @@ class _LoginPageState extends State<LoginPage> {
   void geustMode() async {
     final dio = Dio();
     try {
-      final responeGusetToken = await dio.get('http://$url/user/getGuestToken');
+      final responeGusetToken = await dio.get('$url/user/getGuestToken');
       TokenJwtModel tokenJWT =
           tokenJwtModelFromJson(jsonEncode(responeGusetToken.data));
 

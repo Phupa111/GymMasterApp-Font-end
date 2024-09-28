@@ -58,17 +58,16 @@ class _ProfilePageState extends State<ProfilePage> {
       "uid": uid,
     };
     try {
-      final response =
-          await dio.post("http://$url/calculate/getDataUserAndBodyFat",
-              data: userData,
-              options: Options(
-                headers: {
-                  'Authorization': 'Bearer $tokenJWT',
-                },
-                validateStatus: (status) {
-                  return status! < 500; // Accept status codes less than 500
-                },
-              ));
+      final response = await dio.post("$url/calculate/getDataUserAndBodyFat",
+          data: userData,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJWT',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       print(response.data);
       final List<dynamic> profileJson = response.data;
       profileData = profileJson.map((e) => ProfileModel.fromJson(e)).toList();

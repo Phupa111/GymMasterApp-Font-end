@@ -217,7 +217,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
     final dio = Dio();
     try {
       // final response = await dio.get(
-      //   'http://${url}/enCouser/getAllUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+      //   '${url}/enCouser/getAllUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
       // );
       // final userEnabelCourseData = response.data as List<dynamic>;
       // if (userEnabelCourseData.isNotEmpty) {
@@ -230,7 +230,7 @@ class _ExerciesStartState extends State<ExerciesStart> {
       // });
       //} else {
       final exercisesResponse =
-          await dio.post('http://${url}/tabel/getExercisesInTabel',
+          await dio.post('${url}/tabel/getExercisesInTabel',
               data: {'tid': widget.tabelID, 'dayNum': widget.day},
               options: Options(
                 headers: {

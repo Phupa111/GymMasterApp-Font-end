@@ -30,7 +30,7 @@ class PhotoService {
         )
       });
 
-      final response = await dio.post("http://$url/photo/insertProgress",
+      final response = await dio.post("$url/photo/insertProgress",
           data: formData,
           options: Options(
             headers: {
@@ -55,7 +55,7 @@ class PhotoService {
       int uid, String tokenJwt) async {
     try {
       final response = await dio.get(
-        'http://$url/progress/getProgressUser/$uid',
+        '$url/progress/getProgressUser/$uid',
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJwt',
@@ -95,7 +95,7 @@ class PhotoService {
 
     try {
       final response = await dio.post(
-        "http://$url/progress/deleteImageProgress",
+        "$url/progress/deleteImageProgress",
         data: json,
         options: Options(
           headers: {
@@ -125,7 +125,7 @@ class PhotoService {
 
     try {
       final response = await dio.post(
-        'http://$url/progress/setBefore',
+        '$url/progress/setBefore',
         data: json,
         options: Options(
           headers: {
@@ -151,7 +151,7 @@ class PhotoService {
       int uid, String tokenJwt) async {
     try {
       final response = await dio.get(
-        'http://$url/progress/getLatestProgress/$uid',
+        '$url/progress/getLatestProgress/$uid',
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJwt',
@@ -187,7 +187,7 @@ class PhotoService {
       int uid, String tokenJwt) async {
     try {
       final response = await dio.get(
-        'http://$url/progress/getBeforeProgress/$uid',
+        '$url/progress/getBeforeProgress/$uid',
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJwt',

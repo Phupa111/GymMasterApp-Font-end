@@ -28,7 +28,7 @@ class _EditUsernameDialogState extends State<EditUsernameDialog> {
     const String url = AppConstants.BASE_URL;
     // log("${dateNow.toString().split(" ")[0]}_$uid");
     try {
-      var response = await dioInstance.get('http://$url/user/getUser/$username',
+      var response = await dioInstance.get('$url/user/getUser/$username',
           options: Options(
             headers: {
               'Authorization': 'Bearer $tokenJwt',
@@ -43,7 +43,7 @@ class _EditUsernameDialogState extends State<EditUsernameDialog> {
           "username": username,
         };
         final responseChangeUsername =
-            await dioInstance.post("http://$url/user/update/username",
+            await dioInstance.post("$url/user/update/username",
                 data: json,
                 options: Options(
                   headers: {

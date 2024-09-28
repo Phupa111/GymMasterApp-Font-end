@@ -35,7 +35,7 @@ class _SelectGenderRadioState extends State<SelectGenderRadio> {
       "gender": gender,
     };
     try {
-      final response = await dio.post("http://$ip/user/update/gender",
+      final response = await dio.post("$ip/user/update/gender",
           data: json,
           options: Options(
             headers: {

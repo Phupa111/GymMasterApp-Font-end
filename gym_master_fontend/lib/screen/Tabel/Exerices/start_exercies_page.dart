@@ -242,7 +242,7 @@ class _StartExPageState extends State<StartExPage> {
 
     try {
       final response = await dio.post(
-        'http://$url/enCouser/updateIsSuccess',
+        '$url/enCouser/updateIsSuccess',
         data: regBody,
         options: Options(
           headers: {
@@ -276,7 +276,7 @@ class _StartExPageState extends State<StartExPage> {
 
     try {
       final response = await dio.post(
-        'http://$url/enCouser/updateWeekStartDate',
+        '$url/enCouser/updateWeekStartDate',
         data: regUpdateWeekBody,
         options: Options(
           headers: {
@@ -306,7 +306,7 @@ class _StartExPageState extends State<StartExPage> {
 
     try {
       final response = await dio.post(
-        'http://$url/user/updateDaySucess',
+        '$url/user/updateDaySucess',
         data: regBody,
         options: Options(
           headers: {

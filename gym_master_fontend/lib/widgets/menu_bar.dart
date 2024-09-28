@@ -221,7 +221,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
       log("username : $username");
 
       final response = await dio.get(
-        'http://$url/user/getUser/$username',
+        '$url/user/getUser/$username',
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJWT',
