@@ -62,7 +62,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
     try {
       final dio = Dio();
       final response = await dio.post(
-        'http://$url/tabel/CreatTabel',
+        '$url/tabel/CreatTabel',
         data: regBodyAdmin,
         options: Options(
           headers: {

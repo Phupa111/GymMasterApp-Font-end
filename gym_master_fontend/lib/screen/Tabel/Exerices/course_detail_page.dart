@@ -77,14 +77,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       );
 
       final weekResponse = await dio.get(
-        'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=1&day=1',
+        '$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=1&day=1',
         options: options,
       );
 
       if (weekResponse.statusCode == 200) {
         weeksDiffModel = WeeksDiffModel.fromJson(weekResponse.data[0]);
         final userSuccessEnRes = await dio.get(
-          'http://$url/enCouser/getSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+          '$url/enCouser/getSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
           options: options,
         );
 
@@ -98,7 +98,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         }
 
         final response = await dio.get(
-          'http://$url/enCouser/getIsNotSuccesUserEnCouserbyWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=$week_count',
+          '$url/enCouser/getIsNotSuccesUserEnCouserbyWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=$week_count',
           options: options,
         );
         userEnabelCourse = (response.data as List)
@@ -162,7 +162,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         if (week_count > widget.times) {
           if (succesUserEn.length != allExcount) {
             final responseNotSucces = await dio.get(
-              'http://$url/enCouser/getNotSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+              '$url/enCouser/getNotSuccesUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
               options: options,
             );
 
@@ -172,7 +172,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
             if (userNotSuccesCourse.isNotEmpty) {
               final respones = await dio.get(
-                'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+                '$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
                 options: options,
               );
 
@@ -186,7 +186,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
               if (userEnabelCourse.isNotEmpty) {
                 final weekResponse = await dio.get(
-                  'http://$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=${userEnabelCourse[0].week}&day=${userEnabelCourse[0].day}',
+                  '$url/enCouser/getWeek?uid=${widget.uid}&tid=${widget.tabelID}&week=${userEnabelCourse[0].week}&day=${userEnabelCourse[0].day}',
                   options: options,
                 );
 
@@ -237,10 +237,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       final dio = Dio();
 
       try {
-        final response = await dio.post(
-            'http://$url/enCouser/updateWeekStartDate',
-            data: regUpdateWeekBody,
-            options: options);
+        final response = await dio.post('$url/enCouser/updateWeekStartDate',
+            data: regUpdateWeekBody, options: options);
         if (response.statusCode == 200) {
           log("Week start date updated successfully for week: ${userNotSuccesCourse[i].week}, day: ${userNotSuccesCourse[i].day}");
         } else {
@@ -251,7 +249,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       }
     }
     final respones = await dio.get(
-        'http://$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
+        '$url/enCouser/getFixUserEnCouser?uid=${widget.uid}&tid=${widget.tabelID}',
         options: options);
     if (mounted) {
       setState(() {
@@ -598,7 +596,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     };
 
     try {
-      final response = await dio.post('http://$url/enCouser/deleteUserCourse',
+      final response = await dio.post('$url/enCouser/deleteUserCourse',
           data: regBody,
           options: Options(
             headers: {

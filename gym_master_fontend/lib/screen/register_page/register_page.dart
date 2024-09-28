@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
     log(_emailController.text);
 
     try {
-      final responseToken = await dio.get('http://$url/user/getGuestToken');
+      final responseToken = await dio.get('$url/user/getGuestToken');
       TokenJwtModel tokenJWT =
           tokenJwtModelFromJson(jsonEncode(responseToken.data));
 
@@ -55,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
         log("Token: ${tokenJWT.tokenJwt}");
 
         var emailResponse = await dio.get(
-          'http://$url/user/getUser/${_emailController.text}',
+          '$url/user/getUser/${_emailController.text}',
           options: Options(
             headers: {
               'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
@@ -67,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
         );
 
         var userResponse = await dio.get(
-          'http://$url/user/getUser/${_usernameController.text}',
+          '$url/user/getUser/${_usernameController.text}',
           options: Options(
             headers: {
               'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
@@ -119,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
       var user = await AuthService().signInWithGoogle();
       if (user != null) {
         final response = await dio.get(
-          'http://${url}/user/selectFromEmail/${user.email.toString()}',
+          '$url/user/selectFromEmail/${user.email.toString()}',
         );
 
         if (response.statusCode == 200) {
@@ -178,53 +178,55 @@ class _RegisterPageState extends State<RegisterPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30.0),
                       child: TextFormField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                              borderSide: const BorderSide(
-                                color: Colors.transparent,
-                                width: 2.0,
-                              ),
-                            ),
-                            prefixIcon: const Icon(Icons.person,
-                                color: Color(0xFFFFAC41)),
-                            contentPadding: const EdgeInsets.all(15.0),
-                            filled: true,
-                            fillColor: const Color(0xFFF1F0F0),
-                            border: InputBorder.none,
-                            hintText: "ชื่อผู้ใช้",
-                            hintStyle: const TextStyle(
-                              fontFamily: 'Kanit',
-                              color: Color(0xFFFFAC41),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                  color: Colors
-                                      .transparent), // Change border color on focus
-                              borderRadius: BorderRadius.circular(25.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  const BorderSide(color: Colors.transparent),
-                              borderRadius: BorderRadius.circular(15.0),
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                            borderSide: const BorderSide(
+                              color: Colors.transparent,
+                              width: 2.0,
                             ),
                           ),
-                          validator: (value) {
-                            if (usernameStatusCode == 200) {
-                              usernameStatusCode = 0;
-                              return 'มีชื่อผู้ใช้นี้อยู่แล้ว';
-                            } else {
-                              if (value == null || value.isEmpty) {
-                                return 'กรุณาใส่ชื่อผู้ใช้';
-                              }
-                              if (value.length < 6) {
-                                return 'ชื่อผู้ใช้ต้องมีมากกว่า 6 ตัวอักษร';
-                              }
-                              return null;
+                          prefixIcon: const Icon(Icons.person,
+                              color: Color(0xFFFFAC41)),
+                          contentPadding: const EdgeInsets.all(15.0),
+                          filled: true,
+                          fillColor: const Color(0xFFF1F0F0),
+                          border: InputBorder.none,
+                          hintText: "ชื่อผู้ใช้",
+                          hintStyle: const TextStyle(
+                            fontFamily: 'Kanit',
+                            color: Color(0xFFFFAC41),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (usernameStatusCode == 200) {
+                            usernameStatusCode = 0;
+                            return 'มีชื่อผู้ใช้นี้อยู่แล้ว';
+                          } else {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณาใส่ชื่อผู้ใช้';
                             }
-                            // Return null if the password is valid
-                          }),
+                            if (value.length < 6) {
+                              return 'ชื่อผู้ใช้ต้องมีมากกว่า 6 ตัวอักษร';
+                            }
+                            if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
+                              return 'ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษและตัวเลขเท่านั้น ห้ามมีอักขระพิเศษ';
+                            }
+                            return null;
+                          }
+                        },
+                      ),
                     ),
                     const SizedBox(
                       height: 10.0,
@@ -308,9 +310,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             color: Color(0xFFFFAC41),
                           ),
                           errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors
-                                    .transparent), // Change border color on focus
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
                             borderRadius: BorderRadius.circular(25.0),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -326,6 +327,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           }
                           if (value.length < 6) {
                             return 'รหัสผ่านต้องมีมากกว่า 6 ตัวอักษร';
+                          }
+                          if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$')
+                              .hasMatch(value)) {
+                            return 'รหัสผ่านต้องเป็นภาษาอังกฤษและต้องมีตัวเลขอย่างน้อย 1 ตัว';
                           }
                           return null; // Return null if the password is valid
                         },

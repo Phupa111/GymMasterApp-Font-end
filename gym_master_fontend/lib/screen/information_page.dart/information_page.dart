@@ -56,7 +56,7 @@ class _InformationPageState extends State<InformationPage> {
       "role": 1,
       "isDisbel": 0,
     };
-    var response = await http.post(Uri.parse('http://$url/user/register'),
+    var response = await http.post(Uri.parse('$url/user/register'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody));
 
@@ -79,7 +79,7 @@ class _InformationPageState extends State<InformationPage> {
         };
 
         final responseToken = await dio.post(
-          'http://$url/user/login',
+          '$url/user/login',
           data: regBody,
         );
 
@@ -88,7 +88,7 @@ class _InformationPageState extends State<InformationPage> {
           var tokenJWT = tokenJwtModelFromJson(jsonEncode(responseToken.data));
 
           final response = await dio.get(
-            'http://$url/user/getUser/${widget.email}',
+            '$url/user/getUser/${widget.email}',
             options: Options(
               headers: {
                 'Authorization': 'Bearer ${tokenJWT.tokenJwt}',
@@ -102,7 +102,7 @@ class _InformationPageState extends State<InformationPage> {
           if (response.statusCode == 200) {
             try {
               final progressRes = await dio.post(
-                'http://${url}/progress/weightInsert',
+                '${url}/progress/weightInsert',
                 data: {
                   'uid': userModel
                       .user.uid, // Assuming you have the user ID available

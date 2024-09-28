@@ -134,6 +134,8 @@ class _CourseViewState extends State<CourseView> {
                                       uid: widget.uid,
                                       times: tabel.times,
                                       role: role,
+                                      isAdmin: widget.isAdminCouser,
+                                      descrestion: tabel.description,
                                     ));
                                     if (refresh == true) {
                                       loadData = loadDataAsync();
@@ -209,17 +211,68 @@ class _CourseViewState extends State<CourseView> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          'Times: ${tabel.times}',
+                                          'ระยะเวลา: ${tabel.times} สัปดาห์',
                                           style: const TextStyle(
                                             fontSize: 16,
                                             color: Colors.white,
                                           ),
                                         ),
                                         Text(
-                                          'Days per Week: ${tabel.dayPerWeek}',
+                                          'จำนวนวัน: ${tabel.dayPerWeek}',
                                           style: const TextStyle(
                                             fontSize: 16,
                                             color: Colors.white,
+                                          ),
+                                        ),
+                                        Visibility(
+                                          visible: widget.isAdminCouser,
+                                          child: Row(
+                                            children: [
+                                              const Text(
+                                                'ความยาก',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              // Loop to add difficulty level icons
+                                              for (int i = 1;
+                                                  i <= tabel.level;
+                                                  i++)
+                                                const Icon(
+                                                  Icons
+                                                      .flash_on, // Icon for difficulty level
+                                                  color: Colors
+                                                      .white, // Color for the icons
+                                                  size: 16, // Size of the icons
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        Visibility(
+                                          visible: widget.isAdminCouser,
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                tabel.gender == 1
+                                                    ? 'เพศ ชาย '
+                                                    : 'เพศ หญิง ',
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              Icon(
+                                                tabel.gender == 1
+                                                    ? Icons.male
+                                                    : Icons.female,
+                                                color: tabel.gender == 1
+                                                    ? const Color.fromARGB(
+                                                        255, 95, 105, 245)
+                                                    : const Color.fromARGB(
+                                                        255, 243, 59, 197),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         Row(
@@ -282,6 +335,10 @@ class _CourseViewState extends State<CourseView> {
                                                       uid: widget.uid,
                                                       times: tabel.times,
                                                       role: role,
+                                                      isAdmin:
+                                                          widget.isAdminCouser,
+                                                      descrestion:
+                                                          tabel.description,
                                                     ));
                                                   },
                                                   style:
@@ -382,58 +439,26 @@ class _CourseViewState extends State<CourseView> {
                                           progressColor: Colors.amber[400],
                                         ),
                                       ),
-                                      Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 10, 8, 0),
-                                            child: ElevatedButton(
-                                              onPressed: () async {
-                                                deleteUserCourse(tabel.tid);
-                                                await AwesomeNotifications()
-                                                    .cancel(tabel.tid);
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors
-                                                    .red, // Button background color
-                                              ),
-                                              child: const Text("เลิกใช้งาน",
-                                                  style: TextStyle(
-                                                      color: Colors.white)),
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              8, 10, 8, 0),
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              deleteUserCourse(tabel.tid);
+                                              await AwesomeNotifications()
+                                                  .cancel(tabel.tid);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors
+                                                  .red, // Button background color
                                             ),
+                                            child: const Text("เลิกใช้งาน",
+                                                style: TextStyle(
+                                                    color: Colors.white)),
                                           ),
-                                          Visibility(
-                                            visible: !widget.isAdminCouser,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 10, 8, 0),
-                                              child: ElevatedButton(
-                                                onPressed: () {
-                                                  Get.to(EditTabelPage(
-                                                    tabelID: tabel.tid,
-                                                    tabelName: tabel.couserName,
-                                                    dayPerWeek:
-                                                        tabel.dayPerWeek,
-                                                    isUnused: false,
-                                                    tokenJWT: widget.tokenJWT,
-                                                    uid: widget.uid,
-                                                    times: tabel.times,
-                                                    role: role,
-                                                  ));
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors
-                                                      .white, // Button background color
-                                                ),
-                                                child: const Text("แก้ไข",
-                                                    style: TextStyle(
-                                                        color: Colors.orange)),
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      )
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -586,7 +611,7 @@ class _CourseViewState extends State<CourseView> {
     var regBody = {"tid": tid};
 
     try {
-      final String endpoint = 'http://$url/tabel/deleteCouser';
+      final String endpoint = '$url/tabel/deleteCouser';
 
       final response = await dio.delete(
         endpoint,
@@ -626,8 +651,8 @@ class _CourseViewState extends State<CourseView> {
     try {
       if (!widget.isEnnabel) {
         final String endpoint = widget.isAdminCouser
-            ? 'http://$url/Tabel/getAdminTabel?uid=${widget.uid}&search=${searchController.text}&gender=$gender&level=$level'
-            : 'http://$url/tabel/getUnUesUserTabel';
+            ? '$url/Tabel/getAdminTabel?uid=${widget.uid}&search=${searchController.text}&gender=$gender&level=$level'
+            : '$url/tabel/getUnUesUserTabel';
 
         final response = widget.isAdminCouser
             ? await dio.get(
@@ -659,8 +684,8 @@ class _CourseViewState extends State<CourseView> {
             jsonData.map((item) => TabelModel.fromJson(item)).toList();
       } else {
         final String endpoint = widget.isAdminCouser
-            ? 'http://$url/tabel/getEnnabelAdminTabel'
-            : 'http://$url/tabel/getEnnabelUserTabel';
+            ? '$url/tabel/getEnnabelAdminTabel'
+            : '$url/tabel/getEnnabelUserTabel';
 
         final response = await dio.post(
           endpoint,
@@ -701,7 +726,7 @@ class _CourseViewState extends State<CourseView> {
 
         try {
           final response = await dio.post(
-            'http://$url/enCouser/EnabelCouser',
+            '$url/enCouser/EnabelCouser',
             data: regBody,
             options: Options(
               headers: {
@@ -746,7 +771,7 @@ class _CourseViewState extends State<CourseView> {
 
     try {
       final response = await dio.post(
-        'http://$url/enCouser/updateWeekStartDate',
+        '$url/enCouser/updateWeekStartDate',
         data: regUpdateWeekBody,
         options: Options(
           headers: {
@@ -775,8 +800,8 @@ class _CourseViewState extends State<CourseView> {
     };
 
     try {
-      final response = await dio.post('http://$url/enCouser/deleteUserCourse',
-          data: regBody);
+      final response =
+          await dio.post('$url/enCouser/deleteUserCourse', data: regBody);
 
       if (response.statusCode == 200) {
         // Course deleted successfully! (Handle success scenario)

@@ -218,7 +218,7 @@ class _UesrListViewPageState extends State<UesrListViewPage> {
     var regBody = {"isDisbel": isDisbel, "uid": uid};
 
     try {
-      final String endpoint = 'http://$url/user/disableUser';
+      final String endpoint = '$url/user/disableUser';
       final response = await dio.post(
         endpoint,
         data: regBody,
@@ -250,7 +250,7 @@ class _UesrListViewPageState extends State<UesrListViewPage> {
     try {
       if (widget.isEnnabelUser) {
         final String endpoint =
-            'http://$url/user/getAllUsers?isDisble=0&search=${searchController.text}';
+            '$url/user/getAllUsers?isDisble=0&search=${searchController.text}';
 
         final response = await dio.get(
           endpoint,
@@ -269,7 +269,7 @@ class _UesrListViewPageState extends State<UesrListViewPage> {
             jsonData.map((item) => UsersModels.fromJson(item)).toList();
       } else {
         final String endpoint =
-            'http://$url/user/getAllUsers?isDisble=1&search=${searchController.text}';
+            '$url/user/getAllUsers?isDisble=1&search=${searchController.text}';
 
         final response = await dio.get(
           endpoint,

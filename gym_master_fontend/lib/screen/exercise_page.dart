@@ -188,53 +188,26 @@ class _ExercisePageState extends State<ExercisePage> {
                                     progressColor: Colors.amber[400],
                                   ),
                                 ),
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          8, 10, 8, 0),
-                                      child: ElevatedButton(
-                                        onPressed: () async {
-                                          deleteUserCourse(tabel.tid);
-                                          await AwesomeNotifications()
-                                              .cancel(tabel.tid);
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors
-                                              .red, // Button background color
-                                        ),
-                                        child: const Text("เลิกใช้งาน",
-                                            style:
-                                                TextStyle(color: Colors.white)),
+                                Center(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(8, 10, 8, 0),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        deleteUserCourse(tabel.tid);
+                                        await AwesomeNotifications()
+                                            .cancel(tabel.tid);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors
+                                            .red, // Button background color
                                       ),
+                                      child: const Text("เลิกใช้งาน",
+                                          style:
+                                              TextStyle(color: Colors.white)),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          8, 10, 8, 0),
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          Get.to(EditTabelPage(
-                                            tabelID: tabel.tid,
-                                            tabelName: tabel.couserName,
-                                            dayPerWeek: tabel.dayPerWeek,
-                                            isUnused: false,
-                                            tokenJWT: tokenJWT,
-                                            uid: uid,
-                                            times: tabel.times,
-                                            role: role,
-                                          ));
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors
-                                              .white, // Button background color
-                                        ),
-                                        child: const Text("แก้ไข",
-                                            style: TextStyle(
-                                                color: Colors.orange)),
-                                      ),
-                                    )
-                                  ],
-                                )
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -256,8 +229,8 @@ class _ExercisePageState extends State<ExercisePage> {
     };
 
     try {
-      final response = await dio.post('http://$url/enCouser/deleteUserCourse',
-          data: regBody);
+      final response =
+          await dio.post('$url/enCouser/deleteUserCourse', data: regBody);
 
       if (response.statusCode == 200) {
         // Course deleted successfully! (Handle success scenario)
@@ -281,7 +254,7 @@ class _ExercisePageState extends State<ExercisePage> {
 
     try {
       final response = await dio.get(
-        'http://$url/Tabel/getAllEnnabelUserTabel?uid=$uid',
+        '$url/Tabel/getAllEnnabelUserTabel?uid=$uid',
         options: Options(
           headers: {
             'Authorization': 'Bearer $tokenJWT',

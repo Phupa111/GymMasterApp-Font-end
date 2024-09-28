@@ -230,7 +230,7 @@ class _LineChartPageState extends State<LineChartPage> {
             "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
         log(date);
         final updateWeigth = await dio.post(
-          'http://$url/progress/updateWeigth',
+          '$url/progress/updateWeigth',
           data: {"newWeight": weightAdd, "uid": uid, "dataProgress": date},
           options: Options(
             headers: {
@@ -250,7 +250,7 @@ class _LineChartPageState extends State<LineChartPage> {
     } else {
       try {
         final progressRes = await dio.post(
-          'http://$url/progress/weightInsert',
+          '$url/progress/weightInsert',
           data: {
             'uid': uid, // Assuming you have the user ID available
             'weight': weightAdd, // The weight data you want to insert
@@ -455,7 +455,7 @@ class _LineChartPageState extends State<LineChartPage> {
     final dio = Dio();
 
     try {
-      final String endpoint = 'http://$url/progress/getWeightProgress?uid=$uid';
+      final String endpoint = '$url/progress/getWeightProgress?uid=$uid';
       final response = await dio.get(
         endpoint,
         options: Options(

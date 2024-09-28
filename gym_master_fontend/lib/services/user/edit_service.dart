@@ -16,7 +16,7 @@ class EditService {
 
     try {
       final response = await dio.post(
-        "http://$ip/user/getDataUserById",
+        "$ip/user/getDataUserById",
         data: json,
       );
       if (response.statusCode == 200) {
@@ -39,7 +39,7 @@ class EditService {
     };
 
     try {
-      final response = await dio.post("http://$ip/user/update/password",
+      final response = await dio.post("$ip/user/update/password",
           data: json,
           options: Options(
             headers: {
@@ -66,7 +66,7 @@ class EditService {
       "height": height,
     };
     try {
-      final response = await dio.post("http://$ip/user/update/height",
+      final response = await dio.post("$ip/user/update/height",
           data: json,
           options: Options(
             headers: {
@@ -92,7 +92,7 @@ class EditService {
       "weight": weight,
     };
     try {
-      final response = await dio.post("http://$ip/progress/weightInsert",
+      final response = await dio.post("$ip/progress/weightInsert",
           data: json,
           options: Options(
             headers: {

@@ -113,7 +113,7 @@ class _TdeePageState extends State<TdeePage> {
       "uid": uid,
     };
     try {
-      final response = await dio.post("http://$url/calculate/getDayOfExercise",
+      final response = await dio.post("$url/calculate/getDayOfExercise",
           data: userData,
           options: Options(
             headers: {

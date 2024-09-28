@@ -80,7 +80,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
         )
       });
 
-      final response = await dioInstance.post("http://$url/photo/uploadImage",
+      final response = await dioInstance.post("$url/photo/uploadImage",
           data: formData,
           options: Options(
             headers: {
