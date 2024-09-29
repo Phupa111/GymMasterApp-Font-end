@@ -33,7 +33,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
   String? username;
   String url = AppConstants.BASE_URL;
   UserModel? user;
-  late Future<void> loadData;
+  late Future<void> loadData = Future.value();
   @override
   void initState() {
     super.initState();
@@ -72,7 +72,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
   void _updatePageIndexBasedOnRole() {
     if (role == 1 && currentPageIndex >= 4) {
       currentPageIndex = 0;
-    } else if (role == 2 && currentPageIndex >= 2) {
+    } else if (role == 2 || role == 3 && currentPageIndex >= 2) {
       currentPageIndex = 0;
     } else if (role == 0 && currentPageIndex >= 2) {
       currentPageIndex = 0;
@@ -108,7 +108,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
     final List<Widget> pages;
     if (role == 1) {
       pages = pagesRole1;
-    } else if (role == 2) {
+    } else if (role == 2 || role == 3) {
       pages = pagesRole2;
     } else {
       pages = pagesRole0;
@@ -136,7 +136,7 @@ class _MenuNavBarState extends State<MenuNavBar> {
           label: 'Profile',
         ),
       ];
-    } else if (role == 2) {
+    } else if (role == 2 || role == 3) {
       destinations = const <NavigationDestination>[
         NavigationDestination(
           selectedIcon: Icon(Icons.home),

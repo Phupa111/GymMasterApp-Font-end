@@ -73,6 +73,13 @@ class _LoginPageState extends State<LoginPage> {
           log("token succes");
           var tokenJWT = tokenJwtModelFromJson(jsonEncode(responseToken.data));
           await _prefs.setString("tokenJwt", tokenJWT.tokenJwt);
+          if (_emailController.text == "admin1" &&
+              _passwordController.text == "admin1") {
+            await _prefs.setBool("isMustChangPass", true);
+            log("root admin");
+          } else {
+            await _prefs.setBool("isMustChangPass", false);
+          }
 
           // Fetch user data
           final response = await dio.get(
@@ -95,10 +102,6 @@ class _LoginPageState extends State<LoginPage> {
             await _prefs.setInt("isDisbel", userModel.user.isDisbel);
 
             try {
-              await FirebaseAuth.instance.signInWithEmailAndPassword(
-                email: userModel.user.email,
-                password: _passwordController.text,
-              );
               _showCaptchaDialog();
             } catch (e) {
               log("Error signing in: $e");
@@ -150,6 +153,7 @@ class _LoginPageState extends State<LoginPage> {
           log("token succes");
           var tokenJWT = tokenJwtModelFromJson(jsonEncode(responseToken.data));
           await _prefs.setString("tokenJwt", tokenJWT.tokenJwt);
+          await _prefs.setBool("isMustChangPass", false);
 
           final response = await dio.get(
             '$url/user/getUser/${user.email}',

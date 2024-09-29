@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'dart:io';
 // ignore: depend_on_referenced_packages
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart' as dio;
@@ -22,8 +24,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePageEdit extends StatefulWidget {
-  const ProfilePageEdit({super.key, required this.uid});
+  const ProfilePageEdit({super.key, required this.uid, required this.role});
   final int uid;
+  final int role;
   @override
   State<ProfilePageEdit> createState() => _ProfilePageEditState();
 }
@@ -214,48 +217,51 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                           ),
                         ),
                       ),
-                      ListTile(
-                        leading: const FaIcon(FontAwesomeIcons.venusMars),
-                        onTap: () async {
-                          final updategender = await showDialog(
-                              context: context,
-                              builder: (context) => SelectGenderRadio(
-                                    uid: uid,
-                                    gender: userData[index].gender,
-                                    tokenJWT: tokenJWT!,
-                                  ));
+                      Visibility(
+                        visible: widget.role == 1,
+                        child: ListTile(
+                          leading: const FaIcon(FontAwesomeIcons.venusMars),
+                          onTap: () async {
+                            final updategender = await showDialog(
+                                context: context,
+                                builder: (context) => SelectGenderRadio(
+                                      uid: uid,
+                                      gender: userData[index].gender,
+                                      tokenJWT: tokenJWT!,
+                                    ));
 
-                          if (updategender != null) {
-                            setState(() {
-                              userData[index].gender = updategender;
-                            });
-                            AwesomeDialog(
-                              context: context,
-                              dialogType: DialogType.success,
-                              title: "แก้ไขสำเร็จ",
-                              btnOkOnPress: () {},
-                            ).show();
-                          }
-                        },
-                        title: const Text(
-                          "เพศ",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Kanit',
-                            fontWeight: FontWeight.normal,
+                            if (updategender != null) {
+                              setState(() {
+                                userData[index].gender = updategender;
+                              });
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.success,
+                                title: "แก้ไขสำเร็จ",
+                                btnOkOnPress: () {},
+                              ).show();
+                            }
+                          },
+                          title: const Text(
+                            "เพศ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Kanit',
+                              fontWeight: FontWeight.normal,
+                            ),
                           ),
+                          trailing: userData[index].gender == 1
+                              ? const Text(
+                                  "ชาย",
+                                  style: TextStyle(
+                                      fontSize: 18.0, fontFamily: 'Kanit'),
+                                )
+                              : const Text(
+                                  "หญิง",
+                                  style: TextStyle(
+                                      fontSize: 18.0, fontFamily: 'Kanit'),
+                                ),
                         ),
-                        trailing: userData[index].gender == 1
-                            ? const Text(
-                                "ชาย",
-                                style: TextStyle(
-                                    fontSize: 18.0, fontFamily: 'Kanit'),
-                              )
-                            : const Text(
-                                "หญิง",
-                                style: TextStyle(
-                                    fontSize: 18.0, fontFamily: 'Kanit'),
-                              ),
                       ),
                       lineDivider(),
                       ListTile(
@@ -312,6 +318,13 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                                 btnOkOnPress: () {},
                               ).show();
                             } else {
+                              if (widget.role == 3) {
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setBool("isMustChangPass",
+                                    false); // Correct way to use SharedPreferences
+                              }
+
                               AwesomeDialog(
                                 context: context,
                                 dialogType: DialogType.success,
@@ -322,23 +335,66 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                           }
                         },
                       ),
-                      lineDivider(),
-                      ListTile(
-                        title: const Text(
-                          "ส่วนสูง (ซม.)",
-                          style: TextStyle(fontSize: 14.0, fontFamily: 'Kanit'),
+                      Visibility(
+                          visible: widget.role == 1, child: lineDivider()),
+                      Visibility(
+                        visible: widget.role == 1,
+                        child: ListTile(
+                          title: const Text(
+                            "ส่วนสูง (ซม.)",
+                            style:
+                                TextStyle(fontSize: 14.0, fontFamily: 'Kanit'),
+                          ),
+                          leading: const FaIcon(Icons.accessibility),
+                          onTap: () async {
+                            final updateHeight =
+                                await Get.dialog(EditHeightDialog(
+                              uid: uid,
+                              tokenJWT: tokenJWT!,
+                            ));
+                            if (updateHeight != null) {
+                              if (updateHeight != 0) {
+                                setState(() {
+                                  userData[index].height = updateHeight;
+                                });
+                                AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.success,
+                                  title: "แก้ไขสำเร็จ",
+                                  btnOkOnPress: () {},
+                                ).show();
+                              }
+                            }
+                          },
+                          trailing: Text(
+                            userData[index].height.toString(),
+                            style: const TextStyle(
+                                fontSize: 18.0, fontFamily: 'Kanit'),
+                          ),
                         ),
-                        leading: const FaIcon(Icons.accessibility),
-                        onTap: () async {
-                          final updateHeight =
-                              await Get.dialog(EditHeightDialog(
-                            uid: uid,
-                            tokenJWT: tokenJWT!,
-                          ));
-                          if (updateHeight != null) {
-                            if (updateHeight != 0) {
+                      ),
+                      lineDivider(),
+                      Visibility(
+                        visible: widget.role == 1,
+                        child: ListTile(
+                          title: const Text(
+                            "น้ำหนัก (กก.)",
+                            style:
+                                TextStyle(fontSize: 14.0, fontFamily: 'Kanit'),
+                          ),
+                          leading: const FaIcon(Icons.scale),
+                          onTap: () async {
+                            final updateWeight = await Get.dialog(
+                              EditWeightDialog(
+                                uid: uid,
+                                tokenJWT: tokenJWT!,
+                              ),
+                            );
+
+                            if (updateWeight != null) {
                               setState(() {
-                                userData[index].height = updateHeight;
+                                userData[index].weight =
+                                    updateWeight.toString();
                               });
                               AwesomeDialog(
                                 context: context,
@@ -347,45 +403,12 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                                 btnOkOnPress: () {},
                               ).show();
                             }
-                          }
-                        },
-                        trailing: Text(
-                          userData[index].height.toString(),
-                          style: const TextStyle(
-                              fontSize: 18.0, fontFamily: 'Kanit'),
-                        ),
-                      ),
-                      lineDivider(),
-                      ListTile(
-                        title: const Text(
-                          "น้ำหนัก (กก.)",
-                          style: TextStyle(fontSize: 14.0, fontFamily: 'Kanit'),
-                        ),
-                        leading: const FaIcon(Icons.scale),
-                        onTap: () async {
-                          final updateWeight = await Get.dialog(
-                            EditWeightDialog(
-                              uid: uid,
-                              tokenJWT: tokenJWT!,
-                            ),
-                          );
-
-                          if (updateWeight != null) {
-                            setState(() {
-                              userData[index].weight = updateWeight.toString();
-                            });
-                            AwesomeDialog(
-                              context: context,
-                              dialogType: DialogType.success,
-                              title: "แก้ไขสำเร็จ",
-                              btnOkOnPress: () {},
-                            ).show();
-                          }
-                        },
-                        trailing: Text(
-                          userData[index].weight,
-                          style: const TextStyle(
-                              fontSize: 18.0, fontFamily: 'Kanit'),
+                          },
+                          trailing: Text(
+                            userData[index].weight,
+                            style: const TextStyle(
+                                fontSize: 18.0, fontFamily: 'Kanit'),
+                          ),
                         ),
                       ),
                     ],

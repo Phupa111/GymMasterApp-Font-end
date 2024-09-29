@@ -71,7 +71,11 @@ class _EditPasswordDialogState extends State<EditPasswordDialog> {
                       return "กรุณารหัสผ่าน";
                     }
                     if (RegExp(r'[ก-๙]').hasMatch(value)) {
-                      return 'ชื่อผู้ใช้ห้ามมีตัวอักษรภาษาไทย';
+                      return 'รหัสผ่านห้ามมีตัวอักษรภาษาไทย';
+                    }
+                    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$')
+                        .hasMatch(value)) {
+                      return 'รหัสผ่านต้องเป็นภาษาอังกฤษและต้องมีตัวเลขอย่างน้อย 1 ตัว';
                     }
                     if (value.length < 6) {
                       return "รหัสผ่านต้องยาวมากกว่า 6 ตัว";
