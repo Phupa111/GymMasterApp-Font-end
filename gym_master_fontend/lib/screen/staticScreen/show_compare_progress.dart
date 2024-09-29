@@ -167,12 +167,12 @@ class _ShowCompareProgressState extends State<ShowCompareProgress> {
                         ),
                       ));
                     }
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        color: Colors.white,
-                        shadowColor: Colors.red,
-                        elevation: 0.8,
+                    return Card(
+                      color: Colors.white,
+                      shadowColor: Colors.red,
+                      elevation: 0.8,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
