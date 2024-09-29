@@ -2,7 +2,9 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gym_master_fontend/model/ProfileModel.dart';
 import 'package:gym_master_fontend/screen/login_page.dart';
@@ -23,6 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
   SharedPreferences? prefs;
 
   int? uid;
+  int? role;
   late Future<void> userProfileData;
   List<ProfileModel> profileData = [];
   String? tokenJWT;
@@ -44,6 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _initializePreferences() async {
     prefs = await SharedPreferences.getInstance();
     uid = prefs?.getInt("uid");
+    role = prefs?.getInt("role");
     tokenJWT = prefs?.getString("tokenJwt");
     setState(() {
       userProfileData = loadProfile();
@@ -88,6 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
         await prefs!.remove('username');
         await prefs!.remove('isDisbel');
         await prefs!.remove('tokenJwt');
+        await prefs!.remove("isMustChangPass");
       }
       Get.to(const LoginPage());
     } catch (e) {
@@ -183,7 +188,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                     IconButton(
                                         onPressed: () async {
                                           final updatePage = await Get.to(
-                                              () => ProfilePageEdit(uid: uid!));
+                                              () => ProfilePageEdit(
+                                                    uid: uid!,
+                                                    role: role!,
+                                                  ));
 
                                           if (updatePage == "refresh") {
                                             setState(() {
@@ -198,82 +206,90 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ],
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 20.0),
-                                child: Container(
-                                  height: 100.0,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.7,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(30.0),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          offset: Offset(0, 5),
-                                          color:
-                                              Color.fromARGB(96, 141, 139, 139),
-                                          blurRadius: 5),
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 12.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Text(
-                                              profile.bmr,
-                                              style: const TextStyle(
-                                                color: Colors.orange,
-                                                fontSize: 28,
-                                                fontFamily: 'Kanit',
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                            const Text(
-                                              "BMR",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 20,
-                                                fontFamily: 'Kanit',
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            Text(
-                                              profile.bmi,
-                                              style: const TextStyle(
-                                                color: Colors.orange,
-                                                fontSize: 28,
-                                                fontFamily: 'Kanit',
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                            const Text(
-                                              "BMI",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 20,
-                                                fontFamily: 'Kanit',
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                              Visibility(
+                                visible: role == 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 20.0),
+                                  child: Container(
+                                    height: 100.0,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.7,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(30.0),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            offset: Offset(0, 5),
+                                            color: Color.fromARGB(
+                                                96, 141, 139, 139),
+                                            blurRadius: 5),
                                       ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 12.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                profile.bmr,
+                                                style: const TextStyle(
+                                                  color: Colors.orange,
+                                                  fontSize: 28,
+                                                  fontFamily: 'Kanit',
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "BMR",
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 20,
+                                                  fontFamily: 'Kanit',
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              Text(
+                                                profile.bmi,
+                                                style: const TextStyle(
+                                                  color: Colors.orange,
+                                                  fontSize: 28,
+                                                  fontFamily: 'Kanit',
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "BMI",
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 20,
+                                                  fontFamily: 'Kanit',
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
+                              Visibility(
+                                  visible: role != 1,
+                                  child: const SizedBox(
+                                    height: 80,
+                                  )),
                               Padding(
                                 padding: const EdgeInsets.only(
                                   top: 15.0,
@@ -293,76 +309,108 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                               ),
-                              ListTile(
-                                leading: const FaIcon(
-                                    FontAwesomeIcons.weightScale,
-                                    size: 25.0),
-                                title: Text(
-                                  "${profile.detail[index].weight} กก.",
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontFamily: 'Kanit',
-                                    fontWeight: FontWeight.normal,
+                              Visibility(
+                                visible: role != 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 5.0,
                                   ),
-                                ),
-                              ),
-                              ListTile(
-                                leading: const FaIcon(FontAwesomeIcons.person,
-                                    size: 25.0),
-                                title: Text(
-                                  "${profile.detail[index].height} ซม.",
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontFamily: 'Kanit',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Column(
-                                      children: [
-                                        FaIcon(FontAwesomeIcons.universalAccess,
-                                            size: 25.0),
-                                        Text(
-                                          "Body Fat",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 12,
-                                            fontFamily: 'Kanit',
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        )
-                                      ],
+                                  child: ListTile(
+                                    leading: const FaIcon(
+                                        FontAwesomeIcons.person,
+                                        size: 25.0),
+                                    title: Text(
+                                      profile.detail[index].username,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18,
+                                        fontFamily: 'Kanit',
+                                        fontWeight: FontWeight.normal,
+                                      ),
                                     ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(left: 28.0),
-                                      child: Container(
-                                        width: 80,
-                                        decoration: const BoxDecoration(
-                                            color: Colors.orange,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(12.0))),
-                                        child: Center(
-                                          child: Text(
-                                            "${profile.bodyFat} %",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              Visibility(
+                                visible: role == 1,
+                                child: ListTile(
+                                  leading: const FaIcon(
+                                      FontAwesomeIcons.weightScale,
+                                      size: 25.0),
+                                  title: Text(
+                                    "${profile.detail[index].weight} กก.",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontFamily: 'Kanit',
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Visibility(
+                                visible: role == 1,
+                                child: ListTile(
+                                  leading: const FaIcon(FontAwesomeIcons.person,
+                                      size: 25.0),
+                                  title: Text(
+                                    "${profile.detail[index].height} ซม.",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontFamily: 'Kanit',
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Visibility(
+                                visible: role == 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Column(
+                                        children: [
+                                          FaIcon(
+                                              FontAwesomeIcons.universalAccess,
+                                              size: 25.0),
+                                          Text(
+                                            "Body Fat",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 12,
                                               fontFamily: 'Kanit',
                                               fontWeight: FontWeight.normal,
                                             ),
+                                          )
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 28.0),
+                                        child: Container(
+                                          width: 80,
+                                          decoration: const BoxDecoration(
+                                              color: Colors.orange,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(12.0))),
+                                          child: Center(
+                                            child: Text(
+                                              "${profile.bodyFat} %",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontFamily: 'Kanit',
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    )
-                                  ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                               ElevatedButton(
