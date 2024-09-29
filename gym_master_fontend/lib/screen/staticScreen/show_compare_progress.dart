@@ -1,11 +1,13 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/ProgressCompareLatestModel.dart';
 import 'package:gym_master_fontend/model/ProgressCompareModel.dart';
 import 'package:gym_master_fontend/screen/showImageScreen/show_image_screen.dart';
+import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:gym_master_fontend/services/photo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,16 +25,16 @@ class _ShowCompareProgressState extends State<ShowCompareProgress> {
   int? uid;
   String? tokenJwt;
   late SharedPreferences prefs;
-  late Future<List<ProgressCompareLatestModel>> latestProgressImage;
-  late Future<List<ProgressCompareModel>> beforeProgressImage;
+  late List<ProgressCompareLatestModel> latestProgressImage;
+  late List<ProgressCompareModel> beforeProgressImage;
+  late Future<void> progressLoadData;
 
   @override
   void initState() {
     super.initState();
     uid = widget.uid;
     tokenJwt = widget.tokenJwt;
-    latestProgressImage = PhotoService().getLatestProgress(uid!, tokenJwt!);
-    beforeProgressImage = PhotoService().getBeforeProgress(uid!, tokenJwt!);
+    _initializePreferences();
   }
 
   Future<void> _initializePreferences() async {
@@ -42,14 +44,66 @@ class _ShowCompareProgressState extends State<ShowCompareProgress> {
     log("show compare $uid");
     log("show compare $tokenJwt");
     if (uid != null) {
-      loadData();
+      progressLoadData = loadData();
     } else {}
     setState(() {});
   }
 
   Future<void> loadData() async {
-    latestProgressImage = PhotoService().getLatestProgress(uid!, tokenJwt!);
-    beforeProgressImage = PhotoService().getBeforeProgress(uid!, tokenJwt!);
+    // latestProgressImage = PhotoService().getLatestProgress(uid!, tokenJwt!);
+    // beforeProgressImage = PhotoService().getBeforeProgress(uid!, tokenJwt!);
+    final dio = Dio();
+    const String url = AppConstants.BASE_URL;
+    try {
+      final response = await dio.get(
+        '$url/progress/getBeforeProgress/$uid',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $tokenJwt',
+          },
+          validateStatus: (status) {
+            return status! < 500;
+          },
+        ),
+      );
+
+      final response1 = await dio.get(
+        '$url/progress/getLatestProgress/$uid',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $tokenJwt',
+          },
+          validateStatus: (status) {
+            return status! < 500;
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        beforeProgressImage =
+            data.map((e) => ProgressCompareModel.fromJson(e)).toList();
+      } else {
+        beforeProgressImage = [];
+      }
+
+      if (response1.statusCode == 200) {
+        // ตรวจสอบข้อมูลที่ได้รับว่าเป็น List หรือไม่
+        if (response1.data is List) {
+          final List<dynamic> data = response1.data;
+          latestProgressImage =
+              data.map((e) => ProgressCompareLatestModel.fromJson(e)).toList();
+        } else {
+          // ถ้าไม่ใช่ List ให้แสดง Error ขึ้นมา
+          throw Exception(
+              'Expected a List but got ${response1.data.runtimeType}');
+        }
+      } else {
+        latestProgressImage = [];
+      }
+    } catch (e) {
+      throw Exception('Failed to get before image Progress: $e');
+    }
   }
 
   @override
@@ -95,110 +149,114 @@ class _ShowCompareProgressState extends State<ShowCompareProgress> {
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Before",
-                  style: TextStyle(
-                    fontFamily: 'Kanit',
-                    fontSize: 18.0,
-                  ),
-                ),
-              ),
-              FutureBuilder<List<ProgressCompareModel>>(
-                future: beforeProgressImage,
+              FutureBuilder(
+                future: loadData(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                        child: Text(
-                      'คุณยังไม่ได้ถ่ายรูปหรือเลือกรูป',
-                      style: TextStyle(
-                        fontFamily: 'Kanit',
-                        fontSize: 20.0,
-                      ),
-                    ));
-                  }
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final image = snapshot.data![index];
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 50.0, right: 50.0),
-                        child: SizedBox(
-                          width: 100.0,
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(12.0),
-                            ),
-                            child: Image.network(
-                              image.picture,
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                  } else {
+                    if (beforeProgressImage.isEmpty) {
+                      return const Center(
+                          child: Text(
+                        'คุณยังไม่ได้ถ่ายรูปหรือเลือกรูป',
+                        style: TextStyle(
+                          fontFamily: 'Kanit',
+                          fontSize: 20.0,
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "After",
-                  style: TextStyle(
-                    fontFamily: 'Kanit',
-                    fontSize: 18.0,
-                  ),
-                ),
-              ),
-              FutureBuilder<List<ProgressCompareLatestModel>>(
-                future: latestProgressImage,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                        child: Text(
-                      'คุณยังไม่ได้ถ่ายรูป',
-                      style: TextStyle(
-                        fontFamily: 'Kanit',
-                        fontSize: 20.0,
-                      ),
-                    ));
-                  }
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final image = snapshot.data![index];
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 50.0, right: 50.0),
-                        child: SizedBox(
-                          width: 100.0,
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(12.0),
-                            ),
-                            child: Image.network(
-                              image.picture,
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                      ));
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        color: Colors.white,
+                        shadowColor: Colors.red,
+                        elevation: 0.8,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            beforeProgressImage.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                    'คุณยังไม่ได้ถ่ายรูปหรือเลือกรูป',
+                                    style: TextStyle(
+                                      fontFamily: 'Kanit',
+                                      fontSize: 20.0,
+                                    ),
+                                  ))
+                                : Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text(
+                                            "Before",
+                                            style: TextStyle(
+                                              fontFamily: 'Kanit',
+                                              fontSize: 18.0,
+                                            ),
+                                          ),
+                                        ),
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(8.0),
+                                          ),
+                                          child: Image.network(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.25,
+                                              beforeProgressImage[0].picture,
+                                              fit: BoxFit.cover),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                            latestProgressImage.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                    'คุณยังไม่ได้ถ่ายรูป',
+                                    style: TextStyle(
+                                      fontFamily: 'Kanit',
+                                      fontSize: 20.0,
+                                    ),
+                                  ))
+                                : Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text(
+                                            "After",
+                                            style: TextStyle(
+                                              fontFamily: 'Kanit',
+                                              fontSize: 18.0,
+                                            ),
+                                          ),
+                                        ),
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(8.0),
+                                          ),
+                                          child: Image.network(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.25,
+                                              latestProgressImage[0].picture,
+                                              fit: BoxFit.cover),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                          ],
                         ),
-                      );
-                    },
-                  );
+                      ),
+                    );
+                  }
                 },
               ),
             ],

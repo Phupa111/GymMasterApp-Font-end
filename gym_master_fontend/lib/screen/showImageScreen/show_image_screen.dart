@@ -212,7 +212,6 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
                   log(monthYear);
                   List<PhotoProgressModel> monthlyProgress =
                       groupedData[monthYear]!.reversed.toList();
-
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
