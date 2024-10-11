@@ -1,10 +1,14 @@
 import 'dart:developer';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:gym_master_fontend/model/UserModel.dart';
 import 'package:gym_master_fontend/model/UsersModels.dart';
+import 'package:gym_master_fontend/screen/admin_edit_page/admin_edit_page.dart';
 import 'package:gym_master_fontend/services/app_const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,6 +43,35 @@ class _UesrListViewPageState extends State<UesrListViewPage> {
     setState(() {
       loadData = loadDataAsync();
     });
+  }
+
+  void deleteUser(int uid) async {
+    final dio = Dio();
+    var json = {
+      "uid": uid,
+    };
+    try {
+      final response = await dio.post('$url/admin/delete',
+          data: json,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJWT',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          loadData = loadDataAsync();
+        });
+      } else {
+        log("error status Code delete user: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error to delete user: $e");
+    }
   }
 
   @override
@@ -172,6 +205,10 @@ class _UesrListViewPageState extends State<UesrListViewPage> {
                                           ElevatedButton.icon(
                                             onPressed: () {
                                               // Handle Edit action
+                                              Get.to(() => AdminEditPage(
+                                                    uid: user.uid,
+                                                    tokenJwt: tokenJWT,
+                                                  ));
                                             },
                                             icon: const Icon(
                                               Icons.edit,
@@ -191,6 +228,28 @@ class _UesrListViewPageState extends State<UesrListViewPage> {
                                                   vertical: 12.0,
                                                   horizontal:
                                                       16.0), // Adjust padding
+                                            ),
+                                          ),
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              AwesomeDialog(
+                                                context: context,
+                                                dialogType: DialogType.warning,
+                                                title: "ยืนยันการลบผู้ใช้",
+                                                btnOkOnPress: () {
+                                                  deleteUser(user.uid);
+                                                },
+                                              ).show();
+                                            },
+                                            icon: const FaIcon(
+                                              FontAwesomeIcons.trash,
+                                              color: Colors.red,
+                                            ),
+                                            label: const Text(
+                                              "ลบ",
+                                              style: TextStyle(
+                                                fontFamily: 'Kanit',
+                                              ),
                                             ),
                                           ),
                                         ],

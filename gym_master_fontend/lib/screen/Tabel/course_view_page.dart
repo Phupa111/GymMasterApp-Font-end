@@ -335,8 +335,9 @@ class _CourseViewState extends State<CourseView> {
                                                     const EdgeInsets.fromLTRB(
                                                         8, 10, 8, 0),
                                                 child: ElevatedButton(
-                                                  onPressed: () {
-                                                    Get.to(EditTabelPage(
+                                                  onPressed: () async {
+                                                    final update = await Get.to(
+                                                        EditTabelPage(
                                                       tabelID: tabel.tid,
                                                       tabelName:
                                                           tabel.couserName,
@@ -353,6 +354,13 @@ class _CourseViewState extends State<CourseView> {
                                                       descrestion:
                                                           tabel.description,
                                                     ));
+
+                                                    if (update == null) {
+                                                      setState(() {
+                                                        loadData =
+                                                            loadDataAsync();
+                                                      });
+                                                    }
                                                   },
                                                   style:
                                                       ElevatedButton.styleFrom(

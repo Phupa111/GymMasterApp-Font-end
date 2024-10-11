@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:gym_master_fontend/model/ExInTabelModel.dart';
 import 'package:gym_master_fontend/screen/Tabel/Exerices/exercises_page.dart';
 
 import 'package:gym_master_fontend/services/app_const.dart';
+import 'package:http/http.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,10 +54,15 @@ class _EditTabelPageState extends State<EditTabelPage>
   int dayNum = 1;
   final _setContron = TextEditingController();
   final _repContron = TextEditingController();
+  final _times = TextEditingController();
+  final _dayPerWeek = TextEditingController();
+  final _tableName = TextEditingController();
   late SharedPreferences prefs;
   late Future<void> loadData;
   late Future<void> genload;
   final _formKey = GlobalKey<FormState>();
+
+  late int checkUpdate;
 
   String url = AppConstants.BASE_URL;
   @override
@@ -499,6 +506,46 @@ class _EditTabelPageState extends State<EditTabelPage>
     }
   }
 
+  void updateCourseNameAndTimes(int tid, String tableName, String times) async {
+    final dio = Dio();
+    var json = {
+      "tid": tid,
+      "tableName": tableName,
+      "times": times,
+    };
+    try {
+      final response = await dio.post(
+        '$url/tabel/updateCourse',
+        data: json,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenJWT}',
+          },
+          validateStatus: (status) {
+            return status! < 500; // Accept status codes less than 500
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          checkUpdate = 1;
+          loadData = fetchExercisesForAllDays();
+        });
+        log(checkUpdate.toString());
+        Get.close(2);
+      } else {
+        setState(() {
+          checkUpdate = 0;
+        });
+        log("response Code: ${response.statusCode}");
+        log(checkUpdate.toString());
+        Get.back();
+      }
+    } catch (e) {
+      log('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
@@ -544,7 +591,182 @@ class _EditTabelPageState extends State<EditTabelPage>
                     visible: !widget.isUnused,
                     child: IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () {},
+                      onPressed: () {
+                        log("${widget.tabelName} - tid : ${widget.tabelID}");
+                        Get.dialog(Dialog(
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    widget.tabelName,
+                                    style: const TextStyle(
+                                      fontFamily: 'Kanit',
+                                      fontSize: 20.0,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                        borderSide: const BorderSide(
+                                          color: Colors.transparent,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.all(15.0),
+                                      filled: true,
+                                      fillColor: const Color(0xFFF1F0F0),
+                                      border: InputBorder.none,
+                                      hintText: "ชื่อคอร์ส",
+                                      hintStyle: const TextStyle(
+                                        fontFamily: 'Kanit',
+                                        color: Color(0xFFFFAC41),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                          color: Colors.transparent,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Colors.transparent),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                    ),
+                                    controller: _tableName,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                        borderSide: const BorderSide(
+                                          color: Colors.transparent,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.all(15.0),
+                                      filled: true,
+                                      fillColor: const Color(0xFFF1F0F0),
+                                      border: InputBorder.none,
+                                      hintText: "ระยะเวลา (สัปดาห์)",
+                                      hintStyle: const TextStyle(
+                                        fontFamily: 'Kanit',
+                                        color: Color(0xFFFFAC41),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                          color: Colors.transparent,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Colors.transparent),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ],
+                                    controller: _times,
+                                    readOnly: true,
+                                    onTap: () {
+                                      showCupertinoModalPopup(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            SizedBox(
+                                              height: 250,
+                                              child: CupertinoPicker(
+                                                backgroundColor: Colors.white,
+                                                itemExtent: 32.0,
+                                                scrollController:
+                                                    FixedExtentScrollController(
+                                                        initialItem: 0),
+                                                onSelectedItemChanged: (value) {
+                                                  setState(() {
+                                                    _times.text =
+                                                        (value + 1).toString();
+                                                  });
+                                                },
+                                                children: List.generate(
+                                                  53,
+                                                  (index) => Center(
+                                                      child: Text(
+                                                          '${index + 1} สัปดาห์')),
+                                                ),
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                if (_dayPerWeek.text.isEmpty) {
+                                                  _times.text = "1";
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('ตกลง'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                  onPressed: () {
+                                    if (_tableName.text.isEmpty &&
+                                        _times.text.isEmpty) {
+                                      AwesomeDialog(
+                                        context: context,
+                                        dialogType: DialogType.error,
+                                        title: "กรอกข้อมูลช่องใดช่องหนึ่ง",
+                                        btnOkOnPress: () {},
+                                      ).show();
+                                    } else {
+                                      log("tableId : ${widget.tabelID} \n Table Name: ${_tableName.text} \n times: ${_times.text}");
+                                      updateCourseNameAndTimes(widget.tabelID,
+                                          _tableName.text, _times.text);
+                                    }
+                                  },
+                                  child: const Text(
+                                    "ตกลง",
+                                    style: TextStyle(
+                                      fontFamily: 'Kanit',
+                                      fontSize: 16.0,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ));
+                      },
                     ),
                   ),
                 ],

@@ -10,15 +10,22 @@ import 'package:gym_master_fontend/services/app_const.dart';
 class EditService {
   String ip = AppConstants.BASE_URL;
   final dio = Dio();
-  Future<List<UserProfileEditModel>> getProfileEdit(int uid) async {
+  Future<List<UserProfileEditModel>> getProfileEdit(
+      int uid, String tokenJwt) async {
     // log(ip);
     var json = {"uid": uid};
 
     try {
-      final response = await dio.post(
-        "$ip/user/getDataUserById",
-        data: json,
-      );
+      final response = await dio.post("$ip/user/getDataUserById",
+          data: json,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $tokenJwt',
+            },
+            validateStatus: (status) {
+              return status! < 500; // Accept status codes less than 500
+            },
+          ));
       if (response.statusCode == 200) {
         // Parse the JSON data and convert it to a list of UserProfileEditModel objects
         final List<dynamic> data = response.data;
@@ -28,7 +35,7 @@ class EditService {
       }
     } catch (e) {
       log("Fetching data error: $e");
-      throw Exception("Failed to load data1S");
+      throw Exception("Failed to load data1S $e");
     }
   }
 
