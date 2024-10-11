@@ -240,7 +240,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                       ),
 
                       Visibility(
-                        visible: widget.role == 2,
+                        visible: widget.role != 1,
                         child: Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: TextFormField(
@@ -329,7 +329,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                       ),
 
                       Visibility(
-                        visible: widget.role == 2,
+                        visible: widget.role != 1,
                         child: Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: TextFormField(
@@ -422,7 +422,7 @@ class _CreateTabelPageState extends State<CreateTabelPage> {
                       // Field for Days Per Week
 
                       Visibility(
-                        visible: widget.role == 2,
+                        visible: widget.role != 1,
                         child: Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: TextFormField(

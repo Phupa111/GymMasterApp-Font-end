@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -287,21 +288,30 @@ class _CourseViewState extends State<CourseView> {
                                                 visible: role == 1,
                                                 child: ElevatedButton(
                                                   onPressed: () async {
-                                                    enabelUserCourse(
-                                                        tabel.tid,
-                                                        tabel.times,
-                                                        tabel.dayPerWeek);
-                                                    await NotificationService
-                                                        .showNotification(
-                                                            notificationId:
-                                                                tabel.tid,
-                                                            title:
-                                                                "แจ้งเตือนการออกกำลังกาย",
-                                                            body:
-                                                                "คุณมีการออกกำลังกายที่คอร์ส ${tabel.couserName}",
-                                                            scheduled: true,
-                                                            hour: 8,
-                                                            minute: 30);
+                                                    AwesomeDialog(
+                                                      context: context,
+                                                      dialogType: DialogType
+                                                          .infoReverse,
+                                                      title:
+                                                          "ใช้งานท่าออกกำลังกาย",
+                                                      btnOkOnPress: () async {
+                                                        enabelUserCourse(
+                                                            tabel.tid,
+                                                            tabel.times,
+                                                            tabel.dayPerWeek);
+                                                        await NotificationService
+                                                            .showNotification(
+                                                                notificationId:
+                                                                    tabel.tid,
+                                                                title:
+                                                                    "แจ้งเตือนการออกกำลังกาย",
+                                                                body:
+                                                                    "คุณมีการออกกำลังกายที่คอร์ส ${tabel.couserName}",
+                                                                scheduled: true,
+                                                                hour: 8,
+                                                                minute: 30);
+                                                      },
+                                                    ).show();
                                                   },
                                                   style:
                                                       ElevatedButton.styleFrom(
@@ -448,9 +458,16 @@ class _CourseViewState extends State<CourseView> {
                                               8, 10, 8, 0),
                                           child: ElevatedButton(
                                             onPressed: () async {
-                                              deleteUserCourse(tabel.tid);
-                                              await AwesomeNotifications()
-                                                  .cancel(tabel.tid);
+                                              AwesomeDialog(
+                                                context: context,
+                                                dialogType: DialogType.success,
+                                                title: "ยืนยันเลิกใช้งาน",
+                                                btnOkOnPress: () async {
+                                                  deleteUserCourse(tabel.tid);
+                                                  await AwesomeNotifications()
+                                                      .cancel(tabel.tid);
+                                                },
+                                              ).show();
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors

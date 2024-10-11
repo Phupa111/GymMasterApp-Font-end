@@ -124,7 +124,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   if (succesUserEn[0].weekStartDate != null) {
                     DateTime newDate = succesUserEn[0]
                         .weekStartDate!
-                        .add(const Duration(days: 8));
+                        .add(const Duration(days: 7));
 
                     // Format the date to display in Thai
                     String formattedDate =
