@@ -191,6 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                               () => ProfilePageEdit(
                                                     uid: uid!,
                                                     role: role!,
+                                                    tokenJwt: tokenJWT!,
                                                   ));
 
                                           if (updatePage == "refresh") {

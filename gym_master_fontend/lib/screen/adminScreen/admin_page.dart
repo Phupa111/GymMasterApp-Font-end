@@ -47,6 +47,7 @@ class _AdminPageState extends State<AdminPage> {
             Get.to(ProfilePageEdit(
               uid: uid!,
               role: role!,
+              tokenJwt: tokenJWT,
             ));
           },
         ).show();

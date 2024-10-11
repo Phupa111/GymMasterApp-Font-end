@@ -107,7 +107,7 @@ class _TdeePageState extends State<TdeePage> {
   Future<void> loadDataTdee() async {
     final dio = Dio();
     String url = AppConstants.BASE_URL;
-    log(uid.toString());
+    log("$uid Load Tdee");
 
     var userData = {
       "uid": uid,
@@ -125,8 +125,8 @@ class _TdeePageState extends State<TdeePage> {
           ));
       final List<dynamic> tdeeJsonData = response.data;
       tdee = tdeeJsonData.map((item) => TdeeModel.fromJson(item)).toList();
-      log(tdeeJsonData.length.toString());
-      log(tdee.length.toString());
+      // log(tdeeJsonData.length.toString());
+      // log(tdee.toString());
     } catch (error) {
       log('Error fecthing Data $error');
     }

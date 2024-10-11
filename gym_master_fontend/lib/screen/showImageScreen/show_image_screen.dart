@@ -166,140 +166,147 @@ class _ShowImageScreenState extends State<ShowImageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Get.back(result: 1);
-          },
-          icon: const FaIcon(
-            FontAwesomeIcons.angleLeft,
-            color: Colors.white,
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: () async {
+        Get.back(result: 1);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Get.back(result: 1);
+            },
+            icon: const FaIcon(
+              FontAwesomeIcons.angleLeft,
+              color: Colors.white,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.orange,
+          title: const Text(
+            "Gallery",
+            style: TextStyle(fontFamily: 'Kanit', color: Colors.white),
           ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.orange,
-        title: const Text(
-          "Gallery",
-          style: TextStyle(fontFamily: 'Kanit', color: Colors.white),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: FutureBuilder<List<PhotoProgressModel>>(
-          future: photoAsync,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const LinearProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            } else if (snapshot.data!.isEmpty) {
-              return const Center(
-                  child: Text(
-                'ไม่มีรูปกดเพื่อถ่าย',
-                style: TextStyle(fontFamily: 'Kanit'),
-              )); // If no data
-            } else {
-              final data = snapshot.data!;
-              log("show image : $data");
-              final groupedData = groupByMonthYear(data);
-              return ListView.builder(
-                itemCount: groupedData.keys.length, // จำนวนกลุ่มเดือนและปี
-                itemBuilder: (context, index) {
-                  String monthYear = groupedData.keys.elementAt(index);
-                  log(monthYear);
-                  List<PhotoProgressModel> monthlyProgress =
-                      groupedData[monthYear]!.reversed.toList();
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          monthYear, // แสดงเดือนและปี
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kanit'),
+        body: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: FutureBuilder<List<PhotoProgressModel>>(
+            future: photoAsync,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const LinearProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else if (snapshot.data!.isEmpty) {
+                return const Center(
+                    child: Text(
+                  'ไม่มีรูปกดเพื่อถ่าย',
+                  style: TextStyle(fontFamily: 'Kanit'),
+                )); // If no data
+              } else {
+                final data = snapshot.data!;
+                log("show image : $data");
+                final groupedData = groupByMonthYear(data);
+                return ListView.builder(
+                  itemCount: groupedData.keys.length, // จำนวนกลุ่มเดือนและปี
+                  itemBuilder: (context, index) {
+                    String monthYear = groupedData.keys.elementAt(index);
+                    log(monthYear);
+                    List<PhotoProgressModel> monthlyProgress =
+                        groupedData[monthYear]!.reversed.toList();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            monthYear, // แสดงเดือนและปี
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Kanit'),
+                          ),
                         ),
-                      ),
-                      GridView.builder(
-                        shrinkWrap:
-                            true, // ต้องการเพื่อไม่ให้ ListView conflict กับ GridView
-                        physics:
-                            const NeverScrollableScrollPhysics(), // ปิดการเลื่อน GridView
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3, // จำนวนคอลัมน์
-                        ),
-                        itemCount: monthlyProgress.length,
-                        itemBuilder: (context, index) {
-                          final progress = monthlyProgress[index];
-                          final currentContext = context;
-                          return GestureDetector(
-                            onTap: () async {
-                              final update = await Get.to(
-                                () => ShowDetailImageDialog(
-                                  pid: progress.pid,
-                                  picture: progress.picture,
-                                  dateprogress: progress.dataProgress,
-                                  tokenJwt: tokenJwt!,
-                                  uid: uid!,
-                                ),
-                                fullscreenDialog: true,
-                                transition: Transition.downToUp,
-                              );
+                        GridView.builder(
+                          shrinkWrap:
+                              true, // ต้องการเพื่อไม่ให้ ListView conflict กับ GridView
+                          physics:
+                              const NeverScrollableScrollPhysics(), // ปิดการเลื่อน GridView
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3, // จำนวนคอลัมน์
+                          ),
+                          itemCount: monthlyProgress.length,
+                          itemBuilder: (context, index) {
+                            final progress = monthlyProgress[index];
+                            final currentContext = context;
+                            return GestureDetector(
+                              onTap: () async {
+                                final update = await Get.to(
+                                  () => ShowDetailImageDialog(
+                                    pid: progress.pid,
+                                    picture: progress.picture,
+                                    dateprogress: progress.dataProgress,
+                                    tokenJwt: tokenJwt!,
+                                    uid: uid!,
+                                  ),
+                                  fullscreenDialog: true,
+                                  transition: Transition.downToUp,
+                                );
 
-                              if (mounted && update != null) {
-                                if (update == 1) {
-                                  setState(() {
-                                    photoAsync = PhotoService()
-                                        .getPhotoPregress(uid!, tokenJwt!);
-                                  });
-                                } else if (update == 0) {
-                                  AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.error,
-                                    title: "เกิดข้อผิดพลาด",
-                                    desc: "ไม่สามารถลบรูปได้",
-                                    btnOkOnPress: () {},
-                                  ).show();
+                                if (mounted && update != null) {
+                                  if (update == 1) {
+                                    setState(() {
+                                      photoAsync = PhotoService()
+                                          .getPhotoPregress(uid!, tokenJwt!);
+                                    });
+                                  } else if (update == 0) {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      title: "เกิดข้อผิดพลาด",
+                                      desc: "ไม่สามารถลบรูปได้",
+                                      btnOkOnPress: () {},
+                                    ).show();
+                                  }
                                 }
-                              }
-                            },
-                            child: Card(
-                              child: Container(
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  image: DecorationImage(
-                                    image: NetworkImage(progress.picture),
-                                    fit: BoxFit.cover,
+                              },
+                              child: Card(
+                                child: Container(
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    image: DecorationImage(
+                                      image: NetworkImage(progress.picture),
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            }
-          },
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+          ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(pickImageDialog());
+          },
+          splashColor: Colors.white,
+          child: const FaIcon(FontAwesomeIcons.camera),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(pickImageDialog());
-        },
-        splashColor: Colors.white,
-        child: const FaIcon(FontAwesomeIcons.camera),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

@@ -1,11 +1,15 @@
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/services/photo_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ConfirmImageScreen extends StatefulWidget {
   const ConfirmImageScreen(
@@ -36,13 +40,25 @@ class _ConfirmImageScreenState extends State<ConfirmImageScreen> {
     tokenJwt = widget.tokenJwt;
   }
 
+  Future<void> signInAnonymously() async {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      print("Successfully signed in anonymously.");
+    } catch (e) {
+      print("Failed to sign in anonymously: $e");
+    }
+  }
+
   Future<void> insertPicture(
       int uid, XFile imagePath, String weight, String tokenJwt) async {
     if (weight.isEmpty) {
       weight = "0";
     }
+
+    log(imagePath.path);
     status =
         await PhotoService().insertProgress(uid, imagePath, weight, tokenJwt);
+
     if (status == 1) {
       Get.back(result: 1);
     } else {

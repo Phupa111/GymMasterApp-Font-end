@@ -68,4 +68,22 @@ class TdeeModel {
         "cut_protein_gram": cutProteinGram,
         "cut_fat_gram": cutFatGram,
       };
+
+  @override
+  String toString() => '''
+TdeeModel(
+  bulking: $bulking,
+  maintenance: $maintenance,
+  cutting: $cutting,
+  bulkCarbGram: $bulkCarbGram,
+  bulkProteinGram: $bulkProteinGram,
+  bulkFatGram: $bulkFatGram,
+  mainCarbGram: $mainCarbGram,
+  mainProteinGram: $mainProteinGram,
+  mainFatGram: $mainFatGram,
+  cutCarbGram: $cutCarbGram,
+  cutProteinGram: $cutProteinGram,
+  cutFatGram: $cutFatGram
+)
+    ''';
 }
