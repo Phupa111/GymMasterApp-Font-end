@@ -1,6 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:gym_master_fontend/screen/Tabel/course_view_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
@@ -131,7 +132,88 @@ class _AdminPageState extends State<AdminPage> {
                   ),
                 ),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.42,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      decoration: const BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(8.0),
+                            topLeft: Radius.circular(8.0)),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const FaIcon(
+                            FontAwesomeIcons.dumbbell,
+                            color: Colors.white,
+                          ),
+                          const Text(
+                            "เพิ่มอุปกรณ์",
+                            style: TextStyle(
+                                fontFamily: 'Kanit',
+                                color: Colors.white,
+                                fontSize: 18.0),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: const Text(
+                              "เพิ่ม",
+                              style: TextStyle(fontFamily: 'Kanit'),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.42,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      decoration: const BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0)),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const FaIcon(
+                            FontAwesomeIcons.person,
+                            color: Colors.white,
+                            size: 30.0,
+                          ),
+                          const Text(
+                            "เพิ่มท่าออกกำลังกาย",
+                            style: TextStyle(
+                                fontFamily: 'Kanit',
+                                color: Colors.white,
+                                fontSize: 18.0),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: const Text(
+                              "เพิ่ม",
+                              style: TextStyle(fontFamily: 'Kanit'),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
