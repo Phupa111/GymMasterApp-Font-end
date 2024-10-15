@@ -5,8 +5,6 @@ import 'dart:io';
 import 'dart:typed_data';
 // ignore: depend_on_referenced_packages
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gym_master_fontend/services/photo_service.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -245,7 +243,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                                   builder: (context) => SelectGenderRadio(
                                         uid: uid,
                                         gender: userData[index].gender,
-                                        tokenJWT: tokenJWT!,
+                                        tokenJWT: tokenJWT,
                                       ));
 
                               if (updategender != null) {
@@ -293,7 +291,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                             final updateUser =
                                 await Get.dialog(EditUsernameDialog(
                               uid: uid,
-                              tokenJWT: tokenJWT!,
+                              tokenJWT: tokenJWT,
                             ));
 
                             if (updateUser != null) {
@@ -326,7 +324,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                             final updatePassword =
                                 await Get.dialog(EditPasswordDialog(
                               uid: uid,
-                              tokenJWT: tokenJWT!,
+                              tokenJWT: tokenJWT,
                             ));
 
                             if (updatePassword != null) {
@@ -370,7 +368,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                               final updateHeight =
                                   await Get.dialog(EditHeightDialog(
                                 uid: uid,
-                                tokenJWT: tokenJWT!,
+                                tokenJWT: tokenJWT,
                               ));
                               if (updateHeight != null) {
                                 if (updateHeight != 0) {
@@ -407,7 +405,7 @@ class _ProfilePageEditState extends State<ProfilePageEdit> {
                               final updateWeight = await Get.dialog(
                                 EditWeightDialog(
                                   uid: uid,
-                                  tokenJWT: tokenJWT!,
+                                  tokenJWT: tokenJWT,
                                 ),
                               );
 
