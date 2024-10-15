@@ -7,6 +7,10 @@ import 'package:gym_master_fontend/screen/Tabel/course_view_page.dart';
 import 'package:gym_master_fontend/screen/Tabel/userTabel_page.dart';
 import 'package:gym_master_fontend/screen/adminScreen/admin_add_page.dart';
 import 'package:gym_master_fontend/screen/adminScreen/user_list/user_list_page.dart';
+import 'package:gym_master_fontend/screen/admin_add_equipment_page/admin_add_equipment_page.dart';
+import 'package:gym_master_fontend/screen/admin_add_posture_page.dart/admin_add_posture_page.dart.dart';
+import 'package:gym_master_fontend/screen/admin_equipment_page/admin_equipment_page.dart';
+import 'package:gym_master_fontend/screen/admin_posture_page/admin_posture_page.dart';
 import 'package:gym_master_fontend/screen/profile_page_edit/profile_page_edit.dart';
 
 import 'package:gym_master_fontend/widgets/card.dart';
@@ -157,16 +161,22 @@ class _AdminPageState extends State<AdminPage> {
                             color: Colors.white,
                           ),
                           const Text(
-                            "เพิ่มอุปกรณ์",
+                            "อุปกรณ์",
                             style: TextStyle(
                                 fontFamily: 'Kanit',
                                 color: Colors.white,
                                 fontSize: 18.0),
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Get.to(
+                                () => AdminEquipmentPage(
+                                  tokenJwt: tokenJWT,
+                                ),
+                              );
+                            },
                             child: const Text(
-                              "เพิ่ม",
+                              "เพิ่มเติม",
                               style: TextStyle(fontFamily: 'Kanit'),
                             ),
                           )
@@ -194,16 +204,19 @@ class _AdminPageState extends State<AdminPage> {
                             size: 30.0,
                           ),
                           const Text(
-                            "เพิ่มท่าออกกำลังกาย",
+                            "ท่าออกกำลังกาย",
                             style: TextStyle(
                                 fontFamily: 'Kanit',
                                 color: Colors.white,
                                 fontSize: 18.0),
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Get.to(
+                                  () => AdminPosturePage(tokenJwt: tokenJWT));
+                            },
                             child: const Text(
-                              "เพิ่ม",
+                              "เพิ่มเติม",
                               style: TextStyle(fontFamily: 'Kanit'),
                             ),
                           )
