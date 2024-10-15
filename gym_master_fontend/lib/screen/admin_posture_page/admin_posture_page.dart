@@ -193,11 +193,10 @@ class _AdminPosturePageState extends State<AdminPosturePage> {
                                           );
 
                                           if (update == true) {
+                                            setState(() {
+                                              loadData = loadDataAsync();
+                                            });
                                             if (mounted) {
-                                              setState(() {
-                                                loadData = loadDataAsync();
-                                              });
-
                                               AwesomeDialog(
                                                 context: context,
                                                 dialogType: DialogType.success,
@@ -249,11 +248,11 @@ class _AdminPosturePageState extends State<AdminPosturePage> {
           final update = await Get.to(
             () => AdminAddPosturePage(tokenJwt: tokenJwt),
           );
-          if (mounted) {
-            if (update == true) {
-              setState(() {
-                loadData = loadDataAsync();
-              });
+          if (update == true) {
+            setState(() {
+              loadData = loadDataAsync();
+            });
+            if (mounted) {
               AwesomeDialog(
                 context: context,
                 dialogType: DialogType.success,
