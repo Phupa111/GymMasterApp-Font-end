@@ -57,7 +57,7 @@ class _EditWeightDialogState extends State<EditWeightDialog> {
                 const Row(
                   children: [
                     Text(
-                      "ส่วนสูง",
+                      "น้ำหนัก",
                       style: TextStyle(fontFamily: 'Kanit', fontSize: 24.0),
                     ),
                   ],
