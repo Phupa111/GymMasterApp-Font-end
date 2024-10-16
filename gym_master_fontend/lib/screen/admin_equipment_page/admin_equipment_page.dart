@@ -162,7 +162,7 @@ class _AdminEquipmentPageState extends State<AdminEquipmentPage> {
                                 if (mounted) {
                                   AwesomeDialog(
                                     context: context,
-                                    dialogType: DialogType.error,
+                                    dialogType: DialogType.success,
                                     title: 'แก้ไขสำเร็จ',
                                     btnOkOnPress: () {},
                                   ).show();
