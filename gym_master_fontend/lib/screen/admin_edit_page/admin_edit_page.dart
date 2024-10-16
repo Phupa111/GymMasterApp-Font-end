@@ -6,7 +6,9 @@ import 'package:gym_master_fontend/model/UserProfileEditModel.dart';
 import 'package:gym_master_fontend/services/user/edit_service.dart';
 import 'package:gym_master_fontend/widgets/dialog/edit_height_dialog.dart';
 import 'package:gym_master_fontend/widgets/dialog/edit_password_dialog.dart';
+import 'package:gym_master_fontend/widgets/dialog/edit_username_dialog.dart';
 import 'package:gym_master_fontend/widgets/dialog/edit_weight_dialog.dart';
+import 'package:gym_master_fontend/widgets/select_gender_radio.dart';
 
 class AdminEditPage extends StatefulWidget {
   const AdminEditPage({super.key, required this.uid, required this.tokenJwt});
@@ -69,7 +71,27 @@ class _AdminEditPageState extends State<AdminEditPage> {
                             fontWeight: FontWeight.normal,
                           ),
                         ),
-                        onTap: () {},
+                        onTap: () async {
+                          final updateUser =
+                              await Get.dialog(EditUsernameDialog(
+                            uid: uid,
+                            tokenJWT: tokenJwt,
+                          ));
+
+                          if (updateUser != null) {
+                            setState(() {
+                              userData[index].username = updateUser;
+                            });
+                            if (mounted) {
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.success,
+                                title: "แก้ไขสำเร็จ",
+                                btnOkOnPress: () {},
+                              ).show();
+                            }
+                          }
+                        },
                         trailing: Text(userData[index].username,
                             style: const TextStyle(
                               fontSize: 18.0,
@@ -81,7 +103,29 @@ class _AdminEditPageState extends State<AdminEditPage> {
                       ),
                       ListTile(
                         leading: const FaIcon(FontAwesomeIcons.venusMars),
-                        onTap: () async {},
+                        onTap: () async {
+                          final updategender = await showDialog(
+                              context: context,
+                              builder: (context) => SelectGenderRadio(
+                                    uid: uid,
+                                    gender: userData[index].gender,
+                                    tokenJWT: tokenJwt,
+                                  ));
+
+                          if (updategender != null) {
+                            setState(() {
+                              userData[index].gender = updategender;
+                            });
+                            if (mounted) {
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.success,
+                                title: "แก้ไขสำเร็จ",
+                                btnOkOnPress: () {},
+                              ).show();
+                            }
+                          }
+                        },
                         title: const Text(
                           "เพศ",
                           style: TextStyle(
